@@ -19,14 +19,15 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
-    '/admin/': RouteRecordInfo<'/admin/', '/admin', Record<never, never>, Record<never, never>>,
+    '/access-logs': RouteRecordInfo<'/access-logs', '/access-logs', Record<never, never>, Record<never, never>>,
+    '/access-rules': RouteRecordInfo<'/access-rules', '/access-rules', Record<never, never>, Record<never, never>>,
     '/admin/access-logs': RouteRecordInfo<'/admin/access-logs', '/admin/access-logs', Record<never, never>, Record<never, never>>,
-    '/admin/access-rules': RouteRecordInfo<'/admin/access-rules', '/admin/access-rules', Record<never, never>, Record<never, never>>,
-    '/admin/areas': RouteRecordInfo<'/admin/areas', '/admin/areas', Record<never, never>, Record<never, never>>,
-    '/admin/devices': RouteRecordInfo<'/admin/devices', '/admin/devices', Record<never, never>, Record<never, never>>,
-    '/admin/groups': RouteRecordInfo<'/admin/groups', '/admin/groups', Record<never, never>, Record<never, never>>,
-    '/admin/portals': RouteRecordInfo<'/admin/portals', '/admin/portals', Record<never, never>, Record<never, never>>,
-    '/admin/time-zones': RouteRecordInfo<'/admin/time-zones', '/admin/time-zones', Record<never, never>, Record<never, never>>,
     '/admin/users': RouteRecordInfo<'/admin/users', '/admin/users', Record<never, never>, Record<never, never>>,
+    '/areas': RouteRecordInfo<'/areas', '/areas', Record<never, never>, Record<never, never>>,
+    '/devices': RouteRecordInfo<'/devices', '/devices', Record<never, never>, Record<never, never>>,
+    '/groups': RouteRecordInfo<'/groups', '/groups', Record<never, never>, Record<never, never>>,
+    '/portals': RouteRecordInfo<'/portals', '/portals', Record<never, never>, Record<never, never>>,
+    '/time-zones': RouteRecordInfo<'/time-zones', '/time-zones', Record<never, never>, Record<never, never>>,
+    '/users': RouteRecordInfo<'/users', '/users', Record<never, never>, Record<never, never>>,
   }
 }

@@ -8,9 +8,30 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AccessLogDetails: typeof import('./components/access-logs/AccessLogDetails.vue')['default']
+    AccessLogFilters: typeof import('./components/access-logs/AccessLogFilters.vue')['default']
+    AccessLogList: typeof import('./components/access-logs/AccessLogList.vue')['default']
+    AccessLogStats: typeof import('./components/access-logs/AccessLogStats.vue')['default']
+    AccessRuleForm: typeof import('./components/access-rules/AccessRuleForm.vue')['default']
+    AccessRuleList: typeof import('./components/access-rules/AccessRuleList.vue')['default']
     AppFooter: typeof import('./components/AppFooter.vue')['default']
+    AreaForm: typeof import('./components/areas/AreaForm.vue')['default']
+    AreaList: typeof import('./components/areas/AreaList.vue')['default']
+    DeviceForm: typeof import('./components/devices/DeviceForm.vue')['default']
+    DeviceList: typeof import('./components/devices/DeviceList.vue')['default']
+    GroupForm: typeof import('./components/groups/GroupForm.vue')['default']
+    GroupList: typeof import('./components/groups/GroupList.vue')['default']
+    GroupMemberList: typeof import('./components/groups/GroupMemberList.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
+    PortalDeviceList: typeof import('./components/portals/PortalDeviceList.vue')['default']
+    PortalList: typeof import('./components/portals/PortalList.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    TimeSpanForm: typeof import('./components/time-zones/TimeSpanForm.vue')['default']
+    TimeSpanList: typeof import('./components/time-zones/TimeSpanList.vue')['default']
+    TimeZoneForm: typeof import('./components/time-zones/TimeZoneForm.vue')['default']
+    TimeZoneList: typeof import('./components/time-zones/TimeZoneList.vue')['default']
+    UserForm: typeof import('./components/users/UserForm.vue')['default']
+    UserList: typeof import('./components/users/UserList.vue')['default']
   }
 }
