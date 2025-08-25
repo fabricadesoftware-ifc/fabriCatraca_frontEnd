@@ -1,10 +1,10 @@
+import type { BaseResponse, PaginatedResponse, QueryParams, TimeZone } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
-import type { TimeZone, QueryParams, BaseResponse, PaginatedResponse } from '@/types'
 
 class TimeZonesService {
-  async getTimeZones (params?: QueryParams): Promise<PaginatedResponse<TimeZone[]>> {
+  async getTimeZones (params?: QueryParams): Promise<PaginatedResponse<TimeZone>> {
     try {
-      const response = await api.get('/time_zones', { params })
+      const response = await api.get('/time_zones/', { params })
       return response.data
     } catch (error) {
       console.error(error)
@@ -14,7 +14,7 @@ class TimeZonesService {
 
   async getTimeZoneById (id: number): Promise<BaseResponse<TimeZone>> {
     try {
-      const response = await api.get(`/time_zones/${id}`)
+      const response = await api.get(`/time_zones/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)
@@ -24,7 +24,7 @@ class TimeZonesService {
 
   async createTimeZone (data: Partial<TimeZone>): Promise<BaseResponse<TimeZone>> {
     try {
-      const response = await api.post('/time_zones', data)
+      const response = await api.post('/time_zones/', data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -34,7 +34,7 @@ class TimeZonesService {
 
   async updateTimeZone (id: number, data: Partial<TimeZone>): Promise<BaseResponse<TimeZone>> {
     try {
-      const response = await api.patch(`/time_zones/${id}`, data)
+      const response = await api.patch(`/time_zones/${id}/`, data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -44,7 +44,7 @@ class TimeZonesService {
 
   async deleteTimeZone (id: number): Promise<BaseResponse<void>> {
     try {
-      const response = await api.delete(`/time_zones/${id}`)
+      const response = await api.delete(`/time_zones/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)

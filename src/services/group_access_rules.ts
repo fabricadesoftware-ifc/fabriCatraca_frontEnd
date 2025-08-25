@@ -1,10 +1,10 @@
+import type { BaseResponse, GroupAccessRule, PaginatedResponse, QueryParams } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
-import type { GroupAccessRule, QueryParams, BaseResponse, PaginatedResponse } from '@/types'
 
 class GroupAccessRulesService {
-  async getGroupAccessRules (params?: QueryParams): Promise<PaginatedResponse<GroupAccessRule[]>> {
+  async getGroupAccessRules (params?: QueryParams): Promise<PaginatedResponse<GroupAccessRule>> {
     try {
-      const response = await api.get('/group_access_rules', { params })
+      const response = await api.get('/group_access_rules/', { params })
       return response.data
     } catch (error) {
       console.error(error)
@@ -14,7 +14,7 @@ class GroupAccessRulesService {
 
   async getGroupAccessRuleById (id: number): Promise<BaseResponse<GroupAccessRule>> {
     try {
-      const response = await api.get(`/group_access_rules/${id}`)
+      const response = await api.get(`/group_access_rules/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)
@@ -24,7 +24,7 @@ class GroupAccessRulesService {
 
   async createGroupAccessRule (data: Partial<GroupAccessRule>): Promise<BaseResponse<GroupAccessRule>> {
     try {
-      const response = await api.post('/group_access_rules', data)
+      const response = await api.post('/group_access_rules/', data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -34,7 +34,7 @@ class GroupAccessRulesService {
 
   async updateGroupAccessRule (id: number, data: Partial<GroupAccessRule>): Promise<BaseResponse<GroupAccessRule>> {
     try {
-      const response = await api.patch(`/group_access_rules/${id}`, data)
+      const response = await api.patch(`/group_access_rules/${id}/`, data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -44,7 +44,7 @@ class GroupAccessRulesService {
 
   async deleteGroupAccessRule (id: number): Promise<BaseResponse<void>> {
     try {
-      const response = await api.delete(`/group_access_rules/${id}`)
+      const response = await api.delete(`/group_access_rules/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)

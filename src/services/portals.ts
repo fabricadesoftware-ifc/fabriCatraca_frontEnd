@@ -1,10 +1,10 @@
+import type { BaseResponse, PaginatedResponse, Portal, QueryParams } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
-import type { Portal, QueryParams, BaseResponse, PaginatedResponse } from '@/types'
 
 class PortalsService {
-  async getPortals (params?: QueryParams): Promise<PaginatedResponse<Portal[]>> {
+  async getPortals (params?: QueryParams): Promise<PaginatedResponse<Portal>> {
     try {
-      const response = await api.get('/portals', { params })
+      const response = await api.get('/portals/', { params })
       return response.data
     } catch (error) {
       console.error(error)
@@ -14,7 +14,7 @@ class PortalsService {
 
   async getPortalById (id: number): Promise<BaseResponse<Portal>> {
     try {
-      const response = await api.get(`/portals/${id}`)
+      const response = await api.get(`/portals/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)
@@ -24,7 +24,7 @@ class PortalsService {
 
   async createPortal (data: Partial<Portal>): Promise<BaseResponse<Portal>> {
     try {
-      const response = await api.post('/portals', data)
+      const response = await api.post('/portals/', data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -34,7 +34,7 @@ class PortalsService {
 
   async updatePortal (id: number, data: Partial<Portal>): Promise<BaseResponse<Portal>> {
     try {
-      const response = await api.patch(`/portals/${id}`, data)
+      const response = await api.patch(`/portals/${id}/`, data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -44,7 +44,7 @@ class PortalsService {
 
   async deletePortal (id: number): Promise<BaseResponse<void>> {
     try {
-      const response = await api.delete(`/portals/${id}`)
+      const response = await api.delete(`/portals/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)

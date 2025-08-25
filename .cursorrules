@@ -1,0 +1,57 @@
+// Vue 3 Composition API + Vuetify .cursorrules
+
+// Vue 3 Composition API best practices (com Vuetify)
+const vue3CompositionApiBestPracticesWithVuetify = [
+  "Use setup() function para lógica do componente",
+  "Utilize ref e reactive para estado reativo",
+  "Implemente computed() para propriedades derivadas",
+  "Use watch e watchEffect para efeitos colaterais",
+  "Implemente lifecycle hooks com onMounted, onUpdated, etc.",
+  "Utilize provide/inject para injeção de dependência",
+  "Separe lógica em composables (src/composables/) — também para estado UI (ex: useDialog, useSnackbar)",
+  "Prefira API de composition para lógica complexa; use componentes simples para apresentação",
+  "Ao usar Vuetify, extraia temas e tokens de design para um composable/theme file",
+  "Use Vuetify's components via template ou render functions; evite lógica de UI pesada no setup",
+  "Aproveite Teleport para diálogos/menus do Vuetify quando necessário",
+  "Use Suspense para carregamento assíncrono de views e componentes pesados",
+  "Implemente tratamento de erros centralizado (errorCaptured / error boundaries)",
+  "Documente props/emit com typings (TypeScript) para melhores DX e autocomplete",
+];
+
+// Folder structure (com Vuetify)
+const folderStructureWithVuetify = `
+src/
+  assets/
+    styles/
+      main.scss        # global styles, variáveis SASS, overrides Vuetify
+  components/
+  composables/
+  views/
+  router/
+  store/               # pinia / vuex
+  plugins/
+    vuetify.ts         # plugin Vuetify + configuração de tema/icons
+    axios.ts
+  layouts/
+  App.vue
+  main.ts
+  env.d.ts             # tipos globais
+`;
+
+// Additional instructions (com Vuetify)
+const additionalInstructionsWithVuetify = `
+1. Use TypeScript para segurança de tipos.
+2. Defina corretamente props e emits com types.
+3. Utilize Vue 3's Teleport para modais e componentes do Vuetify que precisam sair do fluxo DOM.
+4. Use Suspense para components/views assíncronas.
+5. Implemente tratamento de erros global e local.
+6. Siga Vue 3 style guide e convenções de nomenclatura.
+7. Use Vite para desenvolvimento rápido e build.
+8. Instale e configure Vuetify como plugin em src/plugins/vuetify.ts.
+9. Centralize tema (cores, tipografia) no plugin Vuetify e em um composable (ex: useTheme).
+10. Habilite tree-shaking e importe somente components/directives necessários quando for relevante.
+11. Prefira composables para controlar estados de UI (snackbar, dialogs) e conecte ao Vuetify através de refs/reactive.
+12. Evite sobrescrever demasiadamente estilos do Vuetify; prefira variáveis SASS e theming.
+`;
+
+// Example minimal setup files (TypeScript) — cole no seu projeto

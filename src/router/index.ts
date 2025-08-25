@@ -4,14 +4,23 @@
  * Automatic routes for `./src/pages/*.vue`
  */
 
-// Composables
 import { setupLayouts } from 'virtual:generated-layouts'
+// Composables
 import { createRouter, createWebHistory } from 'vue-router/auto'
 import { routes } from 'vue-router/auto-routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: setupLayouts(routes),
+})
+
+// Configurar layouts para rotas administrativas
+router.beforeEach((to, from, next) => {
+  // Se a rota começa com /admin, usar o layout admin
+  if (to.path.startsWith('/admin')) {
+    to.meta.layout = 'admin'
+  }
+  next()
 })
 
 // Workaround for https://github.com/vitejs/vite/issues/11804

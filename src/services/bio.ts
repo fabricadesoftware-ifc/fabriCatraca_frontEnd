@@ -1,10 +1,10 @@
+import type { BaseResponse, Bio, PaginatedResponse, QueryParams } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
-import type { Bio, QueryParams, BaseResponse, PaginatedResponse } from '@/types'
 
 class BioService {
-  async getBio (params?: QueryParams): Promise<PaginatedResponse<Bio[]>> {
+  async getBio (params?: QueryParams): Promise<PaginatedResponse<Bio>> {
     try {
-      const response = await api.get('/templates', { params })
+      const response = await api.get('/templates/', { params })
       return response.data
     } catch (error) {
       console.error(error)
@@ -14,7 +14,7 @@ class BioService {
 
   async getBioById (id: number): Promise<BaseResponse<Bio>> {
     try {
-      const response = await api.get(`/templates/${id}`)
+      const response = await api.get(`/templates/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)
@@ -24,7 +24,7 @@ class BioService {
 
   async createBio (data: Partial<Bio>): Promise<BaseResponse<Bio>> {
     try {
-      const response = await api.post('/templates', data)
+      const response = await api.post('/templates/', data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -34,7 +34,7 @@ class BioService {
 
   async deleteBio (id: number): Promise<BaseResponse<void>> {
     try {
-      const response = await api.delete(`/templates/${id}`)
+      const response = await api.delete(`/templates/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)

@@ -1,10 +1,10 @@
+import type { BaseResponse, PaginatedResponse, QueryParams, TimeSpan } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
-import type { TimeSpan, QueryParams, BaseResponse, PaginatedResponse } from '@/types'
 
 class TimeSpansService {
-  async getTimeSpans (params?: QueryParams): Promise<PaginatedResponse<TimeSpan[]>> {
+  async getTimeSpans (params?: QueryParams): Promise<PaginatedResponse<TimeSpan>> {
     try {
-      const response = await api.get('/time_spans', { params })
+      const response = await api.get('/time_spans/', { params })
       return response.data
     } catch (error) {
       console.error(error)
@@ -14,7 +14,7 @@ class TimeSpansService {
 
   async getTimeSpanById (id: number): Promise<BaseResponse<TimeSpan>> {
     try {
-      const response = await api.get(`/time_spans/${id}`)
+      const response = await api.get(`/time_spans/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)
@@ -24,7 +24,7 @@ class TimeSpansService {
 
   async createTimeSpan (data: Partial<TimeSpan>): Promise<BaseResponse<TimeSpan>> {
     try {
-      const response = await api.post('/time_spans', data)
+      const response = await api.post('/time_spans/', data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -34,7 +34,7 @@ class TimeSpansService {
 
   async updateTimeSpan (id: number, data: Partial<TimeSpan>): Promise<BaseResponse<TimeSpan>> {
     try {
-      const response = await api.patch(`/time_spans/${id}`, data)
+      const response = await api.patch(`/time_spans/${id}/`, data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -44,7 +44,7 @@ class TimeSpansService {
 
   async deleteTimeSpan (id: number): Promise<BaseResponse<void>> {
     try {
-      const response = await api.delete(`/time_spans/${id}`)
+      const response = await api.delete(`/time_spans/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)

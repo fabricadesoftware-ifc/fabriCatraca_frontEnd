@@ -10,6 +10,8 @@ export interface PaginatedResponse<T> {
   next: string | null
   previous: string | null
   results: T[]
+  page_size: number
+  page?: number
 }
 
 export interface QueryParams {
@@ -24,8 +26,12 @@ export interface QueryParams {
 export interface AccessRule {
   id: number
   name: string
-  type: number
+  description?: string
+  type: string
   priority: number
+  is_active: boolean
+  time_zones?: TimeZone[]
+  areas?: Area[]
 }
 
 export interface AccessRuleTimeZone {
@@ -79,8 +85,11 @@ export interface GroupAccessRule {
 export interface Portal {
   id: number
   name: string
+  description?: string
   area_from: Area
   area_to: Area
+  is_active: boolean
+  updating?: boolean
 }
 
 export interface PortalAccessRule {
@@ -109,6 +118,10 @@ export interface TimeSpan {
 export interface TimeZone {
   id: number
   name: string
+  description?: string
+  is_active: boolean
+  time_spans?: TimeSpan[]
+  updating?: boolean
 }
 
 export interface User {

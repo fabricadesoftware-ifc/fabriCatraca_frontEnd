@@ -1,10 +1,10 @@
+import type { BaseResponse, PaginatedResponse, QueryParams, UserAccessRule } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
-import type { UserAccessRule, QueryParams, BaseResponse, PaginatedResponse } from '@/types'
 
 class UserAccessRulesService {
-  async getUserAccessRules (params?: QueryParams): Promise<PaginatedResponse<UserAccessRule[]>> {
+  async getUserAccessRules (params?: QueryParams): Promise<PaginatedResponse<UserAccessRule>> {
     try {
-      const response = await api.get('/user_access_rules', { params })
+      const response = await api.get('/user_access_rules/', { params })
       return response.data
     } catch (error) {
       console.error(error)
@@ -14,7 +14,7 @@ class UserAccessRulesService {
 
   async getUserAccessRuleById (id: number): Promise<BaseResponse<UserAccessRule>> {
     try {
-      const response = await api.get(`/user_access_rules/${id}`)
+      const response = await api.get(`/user_access_rules/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)
@@ -24,7 +24,7 @@ class UserAccessRulesService {
 
   async createUserAccessRule (data: Partial<UserAccessRule>): Promise<BaseResponse<UserAccessRule>> {
     try {
-      const response = await api.post('/user_access_rules', data)
+      const response = await api.post('/user_access_rules/', data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -34,7 +34,7 @@ class UserAccessRulesService {
 
   async updateUserAccessRule (id: number, data: Partial<UserAccessRule>): Promise<BaseResponse<UserAccessRule>> {
     try {
-      const response = await api.patch(`/user_access_rules/${id}`, data)
+      const response = await api.patch(`/user_access_rules/${id}/`, data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -44,7 +44,7 @@ class UserAccessRulesService {
 
   async deleteUserAccessRule (id: number): Promise<BaseResponse<void>> {
     try {
-      const response = await api.delete(`/user_access_rules/${id}`)
+      const response = await api.delete(`/user_access_rules/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)

@@ -1,10 +1,10 @@
+import type { BaseResponse, Card, PaginatedResponse, QueryParams } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
-import type { Card, QueryParams, BaseResponse, PaginatedResponse } from '@/types'
 
 class CardsService {
-  async getCards (params?: QueryParams): Promise<PaginatedResponse<Card[]>> {
+  async getCards (params?: QueryParams): Promise<PaginatedResponse<Card>> {
     try {
-      const response = await api.get('/cards', { params })
+      const response = await api.get('/cards/', { params })
       return response.data
     } catch (error) {
       console.error(error)
@@ -14,7 +14,7 @@ class CardsService {
 
   async getCardById (id: number): Promise<BaseResponse<Card>> {
     try {
-      const response = await api.get(`/cards/${id}`)
+      const response = await api.get(`/cards/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)
@@ -24,7 +24,7 @@ class CardsService {
 
   async createCard (data: Partial<Card>): Promise<BaseResponse<Card>> {
     try {
-      const response = await api.post('/cards', data)
+      const response = await api.post('/cards/', data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -34,7 +34,7 @@ class CardsService {
 
   async updateCard (id: number, data: Partial<Card>): Promise<BaseResponse<Card>> {
     try {
-      const response = await api.patch(`/cards/${id}`, data)
+      const response = await api.patch(`/cards/${id}/`, data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -44,7 +44,7 @@ class CardsService {
 
   async deleteCard (id: number): Promise<BaseResponse<void>> {
     try {
-      const response = await api.delete(`/cards/${id}`)
+      const response = await api.delete(`/cards/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)

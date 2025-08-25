@@ -4,7 +4,7 @@ import { controlIdApi as api } from '@/plugins/api'
 class AreasService {
   async getAreas (params?: QueryParams): Promise<PaginatedResponse<Area>> {
     try {
-      const response = await api.get('/areas', { params })
+      const response = await api.get('/areas/', { params })
       return response.data as PaginatedResponse<Area>
     } catch (error) {
       console.error(error)
@@ -14,7 +14,7 @@ class AreasService {
 
   async getAreaById (id: number): Promise<BaseResponse<Area>> {
     try {
-      const response = await api.get(`/areas/${id}`)
+      const response = await api.get(`/areas/${id}/`)
       return response.data as BaseResponse<Area>
     } catch (error) {
       console.error(error)
@@ -24,7 +24,7 @@ class AreasService {
 
   async createArea (data: Partial<Area>): Promise<BaseResponse<Area>> {
     try {
-      const response = await api.post('/areas', data)
+      const response = await api.post('/areas/', data)
       return response.data as BaseResponse<Area>
     } catch (error) {
       console.error(error)
@@ -34,7 +34,7 @@ class AreasService {
 
   async updateArea (id: number, data: Partial<Area>): Promise<BaseResponse<Area>> {
     try {
-      const response = await api.patch(`/areas/${id}`, data)
+      const response = await api.patch(`/areas/${id}/`, data)
       return response.data as BaseResponse<Area>
     } catch (error) {
       console.error(error)
@@ -44,7 +44,7 @@ class AreasService {
 
   async deleteArea (id: number): Promise<BaseResponse<void>> {
     try {
-      const response = await api.delete(`/areas/${id}`)
+      const response = await api.delete(`/areas/${id}/`)
       return response.data as BaseResponse<void>
     } catch (error) {
       console.error(error)

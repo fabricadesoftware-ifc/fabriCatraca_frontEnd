@@ -1,35 +1,17 @@
-import AccessRulesService from './access_rules'
-import AccessRuleTimeZonesService from './access_rule_time_zones'
-import AreasService from './areas'
-import BioService from './bio'
-import CardsService from './cards'
-import ConfigService from './config'
-import DeviceService from './device'
-import GroupAccessRulesService from './group_access_rules'
-import GroupsService from './groups'
-import PortalAccessRulesService from './portal_access_rules'
-import PortalsService from './portals'
-import TimeSpansService from './time_spans'
-import TimeZonesService from './time_zones'
-import UserAccessRulesService from './user_access_rules'
-import UserGroupsService from './user_groups'
-import UsersService from './users'
-
-export {
-  AreasService,
-  AccessRulesService,
-  AccessRuleTimeZonesService,
-  BioService,
-  CardsService,
-  ConfigService,
-  DeviceService,
-  GroupAccessRulesService,
-  GroupsService,
-  PortalAccessRulesService,
-  PortalsService,
-  TimeSpansService,
-  TimeZonesService,
-  UserAccessRulesService,
-  UserGroupsService,
-  UsersService
-}
+export { default as AccessLogsService } from './access_logs'
+export { default as AccessRuleTimeZonesService } from './access_rule_time_zones'
+export { default as AccessRulesService } from './access_rules'
+export { default as AreasService } from './areas'
+export { default as BioService } from './bio'
+export { default as CardsService } from './cards'
+export { default as ConfigService } from './config'
+export { default as DeviceService } from './device'
+export { default as GroupAccessRulesService } from './group_access_rules'
+export { default as GroupsService } from './groups'
+export { default as PortalAccessRulesService } from './portal_access_rules'
+export { default as PortalsService } from './portals'
+export { default as TimeSpansService } from './time_spans'
+export { default as TimeZonesService } from './time_zones'
+export { default as UserAccessRulesService } from './user_access_rules'
+export { default as UserGroupsService } from './user_groups'
+export { default as UsersService } from './users'

@@ -1,0 +1,153 @@
+Sistema de Controle de Acesso Escolar - Requisitos 
+Sistema de Controle de Acesso Escolar - Especificação de Requisitos 
+Requisitos Funcionais (RF) 
+Dashboard Administrativo 
+Painel central com visão geral do sistema 
+Status das catracas em tempo real (online/offline) 
+Resumo de acessos recentes (últimas 24 horas) 
+Indicadores de performance (total de acessos, tentativas bloqueadas) 
+Alertas e notificações importantes 
+Gráficos de fluxo de entrada/saída por horário 
+CRUD para: 
+Alunos: matrícula, nome completo, foto, status (ativo/inativo), turma, 
+horários permitidos 
+Turmas: código, nome, horários de entrada/saída 
+Usuários Administrativos: nome, email, nível de acesso, permissões 
+específicas, histórico de login 
+Catracas: identificação, localização, modelo ControlID, status, última 
+sincronização 
+Autorizações Temporárias: aluno, período de validade, motivo, 
+responsável pela aprovação 
+Registro de Logs: timestamp, usuário, ação realizada, dados alterados, IP de origem 
+Sistema de Controle de Acesso Escolar  Requisitos 1
+Gestão de Horários e Permissões 
+Configuração de grade horária semanal por turma 
+Definição de janelas de tolerância (antes/depois do horário) 
+Criação de horários especiais para eventos e atividades extras 
+Configuração de feriados e dias letivos especiais 
+Sistema de exceções por aluno (atendimento médico, reforço escolar) 
+Controle Biométrico e Sincronização 
+Importação de dados biométricos do SISAE 
+Sincronização automática com catracas ControlID 
+Backup e restauração de configurações das catracas 
+Interação com Usuários 
+Portal web responsivo para administradores 
+Interface de consulta para secretaria escolar 
+Visualização de relatórios por responsáveis (mediante autorização) 
+Sistema de notificações por email para eventos importantes 
+Chat interno para comunicação entre administradores 
+Monitoramento e Auditoria 
+Registro completo de todos os acessos (entrada/saída) 
+Log de tentativas de acesso negadas com motivo 
+Histórico de alterações no sistema com rastreabilidade 
+Monitoramento de performance das catracas 
+Detecção de padrões anômalos de acesso 
+Requisitos Não Funcionais (RNF) 
+Sistema de Controle de Acesso Escolar  Requisitos 2
+
+
+
+
+                 Backup e Resiliência 
+Backup automático diário dos dados críticos 
+Armazenamento criptografado do histórico de acessos 
+Redundância de dados para prevenir perda de informações 
+Plano de recuperação de desastre (RTO: 4 horas, RPO: 1 hora) 
+Sincronização offline das catracas com buffer local 
+Usabilidade e Interface 
+Interface web responsiva compatível com tablets e smartphones 
+Design intuitivo seguindo padrões de UX/UI modernos 
+Tempo máximo de aprendizado: 2 horas para usuários básicos 
+Suporte a múltiplos idiomas (português, espanhol, inglês) 
+Acessibilidade conforme WCAG 2.1 nível AA 
+Integração e Tecnologia 
+Protocolo de comunicação com catracas ControlID 
+Integração com Active Directory para autenticação 
+Webhooks para notificações em tempo real 
+Suporte a importação/exportação CSV e Excel de horarios
+Banco de dados PostgreSQL com alta performance 
+Desempenho e Disponibilidade 
+Tempo de resposta da catraca: máximo 2 segundos 
+Sincronização com catracas em até 30 segundos 
+Segurança e Conformidade 
+Sistema de Controle de Acesso Escolar  Requisitos 3
+
+
+
+
+                                Criptografia AES-256 para dados sensíveis 
+Comunicação HTTPS/TLS 1.3 obrigatória 
+Logs de auditoria invioláveis 
+Conformidade total com LGPD 
+Política de senhas robustas 
+Timeout automático de sessões inativas (30 minutos) 
+Regras de Negócio (RN) 
+Gestão Integrada do Controle de Acesso 
+RN001: O sistema deve atender administradores escolares, secretaria, 
+direção e TI de forma centralizada 
+RN002: Apenas usuários autenticados e autorizados podem acessar o 
+sistema administrativo 
+RN003: Diferentes níveis de permissão: Visualizador, Operador, 
+Administrador, Super Administrador 
+RN004: Todas as ações críticas devem ser registradas em log de auditoria 
+Controle de Acesso e Horários 
+RN005: Aluno só pode acessar durante horários definidos para sua turma RN006: Autorizações temporárias têm prioridade sobre horários de turma 
+RN007: Bloqueios manuais impedem acesso independente de outras 
+regras 
+        
+           RN008: Aluno inativo não pode acessar o sistema 
+
+
+RN009: Máximo de 3 tentativas de acesso em sequência (anti-tailgating) 
+Sistema de Controle de Acesso Escolar  Requisitos 4
+
+
+
+
+
+
+
+
+Segurança e Privacidade 
+RN010: Dados biométricos ficam exclusivamente nas catracas (edge 
+computing) 
+RN011: Consentimento obrigatório para coleta e uso de biometria 
+RN012: Retenção de logs por no máximo 5 anos 
+RN013: Direito ao esquecimento deve ser implementado conforme LGPD RN014: Acesso aos dados pessoais limitado por necessidade e função 
+Operação e Contingência 
+RN015: Catracas devem funcionar offline (modo standalone) por até 72 
+horas 
+RN016: Sistema deve alertar sobre falhas de comunicação em até 5 
+minutos 
+RN017: Backup automático não pode interferir na operação normal 
+RN018: Sincronização deve ocorrer fora dos horários de pico de acesso RN019: Plano de contingência deve estar sempre atualizado 
+Escalabilidade e Crescimento 
+RN020: Arquitetura deve suportar expansão para múltiplas unidades 
+escolares 
+RN021: Sistema deve comportar crescimento de até 100% da base atual sem reestruturação 
+RN022: Novas catracas podem ser adicionadas sem interrupção do serviço 
+RN023: Integração com novos sistemas deve ser possível via API 
+padronizada 
+
+
+Sistema de Controle de Acesso Escolar  Requisitos 5
+
+
+
+
+Critérios de Aceitação 
+Funcionais
+✅ 100% dos alunos cadastrados conseguem acessar nos horários corretos ✅ 0 falsos positivos em acessos não autorizados 
+✅ Relatórios gerados em menos de 10 segundos 
+✅ Sincronização completa em menos de 2 minutos 
+Não Funcionais 
+✅ Zero perda de dados em 12 meses 
+✅ Conformidade LGPD 100% auditada 
+Usabilidade 
+✅ Usuário básico operando sistema em até 1 hora de treinamento 
+✅ Taxa de erro de usuário ≤ 2% 
+✅ Satisfação do usuário ≥ 8/10 
+✅ Suporte técnico resolvendo 90% dos chamados em até 4 horas 
+
+
+Sistema de Controle de Acesso Escolar  Requisitos 6

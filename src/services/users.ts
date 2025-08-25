@@ -1,10 +1,10 @@
+import type { BaseResponse, PaginatedResponse, QueryParams, User } from '@/types'
 import { usersApi as api } from '@/plugins/api'
-import type { User, QueryParams, BaseResponse, PaginatedResponse } from '@/types'
 
 class UsersService {
-  async getUsers (params?: QueryParams): Promise<PaginatedResponse<User[]>> {
+  async getUsers (params?: QueryParams): Promise<PaginatedResponse<User>> {
     try {
-      const response = await api.get('/users', { params })
+      const response = await api.get('/users/', { params })
       return response.data
     } catch (error) {
       console.error(error)
@@ -14,7 +14,7 @@ class UsersService {
 
   async getUserById (id: number): Promise<BaseResponse<User>> {
     try {
-      const response = await api.get(`/users/${id}`)
+      const response = await api.get(`/users/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)
@@ -24,7 +24,7 @@ class UsersService {
 
   async createUser (data: Partial<User>): Promise<BaseResponse<User>> {
     try {
-      const response = await api.post('/users', data)
+      const response = await api.post('/users/', data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -34,7 +34,7 @@ class UsersService {
 
   async updateUser (id: number, data: Partial<User>): Promise<BaseResponse<User>> {
     try {
-      const response = await api.patch(`/users/${id}`, data)
+      const response = await api.patch(`/users/${id}/`, data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -44,7 +44,7 @@ class UsersService {
 
   async deleteUser (id: number): Promise<BaseResponse<void>> {
     try {
-      const response = await api.delete(`/users/${id}`)
+      const response = await api.delete(`/users/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)
@@ -54,7 +54,7 @@ class UsersService {
 
   async getMe (): Promise<BaseResponse<User>> {
     try {
-      const response = await api.get('/users/me')
+      const response = await api.get('/users/me/')
       return response.data
     } catch (error) {
       console.error(error)

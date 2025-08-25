@@ -1,10 +1,10 @@
+import type { BaseResponse, PaginatedResponse, PortalAccessRule, QueryParams } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
-import type { PortalAccessRule, QueryParams, BaseResponse, PaginatedResponse } from '@/types'
 
 class PortalAccessRulesService {
-  async getPortalAccessRules (params?: QueryParams): Promise<PaginatedResponse<PortalAccessRule[]>> {
+  async getPortalAccessRules (params?: QueryParams): Promise<PaginatedResponse<PortalAccessRule>> {
     try {
-      const response = await api.get('/portal_access_rules', { params })
+      const response = await api.get('/portal_access_rules/', { params })
       return response.data
     } catch (error) {
       console.error(error)
@@ -14,7 +14,7 @@ class PortalAccessRulesService {
 
   async getPortalAccessRuleById (id: number): Promise<BaseResponse<PortalAccessRule>> {
     try {
-      const response = await api.get(`/portal_access_rules/${id}`)
+      const response = await api.get(`/portal_access_rules/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)
@@ -24,7 +24,7 @@ class PortalAccessRulesService {
 
   async createPortalAccessRule (data: Partial<PortalAccessRule>): Promise<BaseResponse<PortalAccessRule>> {
     try {
-      const response = await api.post('/portal_access_rules', data)
+      const response = await api.post('/portal_access_rules/', data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -34,7 +34,7 @@ class PortalAccessRulesService {
 
   async updatePortalAccessRule (id: number, data: Partial<PortalAccessRule>): Promise<BaseResponse<PortalAccessRule>> {
     try {
-      const response = await api.patch(`/portal_access_rules/${id}`, data)
+      const response = await api.patch(`/portal_access_rules/${id}/`, data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -44,7 +44,7 @@ class PortalAccessRulesService {
 
   async deletePortalAccessRule (id: number): Promise<BaseResponse<void>> {
     try {
-      const response = await api.delete(`/portal_access_rules/${id}`)
+      const response = await api.delete(`/portal_access_rules/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)

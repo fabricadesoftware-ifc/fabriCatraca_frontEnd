@@ -1,10 +1,10 @@
+import type { BaseResponse, Group, PaginatedResponse, QueryParams } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
-import type { Group, QueryParams, BaseResponse, PaginatedResponse } from '@/types'
 
 class GroupsService {
-  async getGroups (params?: QueryParams): Promise<PaginatedResponse<Group[]>> {
+  async getGroups (params?: QueryParams): Promise<PaginatedResponse<Group>> {
     try {
-      const response = await api.get('/groups', { params })
+      const response = await api.get('/groups/', { params })
       return response.data
     } catch (error) {
       console.error(error)
@@ -14,7 +14,7 @@ class GroupsService {
 
   async getGroupById (id: number): Promise<BaseResponse<Group>> {
     try {
-      const response = await api.get(`/groups/${id}`)
+      const response = await api.get(`/groups/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)
@@ -24,7 +24,7 @@ class GroupsService {
 
   async createGroup (data: Partial<Group>): Promise<BaseResponse<Group>> {
     try {
-      const response = await api.post('/groups', data)
+      const response = await api.post('/groups/', data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -34,7 +34,7 @@ class GroupsService {
 
   async updateGroup (id: number, data: Partial<Group>): Promise<BaseResponse<Group>> {
     try {
-      const response = await api.patch(`/groups/${id}`, data)
+      const response = await api.patch(`/groups/${id}/`, data)
       return response.data
     } catch (error) {
       console.error(error)
@@ -44,7 +44,7 @@ class GroupsService {
 
   async deleteGroup (id: number): Promise<BaseResponse<void>> {
     try {
-      const response = await api.delete(`/groups/${id}`)
+      const response = await api.delete(`/groups/${id}/`)
       return response.data
     } catch (error) {
       console.error(error)
