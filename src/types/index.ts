@@ -1,4 +1,3 @@
-// Interfaces base
 export interface BaseResponse<T> {
   data: T
   message?: string
@@ -15,14 +14,12 @@ export interface PaginatedResponse<T> {
 }
 
 export interface QueryParams {
+  [key: string]: unknown | undefined
   page?: number
   limit?: number
   search?: string
-  // eslint-disable-next-line @typescript-eslint/member-ordering
-  [key: string]: unknown
 }
 
-// Interfaces de entidades
 export interface AccessRule {
   id: number
   name: string
@@ -30,8 +27,9 @@ export interface AccessRule {
   type: string
   priority: number
   is_active: boolean
-  time_zones?: TimeZone[]
-  areas?: Area[]
+  time_zones?: TimeZone[] | number[]
+  areas?: Area[] | number[]
+  updating?: boolean
 }
 
 export interface AccessRuleTimeZone {
@@ -69,11 +67,18 @@ export interface Device {
   username: string
   is_active: boolean
   is_default: boolean
+  status?: string
+  updating?: boolean
 }
 
 export interface Group {
   id: number
   name: string
+  description?: string
+  is_active?: boolean
+  member_count?: number
+  users?: User[]
+  updating?: boolean
 }
 
 export interface GroupAccessRule {
@@ -90,6 +95,9 @@ export interface Portal {
   area_to: Area
   is_active: boolean
   updating?: boolean
+  type?: string
+  area?: Area
+  devices?: Device[]
 }
 
 export interface PortalAccessRule {
@@ -100,7 +108,7 @@ export interface PortalAccessRule {
 
 export interface TimeSpan {
   id: number
-  time_zone: TimeZone
+  time_zone: TimeZone | number
   start: number
   end: number
   sun: boolean
@@ -129,7 +137,8 @@ export interface User {
   name: string
   registration: string
   user_type_id: number
-  devices: Device[]
+  devices: (Device | number)[]
+  email?: string
 }
 
 export interface UserAccessRule {
@@ -140,8 +149,8 @@ export interface UserAccessRule {
 
 export interface UserGroup {
   id: number
-  user: User
-  group: Group
+  user: number
+  group: number
 }
 
 export interface AccessLogs {
@@ -160,20 +169,3 @@ export interface AccessLogs {
   confidence: number
   mask: string
 }
-
-// tipos de eventos
-// 1Equipamento inválido
-// 2Parâmetros de identificação inválidos
-// 3Não identificado
-// 4Identificação pendente
-// 5Tempo de identificação esgotado
-// 6Acesso negado
-// 7Acesso concedido
-// 8Acesso pendente (usado quando o acesso depende de mais de uma pessoa)
-// 9Usuário não é administrador (usado quando um usuário tenta acessar o menu mas não é administrador)
-// 10Acesso não identificado (quando o portal é aberto através da API e o motivo não é informado)
-// 11Acesso por botoeira
-// 12Acesso pela interface web
-// 13Desistência de entrada (exclusivo para iDBlock)
-// 14Sem resposta (nenhuma ação é tomada)
-// 15Acesso pela interfonia (exclusivo para iDFace)
