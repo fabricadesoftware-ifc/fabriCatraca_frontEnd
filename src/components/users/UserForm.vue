@@ -83,86 +83,84 @@
 </template>
 
 <script setup lang="ts">
-import type { User, Device } from '@/types'
-import { ref, computed, watch } from 'vue'
+  import type { Device, User } from '@/types'
+  import { computed, ref, watch } from 'vue'
 
-const props = defineProps<{
-  modelValue: boolean
-  user?: User
-  saving: boolean
-  availableDevices: Device[]
-}>()
+  const props = defineProps<{
+    modelValue: boolean
+    user?: User
+    saving: boolean
+    availableDevices: Device[]
+  }>()
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-  (e: 'save', data: Partial<User>): void
-}>()
+  const emit = defineEmits<{
+    (e: 'update:modelValue', value: boolean): void
+    (e: 'save', data: Partial<User>): void
+  }>()
 
-// Estado local
-const valid = ref(false)
-const form = ref()
-const formData = ref<Partial<User>>({
-  name: '',
-  registration: '',
-  user_type_id: 1,
-  devices: [],
-})
-
-// Dados estáticos
-const userTypes = [
-  { title: 'Aluno', value: 1 },
-  { title: 'Professor', value: 2 },
-  { title: 'Funcionário', value: 3 },
-  { title: 'Administrador', value: 4 },
-]
-
-// Computed
-const dialog = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value),
-})
-
-const isEditing = computed(() => !!props.user)
-
-// Regras de validação
-const rules = {
-  required: (v: string) => !!v || 'Campo obrigatório',
-}
-
-// Métodos
-const closeDialog = () => {
-  dialog.value = false
-  resetForm()
-}
-
-const resetForm = () => {
-  formData.value = {
+  // Estado local
+  const valid = ref(false)
+  const form = ref()
+  const formData = ref<Partial<User>>({
     name: '',
     registration: '',
     user_type_id: 1,
     devices: [],
-  }
-  if (form.value) {
-    form.value.reset()
-  }
-}
+  })
 
-const save = () => {
-  if (!valid.value) return
-  emit('save', formData.value)
-}
+  // Dados estáticos
+  const userTypes = [
+    { title: 'Usuário', value: 0 },
+    { title: 'Visitante', value: 1 },
+  ]
 
-// Watch para atualizar o formulário quando o user mudar
-watch(() => props.user, (newValue) => {
-  if (newValue) {
-    formData.value = {
-      name: newValue.name,
-      registration: newValue.registration,
-      user_type_id: newValue.user_type_id,
-      devices: Array.isArray(newValue.devices) ? newValue.devices.map(d => typeof d === 'number' ? d : d.id) : [],
-    }
-  } else {
+  // Computed
+  const dialog = computed({
+    get: () => props.modelValue,
+    set: (value: boolean) => emit('update:modelValue', value),
+  })
+
+  const isEditing = computed(() => !!props.user)
+
+  // Regras de validação
+  const rules = {
+    required: (v: string) => !!v || 'Campo obrigatório',
+  }
+
+  // Métodos
+  const closeDialog = () => {
+    dialog.value = false
     resetForm()
   }
-}, { immediate: true })
+
+  const resetForm = () => {
+    formData.value = {
+      name: '',
+      registration: '',
+      user_type_id: 1,
+      devices: [],
+    }
+    if (form.value) {
+      form.value.reset()
+    }
+  }
+
+  const save = () => {
+    if (!valid.value) return
+    emit('save', formData.value)
+  }
+
+  // Watch para atualizar o formulário quando o user mudar
+  watch(() => props.user, (newValue: User | undefined) => {
+    if (newValue) {
+      formData.value = {
+        name: newValue.name,
+        registration: newValue.registration,
+        user_type_id: newValue.user_type_id,
+        devices: newValue.devices,
+      }
+    } else {
+      resetForm()
+    }
+  }, { immediate: true })
 </script>

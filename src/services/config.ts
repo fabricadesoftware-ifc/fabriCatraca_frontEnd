@@ -4,7 +4,7 @@ import { controlIdApi as api } from '@/plugins/api'
 class ConfigService {
   async syncData (): Promise<BaseResponse<void>> {
     try {
-      const response = await api.post('/control_id/sync/')
+      const response = await api.get('/sync/')
       return response.data
     } catch (error) {
       console.error(error)

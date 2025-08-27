@@ -128,7 +128,7 @@
   import type { Device } from '@/types'
   import type { TableHeaders } from '@/types/vuetify'
   import { ref } from 'vue'
-  import { useDevice } from '@/composables/useDevice'
+  import { useDeviceStore } from '@/stores/device'
 
   const props = defineProps<{
     devices: Device[]
@@ -141,7 +141,8 @@
     (e: 'edit' | 'view' | 'test' | 'delete' | 'toggle-status', device: Device): void
   }>()
 
-  const { getDeviceStatusColor, getDeviceStatusLabel } = useDevice()
+  const deviceStore = useDeviceStore()
+  const { getDeviceStatusColor, getDeviceStatusLabel } = deviceStore
 
   const search = ref('')
 

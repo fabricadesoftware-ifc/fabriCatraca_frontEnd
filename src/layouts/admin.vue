@@ -16,6 +16,17 @@
 
       <v-spacer />
 
+      <v-btn
+        icon
+        :loading="configStore.syncing"
+        @click="syncData"
+      >
+        <v-tooltip activator="parent">
+          Sincronizar Dados
+        </v-tooltip>
+        <v-icon>mdi-sync</v-icon>
+      </v-btn>
+
       <v-btn icon @click="toggleTheme">
         <v-icon>{{ themeIcon }}</v-icon>
       </v-btn>
@@ -106,9 +117,11 @@
   import { computed, ref } from 'vue'
   import { useRouter } from 'vue-router'
   import { useTheme } from 'vuetify'
+  import { useConfigStore } from '@/stores/config'
 
   const router = useRouter()
   const theme = useTheme()
+  const configStore = useConfigStore()
 
   // Estado reativo
   const drawer = ref(true)
@@ -189,6 +202,15 @@
     // TODO: Implementar logout
     console.log('Logout')
     router.push('/login')
+  }
+
+  const syncData = async () => {
+    try {
+      await configStore.syncData()
+      // TODO: Atualizar dados das stores após sincronização
+    } catch (error) {
+      console.error('Erro ao sincronizar dados:', error)
+    }
   }
 </script>
 

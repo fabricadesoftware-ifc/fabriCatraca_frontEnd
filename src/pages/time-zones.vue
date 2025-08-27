@@ -15,7 +15,6 @@
       @delete="deleteTimeZone"
       @edit="editTimeZone"
       @manage-spans="openTimeSpanList"
-      @toggle-status="toggleTimeZoneStatus"
     />
 
     <TimeZoneForm
@@ -135,19 +134,6 @@
     }
   }
 
-  const toggleTimeZoneStatus = async (timeZone: TimeZone) => {
-    timeZone.updating = true
-    try {
-      await updateTimeZone(timeZone.id, { is_active: timeZone.is_active })
-      showSnackbar('Status atualizado com sucesso')
-    } catch (error: unknown) {
-      timeZone.is_active = !timeZone.is_active // Reverter mudança
-      showSnackbar('Erro ao atualizar status', error instanceof Error ? error.message : 'Erro desconhecido')
-    } finally {
-      timeZone.updating = false
-    }
-  }
-
   // Métodos - TimeSpan
   const openTimeSpanList = (timeZone: TimeZone) => {
     selectedTimeZone.value = timeZone
@@ -169,7 +155,7 @@
         await updateTimeSpan(editingTimeSpan.value.id, data)
         showSnackbar('Período atualizado com sucesso')
       } else if (selectedTimeZone.value) {
-        await createTimeSpan({ ...data, time_zone: selectedTimeZone.value.id })
+        await createTimeSpan({ ...data, time_zone: selectedTimeZone.value })
         showSnackbar('Período criado com sucesso')
       }
       timeSpanDialog.value = false

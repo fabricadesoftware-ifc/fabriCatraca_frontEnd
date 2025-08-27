@@ -108,7 +108,7 @@ export interface PortalAccessRule {
 
 export interface TimeSpan {
   id: number
-  time_zone: TimeZone | number
+  time_zone: TimeZone
   start: number
   end: number
   sun: boolean
@@ -126,10 +126,6 @@ export interface TimeSpan {
 export interface TimeZone {
   id: number
   name: string
-  description?: string
-  is_active: boolean
-  time_spans?: TimeSpan[]
-  updating?: boolean
 }
 
 export interface User {
@@ -137,7 +133,7 @@ export interface User {
   name: string
   registration: string
   user_type_id: number
-  devices: (Device | number)[]
+  devices: Device[]
   email?: string
 }
 
