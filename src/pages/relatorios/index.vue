@@ -2,7 +2,7 @@
 
 </script>
 <template>
-HOME
+REALTORIOS
 </template>
 
 <style scoped>

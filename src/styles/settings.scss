@@ -4,7 +4,21 @@
  * Configures SASS variables and Vuetify overwrites
  */
 
-// https://vuetifyjs.com/features/sass-variables/`
-// @use 'vuetify/settings' with (
-//   $color-pack: false
-// );
+// https://vuetifyjs.com/features/sass-variables/
+@use 'vuetify/settings' with (
+  $color-pack: false
+);
+
+// Definir variáveis SASS para o tema
+
+// Variáveis CSS customizadas para uso em outros lugares
+:root {
+    --ifc-primary: #459c50;
+    --ifc-primary-700: #276737;
+    --ifc-accent: #2a9df4;
+    --ifc-success: #2bb673;
+    --ifc-warning: #f2a900;
+    --ifc-error: #e14b4b;
+    --card-bg: #ffffff;
+    --muted-text: #6b7280;
+}
