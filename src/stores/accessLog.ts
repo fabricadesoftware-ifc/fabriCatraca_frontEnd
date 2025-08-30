@@ -22,9 +22,11 @@ export const useAccessLogStore = defineStore('accessLog', {
       this.loading = true
       try {
         const response = await AccessLogsService.getAccessLogs(params)
-        if (response && Array.isArray(response.results)) {
-          this.logs = response.results
-          this.totalLogs = response.count || 0
+        console.log(response)
+        if (response && Array.isArray(response?.results)) {
+          this.logs = response?.results || []
+          console.log(this.logs)
+          this.totalLogs = response?.count || 0
           this.updateStats()
         }
       } catch (error) {
@@ -104,4 +106,3 @@ export const useAccessLogStore = defineStore('accessLog', {
     },
   },
 })
-

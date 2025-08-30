@@ -17,6 +17,7 @@ declare module 'vue' {
     AppFooter: typeof import('./components/AppFooter.vue')['default']
     AreaForm: typeof import('./components/areas/AreaForm.vue')['default']
     AreaList: typeof import('./components/areas/AreaList.vue')['default']
+    CardsComponent: typeof import('./components/cards/CardsComponent.vue')['default']
     DeviceForm: typeof import('./components/devices/DeviceForm.vue')['default']
     DeviceList: typeof import('./components/devices/DeviceList.vue')['default']
     GroupForm: typeof import('./components/groups/GroupForm.vue')['default']

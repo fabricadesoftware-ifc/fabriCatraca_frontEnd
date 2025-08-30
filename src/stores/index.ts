@@ -2,3 +2,14 @@
 import { createPinia } from 'pinia'
 
 export default createPinia()
+
+export { useAccessLogStore } from './accessLog'
+export { useAccessRuleStore } from './accessRule'
+export { useAppStore } from './app'
+export { useAreaStore } from './area'
+export { useConfigStore } from './config'
+export { useDeviceStore } from './device'
+export { useGroupStore } from './group'
+export { usePortalStore } from './portal'
+export { useTimeZoneStore } from './timeZone'
+export { useUserStore } from './user'
