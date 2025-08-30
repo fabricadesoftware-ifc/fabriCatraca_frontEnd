@@ -104,5 +104,12 @@ export const useAccessLogStore = defineStore('accessLog', {
     formatDateTime (dateTime: string) {
       return new Date(dateTime).toLocaleString('pt-BR')
     },
+
+    async returnedTypedLogs (type: number, page_size?: number) {
+      const params = { event_type: type, page_size: page_size || 10 }
+      const response = await AccessLogsService.getAccessLogs(params)
+      console.log(response)
+      return response
+    },
   },
 })

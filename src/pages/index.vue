@@ -1,47 +1,99 @@
 <script setup lang="ts">
+  import type { AccessLogs } from '@/types'
+  import { computed } from 'vue'
   import { useAccessLogStore, useUserStore } from '@/stores'
+
   const accessLogStore = useAccessLogStore()
   const userStore = useUserStore()
+  const acces_accept = ref<AccessLogs>()
+  const acces_rejected = ref<AccessLogs>()
+  const count_approved = ref(0)
+  const count_rejected = ref(0)
+
+
   onMounted(async () => {
     await accessLogStore.loadLogs()
     await userStore.loadUsers()
+    acces_accept.value = await accessLogStore.returnedTypedLogs(7, 30) as unknown as AccessLogs
+    acces_rejected.value = await accessLogStore.returnedTypedLogs(6, 30) as unknown as AccessLogs
+
+    // Contar os logs
+    count_approved.value = (await accessLogStore.returnedTypedLogs(7)).count
+    count_rejected.value = (await accessLogStore.returnedTypedLogs(6)).count
   })
 
-  const data = [
+  const data = computed(() => [
     {
       title: 'Acessos Aprovados',
-      description: 'Acessos Aprovados',
-      value: accessLogStore.totalLogs.toString(),
+      description: 'Total de acessos concedidos com sucesso',
+      value: count_approved.value,
+      trend: 'up' as const,
+      trendValue: '+12%',
+      color: '', // Sem cor específica, deixar o CSS controlar
+      icon: 'mdi-check-circle',
+      iconColor: 'success', // Ícone verde
+      variant: 'light' as const, // Modo claro
     },
     {
       title: 'Acessos Negados',
-      description: 'Acessos Negados',
-      value: accessLogStore.totalLogs.toString(),
+      description: 'Total de tentativas de acesso rejeitadas',
+      value: count_rejected.value,
+      trend: 'down' as const,
+      trendValue: '-5%',
+      color: '', // Sem cor específica, deixar o CSS controlar
+      icon: 'mdi-close-circle',
+      iconColor: 'error', // Ícone vermelho
+      variant: 'light' as const, // Modo claro
     },
     {
-      title: 'Usuarios',
-      description: 'Usuarios',
-      value: userStore.users.length.toString(),
+      title: 'Usuários',
+      description: 'Total de usuários cadastrados no sistema',
+      value: userStore.users.length,
+      trend: 'up' as const,
+      trendValue: '+3%',
+      color: '', // Sem cor específica, deixar o CSS controlar
+      icon: 'mdi-account-group',
+      iconColor: 'info', // Ícone azul
+      variant: 'light' as const, // Modo claro
     },
-  ]
+  ])
 </script>
 
 <template>
   <v-container>
-    <v-title>
-      <h1>Dashboard</h1>
-    </v-title>
+    <h1 class="text-h4 font-weight-bold mb-4">Dashboard</h1>
 
     <v-divider class="my-4" />
 
-    <CardsComponent
-      v-for="card in data"
-      :key="card.title"
-      class="mb-4 max-w-sm"
-      :description="card.description"
-      :title="card.title"
-      :value="card.value"
-    />
+    <v-row>
+      <v-col
+        v-for="card in data"
+        :key="card.title"
+        cols="12"
+        md="4"
+        sm="6"
+      >
+        <CardsComponent
+          :color="card.color"
+          :description="card.description"
+          :icon="card.icon"
+          :icon-color="card.iconColor"
+          :title="card.title"
+          :trend="card.trend"
+          :trend-value="card.trendValue"
+          :value="card.value"
+          :variant="card.variant"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col
+        cols="12"
+        md="16"
+      >
+        <HomeGraph />
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 

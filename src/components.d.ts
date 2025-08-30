@@ -24,6 +24,7 @@ declare module 'vue' {
     GroupList: typeof import('./components/groups/GroupList.vue')['default']
     GroupMemberList: typeof import('./components/groups/GroupMemberList.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
+    HomeGraph: typeof import('./components/graphs/HomeGraph.vue')['default']
     PortalDeviceList: typeof import('./components/portals/PortalDeviceList.vue')['default']
     PortalList: typeof import('./components/portals/PortalList.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
