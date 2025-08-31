@@ -128,8 +128,8 @@
   // Processar dados dos logs recebidos via props
   const processLogData = () => {
     try {
-      // Combinar logs aprovados e negados
-      const allLogs = [...props.approvedLogs, ...props.rejectedLogs]
+      // Combinar logs aprovados e negados (inverter ordem se necessário)
+      const allLogs = [...props.approvedLogs, ...props.rejectedLogs].reverse()
 
       // Agrupar logs por data e hora
       const groupedData = new Map<string, { approved: number; denied: number }>()
@@ -162,7 +162,7 @@
         }
       }
 
-      // Ordenar por data/hora
+      // Ordenar por data/hora (mais antigas à esquerda, mais recentes à direita)
       const sortedDates = Array.from(groupedData.keys()).sort((a, b) => {
         const dateA = new Date(a.split(' ')[0].split('/').reverse().join('-') + ' ' + a.split(' ')[1])
         const dateB = new Date(b.split(' ')[0].split('/').reverse().join('-') + ' ' + b.split(' ')[1])
