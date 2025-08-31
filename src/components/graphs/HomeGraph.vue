@@ -19,10 +19,11 @@
   })
 
   console.log(props)
+
   // Configuração do gráfico
   const chartOption = computed(() => ({
     title: {
-      text: 'Acessos por Tipo (Últimos 30 dias)',
+      text: 'Acessos por Hora (Últimos 30 dias)',
       left: 'center',
       textStyle: {
         fontSize: 16,
@@ -36,6 +37,12 @@
         label: {
           backgroundColor: '#6a7985',
         },
+      },
+      formatter: (params: any) => {
+        const data = params[0]
+        return `${data.name}<br/>
+                <span style="color: #4CAF50;">● Aprovados: ${data.value}</span><br/>
+                <span style="color: #F44336;">● Negados: ${params[1]?.value || 0}</span>`
       },
     },
     legend: {
@@ -124,38 +131,41 @@
       // Combinar logs aprovados e negados
       const allLogs = [...props.approvedLogs, ...props.rejectedLogs]
 
-      // Agrupar logs por data e tipo
+      // Agrupar logs por data e hora
       const groupedData = new Map<string, { approved: number; denied: number }>()
 
       for (const log of allLogs) {
-        const date = new Date(log.time).toLocaleDateString('pt-BR', {
+        const date = new Date(log.time)
+        const dateTime = date.toLocaleString('pt-BR', {
           day: '2-digit',
           month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
         })
 
-        if (!groupedData.has(date)) {
-          groupedData.set(date, { approved: 0, denied: 0 })
+        if (!groupedData.has(dateTime)) {
+          groupedData.set(dateTime, { approved: 0, denied: 0 })
         }
 
-        const dayData = groupedData.get(date)!
+        const timeData = groupedData.get(dateTime)!
 
         // Classificar por tipo de evento
         switch (log.event_type) {
           case 7: { // Acesso Concedido
-            dayData.approved++
+            timeData.approved++
             break
           }
           case 6: { // Acesso Negado
-            dayData.denied++
+            timeData.denied++
             break
           }
         }
       }
 
-      // Ordenar por data
+      // Ordenar por data/hora
       const sortedDates = Array.from(groupedData.keys()).sort((a, b) => {
-        const dateA = new Date(a.split('/').reverse().join('-'))
-        const dateB = new Date(b.split('/').reverse().join('-'))
+        const dateA = new Date(a.split(' ')[0].split('/').reverse().join('-') + ' ' + a.split(' ')[1])
+        const dateB = new Date(b.split(' ')[0].split('/').reverse().join('-') + ' ' + b.split(' ')[1])
         return dateA.getTime() - dateB.getTime()
       })
 
@@ -208,7 +218,7 @@
     <div class="d-flex align-center justify-space-between mb-4">
       <h3 class="text-h6 font-weight-medium">
         <v-icon class="mr-2" color="primary">mdi-chart-line</v-icon>
-        Evolução dos Acessos
+        Evolução dos Acessos por Hora
       </h3>
       <v-btn
         color="primary"
