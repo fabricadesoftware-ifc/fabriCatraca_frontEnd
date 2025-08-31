@@ -111,5 +111,15 @@ export const useAccessLogStore = defineStore('accessLog', {
       console.log(response)
       return response
     },
+
+    async returnedLogsByLastDays (days: number, logs_type?: number) {
+      const params: { days: number, event_type?: number } = { days }
+      if (logs_type) {
+        params.event_type = logs_type
+      }
+      const response = await AccessLogsService.getAccessLogByLastDays(params)
+      console.log(response)
+      return response
+    }
   },
 })

@@ -1,9 +1,13 @@
 <script setup lang="ts">
   import * as echarts from 'echarts'
   import { computed, onMounted, ref, watch } from 'vue'
-  import { useAccessLogStore } from '@/stores'
 
-  const accessLogStore = useAccessLogStore()
+  interface Props {
+    approvedLogs: any[]
+    rejectedLogs: any[]
+  }
+
+  const props = defineProps<Props>()
   const chartRef = ref<HTMLElement>()
   let chartInstance: echarts.ECharts | null = null
 
@@ -12,13 +16,13 @@
     dates: [] as string[],
     approved: [] as number[],
     denied: [] as number[],
-    pending: [] as number[],
   })
 
+  console.log(props)
   // Configuração do gráfico
   const chartOption = computed(() => ({
     title: {
-      text: 'Acessos por Tipo',
+      text: 'Acessos por Tipo (Últimos 30 dias)',
       left: 'center',
       textStyle: {
         fontSize: 16,
@@ -35,7 +39,7 @@
       },
     },
     legend: {
-      data: ['Aprovados', 'Negados', 'Pendentes'],
+      data: ['Aprovados', 'Negados'],
       bottom: 10,
     },
     grid: {
@@ -62,7 +66,6 @@
       {
         name: 'Aprovados',
         type: 'line',
-        stack: 'Total',
         data: chartData.value.approved,
         itemStyle: {
           color: '#4CAF50',
@@ -89,7 +92,6 @@
       {
         name: 'Negados',
         type: 'line',
-        stack: 'Total',
         data: chartData.value.denied,
         itemStyle: {
           color: '#F44336',
@@ -113,65 +115,42 @@
         },
         smooth: true,
       },
-      {
-        name: 'Pendentes',
-        type: 'line',
-        stack: 'Total',
-        data: chartData.value.pending,
-        itemStyle: {
-          color: '#FF9800',
-        },
-        lineStyle: {
-          color: '#FF9800',
-          width: 3,
-        },
-        areaStyle: {
-          color: {
-            type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: 'rgba(255, 152, 0, 0.3)' },
-              { offset: 1, color: 'rgba(255, 152, 0, 0.1)' },
-            ],
-          },
-        },
-        smooth: true,
-      },
     ],
   }))
 
-  // Processar dados dos logs
-  const processLogData = async () => {
+  // Processar dados dos logs recebidos via props
+  const processLogData = () => {
     try {
-      const logs = accessLogStore.logs
+      // Combinar logs aprovados e negados
+      const allLogs = [...props.approvedLogs, ...props.rejectedLogs]
 
       // Agrupar logs por data e tipo
-      const groupedData = new Map<string, { approved: number; denied: number; pending: number }>()
+      const groupedData = new Map<string, { approved: number; denied: number }>()
 
-      logs.forEach((log) => {
+      for (const log of allLogs) {
         const date = new Date(log.time).toLocaleDateString('pt-BR', {
           day: '2-digit',
           month: '2-digit',
         })
 
         if (!groupedData.has(date)) {
-          groupedData.set(date, { approved: 0, denied: 0, pending: 0 })
+          groupedData.set(date, { approved: 0, denied: 0 })
         }
 
         const dayData = groupedData.get(date)!
 
         // Classificar por tipo de evento
-        if (log.event_type === 7) { // Acesso Concedido
-          dayData.approved++
-        } else if (log.event_type === 6) { // Acesso Negado
-          dayData.denied++
-        } else if (log.event_type === 8) { // Acesso Pendente
-          dayData.pending++
+        switch (log.event_type) {
+          case 7: { // Acesso Concedido
+            dayData.approved++
+            break
+          }
+          case 6: { // Acesso Negado
+            dayData.denied++
+            break
+          }
         }
-      })
+      }
 
       // Ordenar por data
       const sortedDates = Array.from(groupedData.keys()).sort((a, b) => {
@@ -185,7 +164,6 @@
         dates: sortedDates,
         approved: sortedDates.map(date => groupedData.get(date)?.approved || 0),
         denied: sortedDates.map(date => groupedData.get(date)?.denied || 0),
-        pending: sortedDates.map(date => groupedData.get(date)?.pending || 0),
       }
 
       updateChart()
@@ -214,14 +192,13 @@
     }
   }
 
-  // Watch para mudanças nos logs
-  watch(() => accessLogStore.logs, () => {
+  // Watch para mudanças nos props
+  watch(() => [props.approvedLogs, props.rejectedLogs], () => {
     processLogData()
   }, { deep: true })
 
-  onMounted(async () => {
-    await accessLogStore.loadLogs()
-    await processLogData()
+  onMounted(() => {
+    processLogData()
     initChart()
   })
 </script>
@@ -254,13 +231,9 @@
         <div class="mr-2" style="width: 12px; height: 12px; background-color: #4CAF50; border-radius: 2px;"></div>
         <span class="text-caption">Aprovados</span>
       </div>
-      <div class="d-flex align-center mr-6">
+      <div class="d-flex align-center">
         <div class="mr-2" style="width: 12px; height: 12px; background-color: #F44336; border-radius: 2px;"></div>
         <span class="text-caption">Negados</span>
-      </div>
-      <div class="d-flex align-center">
-        <div class="mr-2" style="width: 12px; height: 12px; background-color: #FF9800; border-radius: 2px;"></div>
-        <span class="text-caption">Pendentes</span>
       </div>
     </div>
   </v-card>

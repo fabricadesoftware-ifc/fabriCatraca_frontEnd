@@ -21,6 +21,16 @@ class AccessLogsService {
       throw error
     }
   }
+
+  async getAccessLogByLastDays (params: QueryParams): Promise<BaseResponse<AccessLogs>> {
+    try {
+      const response = await api.get('/access_logs/logs_by_days/', { params })
+      return response.data as BaseResponse<AccessLogs>
+    } catch (error) {
+      console.error('❌ Erro ao buscar logs de acesso dos últimos dias:', error)
+      throw error
+    }
+  }
 }
 
 export default new AccessLogsService()

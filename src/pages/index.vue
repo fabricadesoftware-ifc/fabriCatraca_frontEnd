@@ -5,17 +5,16 @@
 
   const accessLogStore = useAccessLogStore()
   const userStore = useUserStore()
-  const acces_accept = ref<AccessLogs>()
-  const acces_rejected = ref<AccessLogs>()
+  const acces_accept = ref<any>()
+  const acces_rejected = ref<any>()
   const count_approved = ref(0)
   const count_rejected = ref(0)
-
 
   onMounted(async () => {
     await accessLogStore.loadLogs()
     await userStore.loadUsers()
-    acces_accept.value = await accessLogStore.returnedTypedLogs(7, 30) as unknown as AccessLogs
-    acces_rejected.value = await accessLogStore.returnedTypedLogs(6, 30) as unknown as AccessLogs
+    acces_accept.value = await accessLogStore.returnedLogsByLastDays(30, 7) as unknown as AccessLogs
+    acces_rejected.value = await accessLogStore.returnedLogsByLastDays(30, 6) as unknown as AccessLogs
 
     // Contar os logs
     count_approved.value = (await accessLogStore.returnedTypedLogs(7)).count
@@ -57,6 +56,20 @@
       variant: 'light' as const, // Modo claro
     },
   ])
+
+  // Dados para o gráfico (últimos 30 logs)
+  const approvedLogs = computed(() => {
+    if (acces_accept.value && acces_accept.value) {
+      return acces_accept.value
+    }
+    return []
+  })
+  const rejectedLogs = computed(() => {
+    if (acces_rejected.value && acces_rejected.value) {
+      return acces_rejected.value
+    }
+    return []
+  })
 </script>
 
 <template>
@@ -91,7 +104,10 @@
         cols="12"
         md="16"
       >
-        <HomeGraph />
+        <HomeGraph
+          :approved-logs="approvedLogs"
+          :rejected-logs="rejectedLogs"
+        />
       </v-col>
     </v-row>
   </v-container>
