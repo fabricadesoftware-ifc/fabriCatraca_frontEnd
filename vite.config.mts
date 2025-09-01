@@ -14,6 +14,10 @@ import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    host: '0.0.0.0',
+    port: 3000,
+  },
   plugins: [
     VueRouter({
       dts: 'src/typed-router.d.ts',
@@ -81,9 +85,6 @@ export default defineConfig({
       '.tsx',
       '.vue',
     ],
-  },
-  server: {
-    port: 3000,
   },
   css: {
     preprocessorOptions: {
