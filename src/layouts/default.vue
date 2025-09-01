@@ -3,10 +3,10 @@
     <v-navigation-drawer
       border="none"
       permanent
-      width="200"
+      width="210"
     >
       <v-list-item class="pt-6 pb-0 d-flex align-center mb-5">
-        <template v-slot:prepend>
+        <template #prepend>
           <v-img
             class="mr-2"
             height="40"
@@ -24,10 +24,11 @@
           <template v-if="!item.subitems">
             <!-- Item pai sem subitens -->
             <v-list-item
-              :prepend-icon="item.icon"
-              :title="item.title"
               :to="item.to"
-            />
+            >
+              <v-icon :icon="item.icon" />
+              <v-title class="pl-3">{{ item.title }}</v-title>
+            </v-list-item>
           </template>
 
           <template v-else>
@@ -36,19 +37,20 @@
               <template #activator="{ props }">
                 <v-list-item
                   v-bind="props"
-                  :prepend-icon="item.icon"
-                  :title="item.title"
-                />
-              </template>
+                >
+                  <v-icon :icon="item.icon" />
+                  <v-title class="pl-3">{{ item.title }}</v-title>
+                </v-list-item></template>
               <v-list-item
                 v-for="subitem in item.subitems"
                 :key="subitem.title"
                 class="pr-0"
-                :prepend-icon="subitem.icon"
-                :title="subitem.title"
                 :to="subitem.to"
-              />
-            </v-list-group>
+              >
+                <v-icon :icon="subitem.icon" />
+                <v-title class="pl-3">{{ subitem.title }}</v-title>
+
+              </v-list-item></v-list-group>
           </template>
         </template>
       </v-list>
@@ -130,20 +132,39 @@
       to: '/',
     },
     {
-      title: 'About',
-      icon: 'mdi-information',
-      to: '/about',
+      title: 'usuario',
+      icon: 'mdi-account',
+      to: '/users',
     },
     {
-      title: 'relatorios',
-      icon: 'mdi-file-document-outline',
-      subitems: [
-        {
-          title: 'relatorio 1',
-          icon: 'mdi-file-document-outline',
-          to: '/relatorios',
-        },
-      ],
+      title: 'Permissões',
+      icon: 'mdi-lock',
+      to: '/access-rules',
+    },
+    {
+      title: 'Areas',
+      icon: 'mdi-map-marker',
+      to: '/areas',
+    },
+    {
+      title: 'Biometria',
+      icon: 'mdi-fingerprint',
+      to: '/bio',
+    },
+    {
+      title: 'Tags',
+      icon: 'mdi-card',
+      to: '/tags',
+    },
+    {
+      title: 'Grupos',
+      icon: 'mdi-account-group',
+      to: '/groups',
+    },
+    {
+      title: 'Dispositivos',
+      icon: 'mdi-turnstile',
+      to: '/devices',
     },
   ]
 </script>

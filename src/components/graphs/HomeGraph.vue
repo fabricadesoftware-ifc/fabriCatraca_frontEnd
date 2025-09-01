@@ -22,12 +22,14 @@
 
   // Configuração do gráfico
   const chartOption = computed(() => ({
+    backgroundColor: '#ffffff',
     title: {
       text: 'Acessos por Hora (Últimos 30 dias)',
       left: 'center',
       textStyle: {
         fontSize: 16,
         fontWeight: 'bold',
+        color: '#333333',
       },
     },
     tooltip: {
@@ -50,7 +52,7 @@
       bottom: 10,
     },
     grid: {
-      left: '3%',
+      left: '8%',
       right: '4%',
       bottom: '15%',
       top: '15%',
@@ -63,11 +65,33 @@
       axisLabel: {
         rotate: 45,
         fontSize: 10,
+        color: '#666666',
+      },
+      axisLine: {
+        lineStyle: {
+          color: '#e0e0e0',
+        },
       },
     },
     yAxis: {
       type: 'value',
       name: 'Quantidade de Acessos',
+      nameTextStyle: {
+        color: '#666666',
+      },
+      axisLabel: {
+        color: '#666666',
+      },
+      axisLine: {
+        lineStyle: {
+          color: '#e0e0e0',
+        },
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#f0f0f0',
+        },
+      },
     },
     series: [
       {
@@ -192,7 +216,7 @@
   // Inicializar gráfico
   const initChart = () => {
     if (chartRef.value) {
-      chartInstance = echarts.init(chartRef.value)
+      chartInstance = echarts.init(chartRef.value, 'light')
       chartInstance.setOption(chartOption.value)
 
       // Responsividade
@@ -253,5 +277,7 @@
   /* Estilos específicos para o gráfico */
   .v-card {
     border-radius: 12px;
+    background-color: white;
+    color: black;
   }
 </style>

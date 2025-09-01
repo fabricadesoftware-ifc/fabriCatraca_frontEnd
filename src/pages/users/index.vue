@@ -2,7 +2,7 @@
 
 </script>
 <template>
-ABOUT
+users
 </template>
 
 <style scoped>
