@@ -24,7 +24,6 @@
   }
 </script>
 <template>
-  <div>
     <v-data-table-server
       :headers="[
         { title: 'ID', key: 'id', align: 'start' },
@@ -80,5 +79,4 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </div>
 </template>
