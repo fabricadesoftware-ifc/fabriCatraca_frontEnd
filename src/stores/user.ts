@@ -1,6 +1,5 @@
-import type { User } from '@/types'
+import type { QueryParams, User } from '@/types'
 import { defineStore } from 'pinia'
-import { useUIState } from '@/composables/useUIState'
 import { UsersService } from '@/services'
 
 export const useUserStore = defineStore('user', {
@@ -12,10 +11,10 @@ export const useUserStore = defineStore('user', {
   }),
 
   actions: {
-    async loadUsers () {
+    async loadUsers (params?: QueryParams) {
       this.loading = true
       try {
-        const response = await UsersService.getUsers()
+        const response = await UsersService.getUsers(params)
         this.users = response.results
       } catch (error) {
         console.error('Erro ao carregar usuários:', error)
@@ -70,4 +69,3 @@ export const useUserStore = defineStore('user', {
     },
   },
 })
-

@@ -33,7 +33,9 @@ declare module 'vue' {
     TimeSpanList: typeof import('./components/time-zones/TimeSpanList.vue')['default']
     TimeZoneForm: typeof import('./components/time-zones/TimeZoneForm.vue')['default']
     TimeZoneList: typeof import('./components/time-zones/TimeZoneList.vue')['default']
+    UserComponent: typeof import('./components/users/UserComponent.vue')['default']
     UserForm: typeof import('./components/users/UserForm.vue')['default']
-    UserList: typeof import('./components/users/UserList.vue')['default']
+    UserList: typeof impor./components/users/UserComponent.vuest.vue')['default']
+    Users: typeof import('./components/users/index.vue')['default']
   }
 }

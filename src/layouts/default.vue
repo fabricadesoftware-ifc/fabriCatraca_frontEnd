@@ -1,3 +1,47 @@
+<script lang="ts" setup>
+  const items = [
+    {
+      title: 'Home',
+      icon: 'mdi-home',
+      to: '/',
+    },
+    {
+      title: 'usuario',
+      icon: 'mdi-account',
+      to: '/users',
+    },
+    {
+      title: 'Permissões',
+      icon: 'mdi-lock',
+      to: '/access-rules',
+    },
+    {
+      title: 'Areas',
+      icon: 'mdi-map-marker',
+      to: '/areas',
+    },
+    {
+      title: 'Biometria',
+      icon: 'mdi-fingerprint',
+      to: '/bio',
+    },
+    {
+      title: 'Tags',
+      icon: 'mdi-card',
+      to: '/tags',
+    },
+    {
+      title: 'Grupos',
+      icon: 'mdi-account-group',
+      to: '/groups',
+    },
+    {
+      title: 'Dispositivos',
+      icon: 'mdi-turnstile',
+      to: '/devices',
+    },
+  ]
+</script>
 <template>
   <v-app>
     <v-navigation-drawer
@@ -21,7 +65,7 @@
       </v-list-item>
       <v-list density="compact" nav>
         <template v-for="item in items" :key="item.title">
-          <template v-if="!item.subitems">
+          <template v-if="!item?.subitems">
             <!-- Item pai sem subitens -->
             <v-list-item
               :to="item.to"
@@ -42,8 +86,8 @@
                   <v-title class="pl-3">{{ item.title }}</v-title>
                 </v-list-item></template>
               <v-list-item
-                v-for="subitem in item.subitems"
-                :key="subitem.title"
+                v-for="(subitem, index) in item.subitems"
+                :key="index"
                 class="pr-0"
                 :to="subitem.to"
               >
@@ -124,50 +168,6 @@
   <AppFooter />
 </template>
 
-<script lang="ts" setup>
-  const items = [
-    {
-      title: 'Home',
-      icon: 'mdi-home',
-      to: '/',
-    },
-    {
-      title: 'usuario',
-      icon: 'mdi-account',
-      to: '/users',
-    },
-    {
-      title: 'Permissões',
-      icon: 'mdi-lock',
-      to: '/access-rules',
-    },
-    {
-      title: 'Areas',
-      icon: 'mdi-map-marker',
-      to: '/areas',
-    },
-    {
-      title: 'Biometria',
-      icon: 'mdi-fingerprint',
-      to: '/bio',
-    },
-    {
-      title: 'Tags',
-      icon: 'mdi-card',
-      to: '/tags',
-    },
-    {
-      title: 'Grupos',
-      icon: 'mdi-account-group',
-      to: '/groups',
-    },
-    {
-      title: 'Dispositivos',
-      icon: 'mdi-turnstile',
-      to: '/devices',
-    },
-  ]
-</script>
 <style scoped>
 .v-autocomplete {
   max-width: 350px;

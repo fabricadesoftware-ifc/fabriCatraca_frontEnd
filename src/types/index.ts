@@ -16,8 +16,11 @@ export interface PaginatedResponse<T> {
 export interface QueryParams {
   [key: string]: unknown | undefined
   page?: number
-  limit?: number
+  page_size?: number
   search?: string
+  name?: string
+  ordering?: string
+  user?: number
 }
 
 export interface AccessRule {
@@ -135,6 +138,7 @@ export interface User {
   user_type_id: number
   devices: Device[]
   email?: string
+  user_groups?: string[]
 }
 
 export interface UserAccessRule {
