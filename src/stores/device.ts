@@ -10,15 +10,23 @@ export const useDeviceStore = defineStore('device', {
     loading: false,
     saving: false,
     syncing: false,
+    count: 0,
+    page_size: 10,
+    current_page: 1,
+    total_pages: 1,
   }),
 
   actions: {
-    async loadDevices () {
+    async loadDevices (params?: { page?: number, page_size?: number }) {
       const { adaptDevice } = useUIState()
       this.loading = true
       try {
-        const response = await DeviceService.getDevices()
+        const response = await DeviceService.getDevices(params)
         this.devices = response.results.map(device => adaptDevice(device))
+        this.count = response.count
+        this.page_size = response.page_size
+        this.current_page = response.current_page
+        this.total_pages = response.total_pages
       } catch (error) {
         console.error('Erro ao carregar dispositivos:', error)
         throw error
@@ -75,6 +83,10 @@ export const useDeviceStore = defineStore('device', {
       try {
         await DeviceService.testConnection(id)
       } catch (error) {
+        const device = this.devices.find(d => d.id === id)
+        if (device) {
+          device.status = 'offline'
+        }
         console.error('Erro ao testar conexão:', error)
         throw error
       }

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
+  import UserDialog from './UserDialog.vue'
 
   interface User {
     id: number
@@ -22,39 +23,97 @@
 
   const dialog = ref(false)
   const selectedUser = ref<User | null>(null)
+  const selected = ref<User[]>([])
 
-  const showUserDetails = (user: User) => {
+  const headers = [
+    { title: 'ID', key: 'id', align: 'start' },
+    { title: 'Nome', key: 'name', align: 'start' },
+    { title: 'Turma', key: 'user_groups', align: 'start' },
+    { title: 'Matrícula', key: 'registration', align: 'start' }
+  ]
+
+  function salvarUsuario (user: User) {
+    console.log('Usuário salvo:', user)
+    // aqui você pode chamar sua store/API
+  }
+
+  function showUserDetails (user: User) {
     selectedUser.value = user
     dialog.value = true
   }
 
-  async function trocarPagina (page: number) {
-    // Emitir evento para o componente pai
+  function removerSelecionados () {
+    if (confirm(`Remover ${selected.value.length} usuário(s)?`)) {
+      console.log('Removendo:', selected.value)
+      // aqui chama sua API / store para deletar
+      selected.value = [] // limpa seleção após remover
+    }
+  }
+
+  function novoUsuario () {
+    selectedUser.value = { id: 0, name: '', registration: '', user_groups: [] }
+    dialog.value = true
+  }
+
+  function trocarPagina (page: number) {
     emit('page-changed', page)
   }
-  async function itemsPerPageChanged (newPageSize: number) {
-    // Emitir evento para o componente pai
-    emit('item-per-page', newPageSize) // Resetar para a primeira página
+
+  function itemsPerPageChanged(newPageSize: number) {
+    emit('item-per-page', newPageSize)
   }
 </script>
+
 <template>
+  <div class="d-flex justify-space-between align-center mb-4">
+    <h2 class="text-h5">Gerenciar Usuários</h2>
+
+    <div>
+      <v-btn
+        class="mr-2"
+        color="error"
+        :disabled="!selected.length"
+        prepend-icon="mdi-delete"
+        @click="removerSelecionados"
+      >
+        Remover Selecionados
+      </v-btn>
+
+      <v-btn
+        color="primary"
+        prepend-icon="mdi-plus"
+        @click="novoUsuario"
+      >
+        Adicionar Usuário
+      </v-btn>
+    </div>
+  </div>
+
   <v-data-table-server
+    v-model:selected="selected"
     class="rounded-lg"
-    :headers="[
-      { title: 'ID', key: 'id', align: 'start' },
-      { title: 'Nome', key: 'name', align: 'start' },
-      { title: 'Turma', key: 'user_groups', align: 'start' },
-      { title: 'Matricula', key: 'registration', align: 'start' }
-    ]"
+    :headers="headers.map(h => ({
+      ...h,
+      align: h.align as 'start' | 'end' | 'center'
+    }))"
     :items="users"
     :items-length="totalItems ?? 0"
     :items-per-page="pageSize ?? 10"
     :loading="users.length === 0"
     :page="currentPage ?? 1"
+    show-select
     @update:items-per-page="itemsPerPageChanged"
     @update:page="trocarPagina"
   >
-    <!-- Slot que substitui as linhas -->
+    <template #item.data-table-select="{ isSelected, toggleSelect }">
+      <v-checkbox
+        density="compact"
+        hide-details
+        :model-value="isSelected"
+        @update:model-value="toggleSelect"
+      />
+    </template>
+
     <template #item="{ item }">
       <tr class="cursor-pointer" @click="showUserDetails(item)">
         <td>{{ item.id }}</td>
@@ -65,49 +124,13 @@
     </template>
   </v-data-table-server>
 
-  <v-dialog v-model="dialog" max-width="500">
-    <v-card v-if="selectedUser">
-      <v-card-title class="text-h5">
-        Detalhes do Usuário
-      </v-card-title>
-
-      <v-card-text>
-        <v-list>
-          <v-list-item>
-            <v-list-item-title>ID:</v-list-item-title>
-            <v-list-item-subtitle>{{ selectedUser.id }}</v-list-item-subtitle>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-title>Nome:</v-list-item-title>
-            <v-list-item-subtitle>{{ selectedUser.name }}</v-list-item-subtitle>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-title>Turma:</v-list-item-title>
-            <v-list-item-subtitle>{{ selectedUser.user_groups?.length ? selectedUser.user_groups[0] : 'Não há grupo' }}</v-list-item-subtitle>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-title>Matrícula:</v-list-item-title>
-            <v-list-item-subtitle>{{ selectedUser.registration }}</v-list-item-subtitle>
-          </v-list-item>
-        </v-list>
-      </v-card-text>
-
-      <v-card-actions>
-        <v-spacer />
-        <v-btn
-          color="primary"
-          variant="text"
-          @click="dialog = false"
-        >
-          Fechar
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <UserDialog
+    v-model="dialog"
+    :user="selectedUser"
+    @save="salvarUsuario"
+  />
 </template>
+
 <style scoped>
 .cursor-pointer {
   cursor: pointer;
@@ -117,5 +140,4 @@
 .cursor-pointer:hover {
   background-color: #f5f5f517;
 }
-
 </style>

@@ -22,6 +22,7 @@ declare module 'vue-router/auto-routes' {
     '/access-rules/': RouteRecordInfo<'/access-rules/', '/access-rules', Record<never, never>, Record<never, never>>,
     '/cadastrar/': RouteRecordInfo<'/cadastrar/', '/cadastrar', Record<never, never>, Record<never, never>>,
     '/configurações/': RouteRecordInfo<'/configurações/', '/configurações', Record<never, never>, Record<never, never>>,
+    '/devices/': RouteRecordInfo<'/devices/', '/devices', Record<never, never>, Record<never, never>>,
     '/portals/': RouteRecordInfo<'/portals/', '/portals', Record<never, never>, Record<never, never>>,
     '/relatorios/': RouteRecordInfo<'/relatorios/', '/relatorios', Record<never, never>, Record<never, never>>,
     '/users/': RouteRecordInfo<'/users/', '/users', Record<never, never>, Record<never, never>>,

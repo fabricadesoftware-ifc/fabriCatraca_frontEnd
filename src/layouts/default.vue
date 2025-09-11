@@ -6,7 +6,7 @@
       to: '/',
     },
     {
-      title: 'usuario',
+      title: 'Usuario',
       icon: 'mdi-account',
       to: '/users',
     },
@@ -86,7 +86,7 @@
                   <v-title class="pl-3">{{ item.title }}</v-title>
                 </v-list-item></template>
               <v-list-item
-                v-for="(subitem, index) in item.subitems"
+                v-for="(subitem, index) in item?.subitems || []"
                 :key="index"
                 class="pr-0"
                 :to="subitem.to"
