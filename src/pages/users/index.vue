@@ -2,9 +2,13 @@
   import { onMounted, ref } from 'vue'
   import { useUserStore } from '@/stores/user'
   const userStore = useUserStore()
-  const currentPage = ref(1)
-  const pageSize = ref(10)
-  const totalPages = ref(0)
+
+  async function pageChanger (page: number) {
+    await userStore.loadUsers({ page: page })
+  }
+  async function itemsPerPageChanger (pageSize: number) {
+    await userStore.loadUsers({ page: userStore.current_page, page_size: pageSize })
+  }
 
   onMounted(async () => {
     await userStore.loadUsers()
@@ -17,10 +21,13 @@
     <v-divider class="my-4" />
 
     <UserComponent
-      :current-page="currentPage"
-      :page-size="pageSize"
-      :total_pages="totalPages"
+      :current-page="userStore.current_page"
+      :page-size="userStore.page_size"
+      :total-items="userStore.count"
+      :total-pages="userStore.total_pages"
       :users="userStore.users"
+      @item-per-page="itemsPerPageChanger($event)"
+      @page-changed="pageChanger($event)"
     />
   </v-container>
 </template>

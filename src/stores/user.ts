@@ -8,6 +8,10 @@ export const useUserStore = defineStore('user', {
     selectedUser: null as User | null,
     loading: false,
     saving: false,
+    current_page: 1,
+    page_size: 10,
+    count: 0,
+    total_pages: 0,
   }),
 
   actions: {
@@ -15,6 +19,10 @@ export const useUserStore = defineStore('user', {
       this.loading = true
       try {
         const response = await UsersService.getUsers(params)
+        this.current_page = response.current_page || 1
+        this.page_size = response.page_size
+        this.count = response.count
+        this.total_pages = response.total_pages || 1
         this.users = response.results
       } catch (error) {
         console.error('Erro ao carregar usuários:', error)

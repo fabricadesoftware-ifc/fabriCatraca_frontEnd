@@ -10,7 +10,8 @@ export interface PaginatedResponse<T> {
   previous: string | null
   results: T[]
   page_size: number
-  page?: number
+  current_page: number
+  total_pages: number
 }
 
 export interface QueryParams {
