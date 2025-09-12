@@ -78,11 +78,7 @@ export interface Device {
 export interface Group {
   id: number
   name: string
-  description?: string
-  is_active?: boolean
-  member_count?: number
   users?: User[]
-  updating?: boolean
 }
 
 export interface GroupAccessRule {
@@ -134,8 +130,8 @@ export interface TimeZone {
 
 export interface UserGroup {
   id: number
-  user: number
-  group: number
+  user: User
+  group: Group
 }
 export interface User {
   id: number
