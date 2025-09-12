@@ -91,13 +91,13 @@ export const useGroupStore = defineStore('group', {
       }
     },
 
-    async removeUserFromGroup (userId: number, groupId: number) {
+    async removeUserFromGroup (groupId: number, userId: number) {
       this.loadingMembers = true
       try {
-        await userGroupsService.deleteUserGroup(userId)
-        if (this.selectedGroup?.id === groupId) {
-          const response = await groupsService.getGroupById(groupId)
-          this.selectedGroup = response.data
+        const response = await userGroupsService.getUserGroups({ user: userId, group: groupId })
+        console.log(response.results)
+        if (response.results[0]) {
+          await userGroupsService.deleteUserGroup(response.results[0].id)
         }
       } catch (error) {
         console.error('Erro ao remover usuário do grupo:', error)
@@ -112,4 +112,3 @@ export const useGroupStore = defineStore('group', {
     },
   },
 })
-

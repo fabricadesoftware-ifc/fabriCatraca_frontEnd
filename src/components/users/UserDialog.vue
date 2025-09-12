@@ -1,11 +1,10 @@
 <script lang="ts" setup>
-  import { ref } from 'vue'
+  import type { User as BaseUser } from '@/types'
+  import { onMounted, ref } from 'vue'
+  import { useGroupStore } from '@/stores'
 
-  interface User {
-    id: number
-    name: string
+  interface User extends BaseUser {
     user_groups?: string[]
-    registration?: string
   }
 
   const props = defineProps<{
@@ -18,10 +17,12 @@
     (e: 'save', value: User): void
   }>()
 
+  const groupStore = useGroupStore()
   const tab = ref('dados')
   const isAdmin = ref(false)
   const name = ref('')
   const registration = ref('')
+  const loading = ref(false)
 
   // Atualiza os campos locais quando o props.user mudar
   watch(
@@ -39,7 +40,7 @@
     emit('update:modelValue', false)
   }
 
-  function salvarUsuario () {
+  async function salvarUsuario () {
     if (props.user) {
       emit('save', {
         ...props.user,
@@ -49,6 +50,33 @@
       closeDialog()
     }
   }
+
+  async function toggleUserGroup (groupId: number) {
+    if (!props.user) return
+
+    loading.value = true
+    try {
+      const isUserInGroup = groupStore.isUserInGroup(props.user, groupStore.groups.find(g => g.id === groupId)!)
+      await (isUserInGroup
+        ? groupStore.removeUserFromGroup(groupId, props.user.id)
+        : groupStore.addUserToGroup(props.user.id, groupId))
+    } catch (error) {
+      console.error('Erro ao alterar grupo do usuário:', error)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  onMounted(async () => {
+    loading.value = true
+    try {
+      await groupStore.loadGroups()
+    } catch (error) {
+      console.error('Erro ao carregar grupos:', error)
+    } finally {
+      loading.value = false
+    }
+  })
 </script>
 <template>
   <v-dialog max-width="900" :model-value="props.modelValue" @update:model-value="emit('update:modelValue', $event)">
@@ -82,28 +110,7 @@
                     v-model="registration"
                     label="Matrícula"
                   />
-                  <v-text-field label="Senha" type="password" />
-                  <v-text-field label="Senha de Pânico" type="password" />
 
-                  <v-row>
-                    <v-col>
-                      <v-text-field label="Horário Início" type="time" />
-                    </v-col>
-                    <v-col>
-                      <v-text-field label="Horário Fim" type="time" />
-                    </v-col>
-                  </v-row>
-
-                  <v-row>
-                    <v-col>
-                      <v-text-field label="Data Início" type="date" />
-                    </v-col>
-                    <v-col>
-                      <v-text-field label="Data Fim" type="date" />
-                    </v-col>
-                  </v-row>
-
-                  <v-text-field label="CPF" />
                   <v-switch v-model="isAdmin" label="Administrador" />
                 </v-col>
 
@@ -121,7 +128,52 @@
           </v-window-item>
 
           <!-- Outras abas -->
-          <v-window-item value="departamentos"><p>Form de Departamentos...</p></v-window-item>
+          <v-window-item value="departamentos">
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-card>
+                    <v-card-text class="pa-4">
+                      <v-progress-linear
+                        v-if="loading"
+                        color="primary"
+                        indeterminate
+                      />
+
+                      <template v-else>
+                        <div class="text-subtitle-1 mb-4">
+                          Selecione os grupos aos quais o usuário pertence:
+                        </div>
+
+                        <v-list lines="two">
+                          <v-list-item
+                            v-for="group in groupStore.groups"
+                            :key="group.id"
+                            :subtitle="group.description || 'Sem descrição'"
+                            :title="group.name"
+                          >
+                            <template #append>
+                              <v-switch
+                                color="primary"
+                                hide-details
+                                :model-value="groupStore.isUserInGroup(props.user!, group)"
+                                @update:model-value="toggleUserGroup(group.id)"
+                              />
+                            </template>
+                          </v-list-item>
+                        </v-list>
+
+                        <div v-if="groupStore.groups.length === 0" class="text-center pa-4">
+                          <v-icon class="mb-2" color="grey" icon="mdi-account-group" size="48" />
+                          <div class="text-body-1 text-grey">Nenhum grupo disponível</div>
+                        </div>
+                      </template>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-window-item>
           <v-window-item value="cartoes"><p>Gerenciar cartões...</p></v-window-item>
           <v-window-item value="horarios"><p>Configurar horários...</p></v-window-item>
           <v-window-item value="pin"><p>Definir PIN...</p></v-window-item>

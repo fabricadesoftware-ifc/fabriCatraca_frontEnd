@@ -132,6 +132,11 @@ export interface TimeZone {
   name: string
 }
 
+export interface UserGroup {
+  id: number
+  user: number
+  group: number
+}
 export interface User {
   id: number
   name: string
@@ -139,19 +144,13 @@ export interface User {
   user_type_id: number
   devices: Device[]
   email?: string
-  user_groups?: string[]
+  user_groups?: UserGroup[]
 }
 
 export interface UserAccessRule {
   id: number
   user: User
   access_rule: AccessRule
-}
-
-export interface UserGroup {
-  id: number
-  user: number
-  group: number
 }
 
 export interface AccessLogs {
