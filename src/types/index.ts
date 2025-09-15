@@ -140,7 +140,7 @@ export interface User {
   user_type_id: number
   devices: Device[]
   email?: string
-  user_groups?: UserGroup[]
+  user_groups?: Group[]
 }
 
 export interface UserAccessRule {

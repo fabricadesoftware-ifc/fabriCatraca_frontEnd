@@ -1,16 +1,21 @@
 <script lang="ts" setup>
   import type { User as BaseUser } from '@/types'
-  import { onMounted, ref } from 'vue'
+  import { onMounted, ref, toValue, watch } from 'vue'
   import { useGroupStore } from '@/stores'
 
-  interface User extends BaseUser {
-    user_groups?: string[]
+  interface User extends Omit<BaseUser, 'user_groups'> {
+    user_groups?: (number | { id: number, name: string })[]
   }
 
   const props = defineProps<{
     modelValue: boolean
     user: User | null
   }>()
+
+  const userGroups = ref<number[]>([])
+  const setUserGroups = (newGroups: number[]) => {
+    userGroups.value = newGroups
+  }
 
   const emit = defineEmits<{
     (e: 'update:modelValue', value: boolean): void
@@ -31,6 +36,7 @@
       if (newUser) {
         name.value = newUser.name
         registration.value = newUser.registration || ''
+        userGroups.value = newUser.user_groups?.map(g => typeof g === 'number' ? g : g.id) || []
       }
     },
     { immediate: true },
@@ -46,24 +52,9 @@
         ...props.user,
         name: name.value,
         registration: registration.value,
+        user_groups: userGroups.value,
       })
       closeDialog()
-    }
-  }
-
-  async function toggleUserGroup (groupId: number) {
-    if (!props.user) return
-
-    loading.value = true
-    try {
-      const isUserInGroup = groupStore.isUserInGroup(props.user, groupStore.groups.find(g => g.id === groupId)!)
-      await (isUserInGroup
-        ? groupStore.removeUserFromGroup(groupId, props.user.id)
-        : groupStore.addUserToGroup(props.user.id, groupId))
-    } catch (error) {
-      console.error('Erro ao alterar grupo do usuário:', error)
-    } finally {
-      loading.value = false
     }
   }
 
@@ -149,15 +140,20 @@
                           <v-list-item
                             v-for="group in groupStore.groups"
                             :key="group.id"
-                            :subtitle="group.description || 'Sem descrição'"
                             :title="group.name"
                           >
                             <template #append>
                               <v-switch
                                 color="primary"
                                 hide-details
-                                :model-value="groupStore.isUserInGroup(props.user!, group)"
-                                @update:model-value="toggleUserGroup(group.id)"
+                                :model-value="userGroups.includes(group.id)"
+                                @update:model-value="(value) => {
+                                  const groups = toValue(userGroups)
+                                  const newGroups = value
+                                    ? [...groups, group.id]
+                                    : groups.filter((gid: number) => gid !== group.id)
+                                  setUserGroups(newGroups)
+                                }"
                               />
                             </template>
                           </v-list-item>

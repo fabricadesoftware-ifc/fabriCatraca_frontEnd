@@ -4,8 +4,8 @@
   import { useUserStore } from '@/stores'
   import UserDialog from './UserDialog.vue'
 
-  interface User extends BaseUser {
-    user_groups?: string[]
+  interface User extends Omit<BaseUser, 'user_groups'> {
+    user_groups?: (number | { id: number, name: string })[]
   }
 
   defineProps<{
@@ -43,9 +43,69 @@
     })
   }, { deep: true })
 
-  function salvarUsuario (user: User) {
-    console.log('Usuário salvo:', user)
-    // aqui você pode chamar sua store/API
+  async function salvarUsuario (user: User) {
+    try {
+      let savedUser: User
+
+      if (user.id === 0) {
+        // Criar novo usuário
+        savedUser = await userStore.createUser({
+          name: user.name,
+          registration: user.registration,
+          user_type_id: user.user_type_id,
+        })
+
+        // Para usuário novo, adicionar todos os grupos selecionados
+        const userGroupIds = (user.user_groups || []).map(g => typeof g === 'number' ? g : g.id)
+        for (const groupId of userGroupIds) {
+          await userStore.addUserToGroup(savedUser.id, groupId)
+        }
+      } else {
+        // Para usuário existente, verificar se dados básicos mudaram
+        const currentUser = await userStore.getUserById(user.id)
+
+        if (!currentUser) {
+          throw new Error('Usuário não encontrado')
+        }
+        const basicDataChanged
+          = currentUser.name !== user.name
+            || currentUser.registration !== user.registration
+
+        // Atualizar dados básicos apenas se mudaram
+        savedUser = basicDataChanged
+          ? await userStore.updateUser(user.id, {
+            name: user.name,
+            registration: user.registration,
+          })
+          : currentUser
+
+        // Gerenciar grupos do usuário
+        const userGroupIds = (user.user_groups || []).map(g => typeof g === 'number' ? g : g.id)
+        const currentGroups = currentUser.user_groups?.map(g => typeof g === 'number' ? g : g.id) || []
+
+        const groupsToAdd = userGroupIds.filter((groupId: number) => !currentGroups.includes(groupId))
+        const groupsToRemove = currentGroups.filter((groupId: number) => !userGroupIds.includes(groupId))
+
+        // Adiciona novos grupos
+        for (const groupId of groupsToAdd) {
+          await userStore.addUserToGroup(user.id, groupId)
+        }
+
+        // Remove grupos
+        for (const groupId of groupsToRemove) {
+          await userStore.removeUserFromGroup(user.id, groupId)
+        }
+      }
+
+      // Recarrega a lista de usuários
+      await userStore.loadUsers({
+        page: userStore.current_page,
+        page_size: userStore.page_size,
+      })
+    } catch (error) {
+      console.error('Erro ao salvar usuário:', error)
+      alert('Erro ao salvar usuário. Por favor, tente novamente.')
+    }
   }
 
   function showUserDetails (event: Event, { item }: { item: User }) {
@@ -115,9 +175,9 @@
     // Atualizar seleção apenas se tivermos itens válidos
     selection.value.selected = selectedItems.length > 0
       ? selectedItems.map(item => ({
-          ...item,
-          id: Number(item.id), // Garantir que o ID é um número
-        }))
+        ...item,
+        id: Number(item.id), // Garantir que o ID é um número
+      }))
       : []
   }
 
@@ -152,18 +212,18 @@
   </div>
 
   <v-data-table-server
+    v-model="selection.selected"
     class="rounded-lg"
     :headers="headers"
     hover
     item-key="id"
-    v-model="selection.selected"
     :items="users"
     :items-length="totalItems ?? 0"
     :items-per-page="pageSize ?? 10"
     :loading="users.length === 0"
     :page="currentPage ?? 1"
     return-object
-    select-strategy="single"
+    select-strategy="all"
     show-select
     @click:row="showUserDetails"
     @update:items-per-page="itemsPerPageChanged"
@@ -172,7 +232,7 @@
   >
     <!-- Template para user_groups -->
     <template #item.user_groups="{ item }">
-      {{ item.user_groups?.length ? item.user_groups[0] : 'Não há grupo' }}
+      {{ item.user_groups?.length ? (typeof item.user_groups[0] === 'object' ? item.user_groups[0].name : 'Grupo ' + item.user_groups[0]) : 'Não há grupo' }}
     </template>
   </v-data-table-server>
 

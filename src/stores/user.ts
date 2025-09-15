@@ -1,6 +1,7 @@
 import type { QueryParams, User } from '@/types'
 import { defineStore } from 'pinia'
 import { UsersService } from '@/services'
+import userGroupsService from '@/services/user_groups'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -73,6 +74,41 @@ export const useUserStore = defineStore('user', {
         throw error
       } finally {
         this.saving = false
+      }
+    },
+
+    async getUserById (id: number) {
+      try {
+        const response = await UsersService.getUserById(id)
+        // Se a API retorna o usuário diretamente, não dentro de { data: ... }
+        return response.data || response
+      } catch (error) {
+        console.error('Erro ao buscar usuário:', error)
+        throw error
+      }
+    },
+
+    async addUserToGroup (userId: number, groupId: number) {
+      try {
+        await userGroupsService.createUserGroup({
+          user: userId,
+          group: groupId,
+        } as any)
+      } catch (error) {
+        console.error('Erro ao adicionar usuário ao grupo:', error)
+        throw error
+      }
+    },
+
+    async removeUserFromGroup (userId: number, groupId: number) {
+      try {
+        const response = await userGroupsService.getUserGroups({ user: userId, group: groupId })
+        if (response.results[0]) {
+          await userGroupsService.deleteUserGroup(response.results[0].id)
+        }
+      } catch (error) {
+        console.error('Erro ao remover usuário do grupo:', error)
+        throw error
       }
     },
   },
