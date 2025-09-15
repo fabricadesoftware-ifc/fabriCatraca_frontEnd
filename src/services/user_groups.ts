@@ -1,4 +1,4 @@
-import type { BaseResponse, PaginatedResponse, QueryParams, UserGroup } from '@/types'
+import type { BaseResponse, PaginatedResponse, QueryParams, UserGroup, UserGroupCreate } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
 
 class UserGroupsService {
@@ -22,7 +22,7 @@ class UserGroupsService {
     }
   }
 
-  async createUserGroup (data: Partial<UserGroup>): Promise<BaseResponse<UserGroup>> {
+  async createUserGroup (data: Partial<UserGroupCreate>): Promise<BaseResponse<UserGroup>> {
     try {
       const response = await api.post('/user_groups/', data)
       return response.data
@@ -32,7 +32,7 @@ class UserGroupsService {
     }
   }
 
-  async updateUserGroup (id: number, data: Partial<UserGroup>): Promise<BaseResponse<UserGroup>> {
+  async updateUserGroup (id: number, data: Partial<UserGroupCreate>): Promise<BaseResponse<UserGroup>> {
     try {
       const response = await api.patch(`/user_groups/${id}/`, data)
       return response.data

@@ -133,6 +133,13 @@ export interface UserGroup {
   user: User
   group: Group
 }
+
+export interface UserGroupCreate {
+  id: number
+  user: number
+  group: number
+}
+
 export interface User {
   id: number
   name: string
