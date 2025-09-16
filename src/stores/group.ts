@@ -1,6 +1,7 @@
 import type { Group, User } from '@/types'
 import { defineStore } from 'pinia'
 import { useUIState } from '@/composables/useUIState'
+import groupAccessRulesService from '@/services/group_access_rules'
 import groupsService from '@/services/groups'
 import userGroupsService from '@/services/user_groups'
 
@@ -11,14 +12,22 @@ export const useGroupStore = defineStore('group', {
     loading: false,
     saving: false,
     loadingMembers: false,
+    current_page: 1,
+    page_size: 10,
+    count: 0,
+    total_pages: 0,
   }),
 
   actions: {
-    async loadGroups () {
+    async loadGroups (params?: any) {
       const { adaptGroup } = useUIState()
       this.loading = true
       try {
-        const response = await groupsService.getGroups()
+        const response = await groupsService.getGroups(params)
+        this.current_page = response.current_page || 1
+        this.page_size = response.page_size
+        this.count = response.count
+        this.total_pages = response.total_pages || 1
         this.groups = response.results.map(group => adaptGroup(group))
       } catch (error) {
         console.error('Erro ao carregar grupos:', error)
@@ -109,6 +118,40 @@ export const useGroupStore = defineStore('group', {
 
     isUserInGroup (user: User, group: Group) {
       return group.users?.some(u => u.id === user.id) || false
+    },
+
+    async getGroupById (id: number) {
+      try {
+        const response = await groupsService.getGroupById(id)
+        return response.data || response
+      } catch (error) {
+        console.error('Erro ao buscar grupo:', error)
+        throw error
+      }
+    },
+
+    async addAccessRuleToGroup (groupId: number, accessRuleId: number) {
+      try {
+        await groupAccessRulesService.createGroupAccessRule({
+          group: groupId,
+          access_rule: accessRuleId,
+        } as any)
+      } catch (error) {
+        console.error('Erro ao adicionar regra de acesso ao grupo:', error)
+        throw error
+      }
+    },
+
+    async removeAccessRuleFromGroup (groupId: number, accessRuleId: number) {
+      try {
+        const response = await groupAccessRulesService.getGroupAccessRules({ group: groupId, access_rule: accessRuleId })
+        if (response.results[0]) {
+          await groupAccessRulesService.deleteGroupAccessRule(response.results[0].id)
+        }
+      } catch (error) {
+        console.error('Erro ao remover regra de acesso do grupo:', error)
+        throw error
+      }
     },
   },
 })

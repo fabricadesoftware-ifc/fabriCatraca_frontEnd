@@ -22,6 +22,7 @@ declare module 'vue' {
     DeviceForm: typeof import('./components/devices/DeviceForm.vue')['default']
     DeviceList: typeof import('./components/devices/DeviceList.vue')['default']
     GroupComponent: typeof import('./components/groups/GroupComponent.vue')['default']
+    GroupDialog: typeof import('./components/groups/GroupDialog.vue')['default']
     GroupForm: typeof import('./components/groups/GroupForm.vue')['default']
     GroupList: typeof import('./components/groups/GroupList.vue')['default']
     GroupMemberList: typeof import('./components/groups/GroupMemberList.vue')['default']
