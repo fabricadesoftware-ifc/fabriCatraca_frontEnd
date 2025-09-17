@@ -1,4 +1,4 @@
-import type { BaseResponse, Bio, PaginatedResponse, QueryParams } from '@/types'
+import type { BaseResponse, Bio, BioCreate, PaginatedResponse, QueryParams } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
 
 class BioService {
@@ -22,7 +22,7 @@ class BioService {
     }
   }
 
-  async createBio (data: Partial<Bio>): Promise<BaseResponse<Bio>> {
+  async createBio (data: Partial<BioCreate>): Promise<BaseResponse<Bio>> {
     try {
       const response = await api.post('/templates/', data)
       return response.data

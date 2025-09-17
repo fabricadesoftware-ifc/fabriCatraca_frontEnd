@@ -56,6 +56,11 @@ export interface Bio {
   devices: Device[]
 }
 
+export interface BioCreate {
+  user_id: number
+  enrollment_device_id: number
+}
+
 export interface Card {
   id: number
   number: string
