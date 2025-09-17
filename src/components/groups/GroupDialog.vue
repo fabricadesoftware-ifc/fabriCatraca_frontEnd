@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import type { Group as BaseGroup } from '@/types'
-  import { onMounted, ref, toValue, watch } from 'vue'
+  import { onMounted, ref, watch } from 'vue'
   import { useAccessRuleStore } from '@/stores'
 
   interface Group extends Omit<BaseGroup, 'access_rules'> {
@@ -17,6 +17,21 @@
   const name = ref('')
   const loading = ref(false)
   const groupAccessRules = ref<number[]>([])
+
+  const toggleAccessRule = (ruleId: number, value: boolean) => {
+    const currentRules = [...groupAccessRules.value]
+    if (value) {
+      if (!currentRules.includes(ruleId)) {
+        currentRules.push(ruleId)
+      }
+    } else {
+      const index = currentRules.indexOf(ruleId)
+      if (index !== -1) {
+        currentRules.splice(index, 1)
+      }
+    }
+    groupAccessRules.value = currentRules
+  }
 
   const emit = defineEmits<{
     (e: 'update:modelValue', value: boolean): void
@@ -41,6 +56,11 @@
 
   async function salvarGrupo () {
     if (props.group) {
+      console.log('Salvando grupo:', {
+        ...props.group,
+        name: name.value,
+        access_rules: groupAccessRules.value,
+      })
       emit('save', {
         ...props.group,
         name: name.value,
@@ -129,11 +149,8 @@
                                 hide-details
                                 :model-value="groupAccessRules.includes(rule.id)"
                                 @update:model-value="(value) => {
-                                  const rules = toValue(groupAccessRules)
-                                  const newRules = value
-                                    ? [...rules, rule.id]
-                                    : rules.filter((rid: number) => rid !== rule.id)
-                                  groupAccessRules.value = newRules
+                                  console.log('Switch alterado:', { ruleId: rule.id, value })
+                                  toggleAccessRule(rule.id, !!value)
                                 }"
                               />
                             </template>

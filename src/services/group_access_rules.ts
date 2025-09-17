@@ -1,4 +1,4 @@
-import type { BaseResponse, GroupAccessRule, PaginatedResponse, QueryParams } from '@/types'
+import type { BaseResponse, GroupAccessRule, GroupAccessRuleCreate, PaginatedResponse, QueryParams } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
 
 class GroupAccessRulesService {
@@ -22,7 +22,7 @@ class GroupAccessRulesService {
     }
   }
 
-  async createGroupAccessRule (data: Partial<GroupAccessRule>): Promise<BaseResponse<GroupAccessRule>> {
+  async createGroupAccessRule (data: Partial<GroupAccessRuleCreate>): Promise<BaseResponse<GroupAccessRule>> {
     try {
       const response = await api.post('/group_access_rules/', data)
       return response.data
@@ -32,7 +32,7 @@ class GroupAccessRulesService {
     }
   }
 
-  async updateGroupAccessRule (id: number, data: Partial<GroupAccessRule>): Promise<BaseResponse<GroupAccessRule>> {
+  async updateGroupAccessRule (id: number, data: Partial<GroupAccessRuleCreate>): Promise<BaseResponse<GroupAccessRule>> {
     try {
       const response = await api.patch(`/group_access_rules/${id}/`, data)
       return response.data

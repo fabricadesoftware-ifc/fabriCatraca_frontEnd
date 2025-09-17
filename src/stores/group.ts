@@ -133,9 +133,9 @@ export const useGroupStore = defineStore('group', {
     async addAccessRuleToGroup (groupId: number, accessRuleId: number) {
       try {
         await groupAccessRulesService.createGroupAccessRule({
-          group: groupId,
-          access_rule: accessRuleId,
-        } as any)
+          group_id: groupId,
+          access_rule_id: accessRuleId,
+        })
       } catch (error) {
         console.error('Erro ao adicionar regra de acesso ao grupo:', error)
         throw error
@@ -144,7 +144,7 @@ export const useGroupStore = defineStore('group', {
 
     async removeAccessRuleFromGroup (groupId: number, accessRuleId: number) {
       try {
-        const response = await groupAccessRulesService.getGroupAccessRules({ group: groupId, access_rule: accessRuleId })
+        const response = await groupAccessRulesService.getGroupAccessRules({ group_id: groupId, access_rule_id: accessRuleId })
         if (response.results[0]) {
           await groupAccessRulesService.deleteGroupAccessRule(response.results[0].id)
         }

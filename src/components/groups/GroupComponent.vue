@@ -2,6 +2,7 @@
   import type { Group as BaseGroup } from '@/types'
   import { ref, watch } from 'vue'
   import { useGroupStore } from '@/stores'
+  import GroupDialog from './GroupDialog.vue'
 
   interface Group extends BaseGroup {
     access_rules?: (number | { id: number, name: string })[]
@@ -43,6 +44,7 @@
   }, { deep: true })
 
   async function salvarGrupo (group: Group) {
+    console.log('salvarGrupo chamado com:', group)
     try {
       let savedGroup: Group
 
@@ -78,16 +80,24 @@
         const groupAccessRuleIds = (group.access_rules || []).map(r => typeof r === 'number' ? r : r.id)
         const currentAccessRules = (currentGroup as any).access_rules?.map((r: any) => typeof r === 'number' ? r : r.id) || []
 
+        console.log('Regras do grupo:', groupAccessRuleIds)
+        console.log('Regras atuais:', currentAccessRules)
+
         const rulesToAdd = groupAccessRuleIds.filter((ruleId: number) => !currentAccessRules.includes(ruleId))
         const rulesToRemove = currentAccessRules.filter((ruleId: number) => !groupAccessRuleIds.includes(ruleId))
 
+        console.log('Regras para adicionar:', rulesToAdd)
+        console.log('Regras para remover:', rulesToRemove)
+
         // Adiciona novas regras
         for (const ruleId of rulesToAdd) {
+          console.log('Adicionando regra:', ruleId)
           await groupStore.addAccessRuleToGroup(group.id, ruleId)
         }
 
         // Remove regras
         for (const ruleId of rulesToRemove) {
+          console.log('Removendo regra:', ruleId)
           await groupStore.removeAccessRuleFromGroup(group.id, ruleId)
         }
       }

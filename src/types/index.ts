@@ -87,6 +87,12 @@ export interface GroupAccessRule {
   access_rule: AccessRule
 }
 
+export interface GroupAccessRuleCreate {
+  id: number
+  group_id: number
+  access_rule_id: number
+}
+
 export interface Portal {
   id: number
   name: string
