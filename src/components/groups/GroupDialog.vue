@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-  import type { Group as BaseGroup } from '@/types'
+  import type { AccessRule, Group as BaseGroup } from '@/types'
   import { onMounted, ref, watch } from 'vue'
   import { useAccessRuleStore } from '@/stores'
 
   interface Group extends Omit<BaseGroup, 'access_rules'> {
-    access_rules?: (number | { id: number, name: string })[]
+    access_rules?: (number | AccessRule)[]
   }
 
   const props = defineProps<{
@@ -56,11 +56,6 @@
 
   async function salvarGrupo () {
     if (props.group) {
-      console.log('Salvando grupo:', {
-        ...props.group,
-        name: name.value,
-        access_rules: groupAccessRules.value,
-      })
       emit('save', {
         ...props.group,
         name: name.value,
@@ -148,10 +143,7 @@
                                 color="primary"
                                 hide-details
                                 :model-value="groupAccessRules.includes(rule.id)"
-                                @update:model-value="(value) => {
-                                  console.log('Switch alterado:', { ruleId: rule.id, value })
-                                  toggleAccessRule(rule.id, !!value)
-                                }"
+                                @update:model-value="(value) => toggleAccessRule(rule.id, !!value)"
                               />
                             </template>
                           </v-list-item>

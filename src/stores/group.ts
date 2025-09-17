@@ -144,9 +144,14 @@ export const useGroupStore = defineStore('group', {
 
     async removeAccessRuleFromGroup (groupId: number, accessRuleId: number) {
       try {
+        // Buscar a relação específica e deletar pelo ID do recurso
         const response = await groupAccessRulesService.getGroupAccessRules({ group_id: groupId, access_rule_id: accessRuleId })
-        if (response.results[0]) {
-          await groupAccessRulesService.deleteGroupAccessRule(response.results[0].id)
+        const relation = (response.results || []).find((rel: any) => (
+          (rel?.group?.id ?? rel?.group_id) === groupId
+          && (rel?.access_rule?.id ?? rel?.access_rule_id) === accessRuleId
+        ))
+        if (relation?.id != null) {
+          await groupAccessRulesService.deleteGroupAccessRule(relation.id)
         }
       } catch (error) {
         console.error('Erro ao remover regra de acesso do grupo:', error)

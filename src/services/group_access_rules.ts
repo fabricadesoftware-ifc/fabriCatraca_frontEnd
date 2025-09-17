@@ -51,6 +51,8 @@ class GroupAccessRulesService {
       throw error
     }
   }
+
+  // Removido: backend não aceita DELETE com querystring; usar busca + DELETE por id
 }
 
 export default new GroupAccessRulesService()

@@ -79,6 +79,7 @@ export interface Group {
   id: number
   name: string
   users?: User[]
+  access_rules?: AccessRule[]
 }
 
 export interface GroupAccessRule {
