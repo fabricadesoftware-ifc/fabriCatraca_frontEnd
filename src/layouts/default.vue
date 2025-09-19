@@ -46,6 +46,11 @@
         },
       ],
     },
+    {
+      title: 'Configurações',
+      icon: 'mdi-cog',
+      to: '/config',
+    }
   ]
 </script>
 <template>

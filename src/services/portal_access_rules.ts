@@ -1,4 +1,4 @@
-import type { BaseResponse, PaginatedResponse, PortalAccessRule, QueryParams } from '@/types'
+import type { BaseResponse, PaginatedResponse, PortalAccessRule, PortalAccessRuleCreate, QueryParams } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
 
 class PortalAccessRulesService {
@@ -22,7 +22,7 @@ class PortalAccessRulesService {
     }
   }
 
-  async createPortalAccessRule (data: Partial<PortalAccessRule>): Promise<BaseResponse<PortalAccessRule>> {
+  async createPortalAccessRule (data: Partial<PortalAccessRuleCreate>): Promise<BaseResponse<PortalAccessRule>> {
     try {
       const response = await api.post('/portal_access_rules/', data)
       return response.data

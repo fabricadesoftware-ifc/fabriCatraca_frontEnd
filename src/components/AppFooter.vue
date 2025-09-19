@@ -2,6 +2,7 @@
   <v-footer
     app
     height="40"
+    relative
   >
     <a
       v-for="item in items"
@@ -30,8 +31,8 @@
     </a>
 
     <div
-      class="text-caption text-disabled"
-      style="position: absolute; right: 16px;"
+      class="text-caption text-disabled absolute bottom-0 mb-2"
+      style="position: absolute; right: 32px;"
     >
       &copy; {{ (new Date()).getFullYear() }} <span class="d-none d-sm-inline-block">Fabrica De Software</span>
     </div>

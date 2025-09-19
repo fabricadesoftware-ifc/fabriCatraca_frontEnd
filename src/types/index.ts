@@ -27,19 +27,21 @@ export interface QueryParams {
 export interface AccessRule {
   id: number
   name: string
-  description?: string
-  type: string
+  type: number
   priority: number
-  is_active: boolean
-  time_zones?: TimeZone[] | number[]
-  areas?: Area[] | number[]
-  updating?: boolean
+  time_zones: TimeZone[] | []
+  areas: Area[] | []
 }
 
 export interface AccessRuleTimeZone {
   id: number
   access_rule: AccessRule
   time_zone: TimeZone
+}
+
+export interface AccessRuleTimeZoneCreate {
+  access_rule: number
+  time_zone: number
 }
 
 export interface Area {
@@ -94,7 +96,6 @@ export interface GroupAccessRule {
 }
 
 export interface GroupAccessRuleCreate {
-  id: number
   group_id: number
   access_rule_id: number
 }
@@ -102,20 +103,19 @@ export interface GroupAccessRuleCreate {
 export interface Portal {
   id: number
   name: string
-  description?: string
   area_from: Area
   area_to: Area
-  is_active: boolean
-  updating?: boolean
-  type?: string
-  area?: Area
-  devices?: Device[]
 }
 
 export interface PortalAccessRule {
   id: number
   portal: Portal
   access_rule: AccessRule
+}
+
+export interface PortalAccessRuleCreate {
+  portal: number
+  access_rule: number
 }
 
 export interface TimeSpan {
@@ -166,6 +166,11 @@ export interface UserAccessRule {
   id: number
   user: User
   access_rule: AccessRule
+}
+
+export interface UserAccessRuleCreate {
+  user: number
+  access_rule: number
 }
 
 export interface AccessLogs {

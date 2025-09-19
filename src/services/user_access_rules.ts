@@ -1,4 +1,4 @@
-import type { BaseResponse, PaginatedResponse, QueryParams, UserAccessRule } from '@/types'
+import type { BaseResponse, PaginatedResponse, QueryParams, UserAccessRule, UserAccessRuleCreate } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
 
 class UserAccessRulesService {
@@ -22,7 +22,7 @@ class UserAccessRulesService {
     }
   }
 
-  async createUserAccessRule (data: Partial<UserAccessRule>): Promise<BaseResponse<UserAccessRule>> {
+  async createUserAccessRule (data: Partial<UserAccessRuleCreate>): Promise<BaseResponse<UserAccessRule>> {
     try {
       const response = await api.post('/user_access_rules/', data)
       return response.data

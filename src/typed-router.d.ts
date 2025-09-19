@@ -20,12 +20,11 @@ declare module 'vue-router/auto-routes' {
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
     '/access-rules/': RouteRecordInfo<'/access-rules/', '/access-rules', Record<never, never>, Record<never, never>>,
-    '/cadastrar/': RouteRecordInfo<'/cadastrar/', '/cadastrar', Record<never, never>, Record<never, never>>,
-    '/configurações/': RouteRecordInfo<'/configurações/', '/configurações', Record<never, never>, Record<never, never>>,
+    '/config/': RouteRecordInfo<'/config/', '/config', Record<never, never>, Record<never, never>>,
+    '/data/export/': RouteRecordInfo<'/data/export/', '/data/export', Record<never, never>, Record<never, never>>,
+    '/data/import/': RouteRecordInfo<'/data/import/', '/data/import', Record<never, never>, Record<never, never>>,
     '/devices/': RouteRecordInfo<'/devices/', '/devices', Record<never, never>, Record<never, never>>,
     '/groups/': RouteRecordInfo<'/groups/', '/groups', Record<never, never>, Record<never, never>>,
-    '/portals/': RouteRecordInfo<'/portals/', '/portals', Record<never, never>, Record<never, never>>,
-    '/relatorios/': RouteRecordInfo<'/relatorios/', '/relatorios', Record<never, never>, Record<never, never>>,
     '/users/': RouteRecordInfo<'/users/', '/users', Record<never, never>, Record<never, never>>,
   }
 }
