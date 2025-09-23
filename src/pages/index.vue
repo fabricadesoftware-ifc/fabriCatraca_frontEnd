@@ -13,8 +13,8 @@
   onMounted(async () => {
     await accessLogStore.loadLogs()
     await userStore.loadUsers()
-    acces_accept.value = await accessLogStore.returnedLogsByLastDays(30, 7) as unknown as AccessLogs
-    acces_rejected.value = await accessLogStore.returnedLogsByLastDays(30, 6) as unknown as AccessLogs
+    acces_accept.value = await accessLogStore.returnedLogsByLastDays(10, 7) as unknown as AccessLogs
+    acces_rejected.value = await accessLogStore.returnedLogsByLastDays(10, 6) as unknown as AccessLogs
 
     // Contar os logs
     count_approved.value = (await accessLogStore.returnedTypedLogs(7)).count
@@ -47,7 +47,7 @@
     {
       title: 'Usuários',
       description: 'Total de usuários cadastrados no sistema',
-      value: userStore.users.length,
+      value: userStore.count,
       trend: 'up' as const,
       trendValue: '+3%',
       color: '', // Sem cor específica, deixar o CSS controlar

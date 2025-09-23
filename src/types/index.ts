@@ -40,8 +40,8 @@ export interface AccessRuleTimeZone {
 }
 
 export interface AccessRuleTimeZoneCreate {
-  access_rule: number
-  time_zone: number
+  access_rule_id: number
+  time_zone_id: number
 }
 
 export interface Area {

@@ -24,12 +24,17 @@
   const chartOption = computed(() => ({
     backgroundColor: '#ffffff',
     title: {
-      text: 'Acessos por Hora (Últimos 30 dias)',
+      text: 'Acessos por Hora',
+      subtext: 'Histórico das últimas 24 horas',
       left: 'center',
       textStyle: {
         fontSize: 16,
         fontWeight: 'bold',
         color: '#333333',
+      },
+      subtextStyle: {
+        fontSize: 12,
+        color: '#666666',
       },
     },
     tooltip: {
@@ -42,7 +47,9 @@
       },
       formatter: (params: any) => {
         const data = params[0]
-        return `${data.name}<br/>
+        const [date, time] = data.name.split(' ')
+        const [day, month] = date.split('/')
+        return `${day}/${month} às ${time}<br/>
                 <span style="color: #4CAF50;">● Aprovados: ${data.value}</span><br/>
                 <span style="color: #F44336;">● Negados: ${params[1]?.value || 0}</span>`
       },
@@ -66,6 +73,10 @@
         rotate: 45,
         fontSize: 10,
         color: '#666666',
+        formatter: (value: string) => {
+          const [_date, time] = value.split(' ')
+          return `${time}h`
+        },
       },
       axisLine: {
         lineStyle: {
@@ -149,48 +160,111 @@
     ],
   }))
 
+  // Gerar intervalo de datas para as últimas 24 horas
+  const generateDateRange = () => {
+    const dates = []
+    const end = new Date()
+    const start = new Date()
+    start.setHours(end.getHours() - 24)
+
+    // Ajusta para o início da hora
+    start.setMinutes(0)
+    start.setSeconds(0)
+    start.setMilliseconds(0)
+
+    // Gera um ponto a cada hora
+    for (let d = new Date(start); d <= end; d.setHours(d.getHours() + 1)) {
+      const dateStr = d.toLocaleString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        day: '2-digit',
+        month: '2-digit',
+      })
+      dates.push(dateStr)
+    }
+
+    return dates
+  }
+
   // Processar dados dos logs recebidos via props
   const processLogData = () => {
     try {
-      // Combinar logs aprovados e negados (inverter ordem se necessário)
-      const allLogs = [...props.approvedLogs, ...props.rejectedLogs].reverse()
+      console.log('Processando logs:', {
+        aprovados: props.approvedLogs?.length || 0,
+        negados: props.rejectedLogs?.length || 0,
+      })
 
-      // Agrupar logs por data e hora
-      const groupedData = new Map<string, { approved: number; denied: number }>()
+      // Inicializar dados com zeros para todas as horas dos últimos 30 dias
+      const groupedData = new Map<string, { approved: number, denied: number }>()
 
-      for (const log of allLogs) {
-        const date = new Date(log.time)
-        const dateTime = date.toLocaleString('pt-BR', {
-          day: '2-digit',
-          month: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-        })
+      // Preencher com zeros para todas as horas
+      for (const dateTime of generateDateRange()) {
+        groupedData.set(dateTime, { approved: 0, denied: 0 })
+      }
 
-        if (!groupedData.has(dateTime)) {
-          groupedData.set(dateTime, { approved: 0, denied: 0 })
-        }
+      // Processar logs aprovados
+      if (props.approvedLogs) {
+        for (const log of props.approvedLogs) {
+          const date = new Date(log.time)
+          const dateTime = date.toLocaleString('pt-BR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          })
 
-        const timeData = groupedData.get(dateTime)!
+          console.log('Log aprovado:', {
+            original: log.time,
+            convertido: dateTime,
+          })
 
-        // Classificar por tipo de evento
-        switch (log.event_type) {
-          case 7: { // Acesso Concedido
-            timeData.approved++
-            break
-          }
-          case 6: { // Acesso Negado
-            timeData.denied++
-            break
-          }
+          const data = groupedData.get(dateTime) || { approved: 0, denied: 0 }
+          data.approved++
+          groupedData.set(dateTime, data)
         }
       }
 
-      // Ordenar por data/hora (mais antigas à esquerda, mais recentes à direita)
+      // Processar logs negados
+      if (props.rejectedLogs) {
+        for (const log of props.rejectedLogs) {
+          const date = new Date(log.time)
+          const dateTime = date.toLocaleString('pt-BR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          })
+
+          console.log('Log negado:', {
+            original: log.time,
+            convertido: dateTime,
+          })
+
+          const data = groupedData.get(dateTime) || { approved: 0, denied: 0 }
+          data.denied++
+          groupedData.set(dateTime, data)
+        }
+      }
+
+      console.log('Dados agrupados:', Object.fromEntries(groupedData))
+
+      // Ordenar por data/hora
       const sortedDates = Array.from(groupedData.keys()).sort((a, b) => {
-        const dateA = new Date(a.split(' ')[0].split('/').reverse().join('-') + ' ' + a.split(' ')[1])
-        const dateB = new Date(b.split(' ')[0].split('/').reverse().join('-') + ' ' + b.split(' ')[1])
-        return dateA.getTime() - dateB.getTime()
+        const [dateA, timeA] = a.split(' ')
+        const [dateB, timeB] = b.split(' ')
+
+        const [dayA, monthA, yearA] = dateA.split('/')
+        const [dayB, monthB, yearB] = dateB.split('/')
+
+        const dateStrA = `${yearA}-${monthA}-${dayA}T${timeA}`
+        const dateStrB = `${yearB}-${monthB}-${dayB}T${timeB}`
+
+        return new Date(dateStrA).getTime() - new Date(dateStrB).getTime()
       })
 
       // Preparar dados para o gráfico
@@ -262,11 +336,11 @@
 
     <div class="d-flex justify-center mt-4">
       <div class="d-flex align-center mr-6">
-        <div class="mr-2" style="width: 12px; height: 12px; background-color: #4CAF50; border-radius: 2px;"></div>
+        <div class="mr-2" style="width: 12px; height: 12px; background-color: #4CAF50; border-radius: 2px;" />
         <span class="text-caption">Aprovados</span>
       </div>
       <div class="d-flex align-center">
-        <div class="mr-2" style="width: 12px; height: 12px; background-color: #F44336; border-radius: 2px;"></div>
+        <div class="mr-2" style="width: 12px; height: 12px; background-color: #F44336; border-radius: 2px;" />
         <span class="text-caption">Negados</span>
       </div>
     </div>
