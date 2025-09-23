@@ -17,6 +17,8 @@ declare module 'vue' {
     AccessRuleList: typeof import('./components/access-rules/AccessRuleList.vue')['default']
     AccessRulesComponent: typeof import('./components/access-rules/AccessRulesComponent.vue')['default']
     AppFooter: typeof import('./components/AppFooter.vue')['default']
+    AreaComponent: typeof import('./components/areas/AreaComponent.vue')['default']
+    AreaDialog: typeof import('./components/areas/AreaDialog.vue')['default']
     AreaForm: typeof import('./components/areas/AreaForm.vue')['default']
     AreaList: typeof import('./components/areas/AreaList.vue')['default']
     CardsComponent: typeof import('./components/cards/CardsComponent.vue')['default']

@@ -193,3 +193,4 @@ export interface AccessLogs {
   confidence: number
   mask: string
 }
+

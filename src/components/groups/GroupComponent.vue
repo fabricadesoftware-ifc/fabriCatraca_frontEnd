@@ -47,7 +47,6 @@
           name: group.name,
         })
 
-        // Para grupo novo, adicionar todas as regras selecionadas
         const groupAccessRuleIds = (group.access_rules || []).map(r => typeof r === 'number' ? r : r.id)
         for (const accessRuleId of groupAccessRuleIds) {
           await groupStore.addAccessRuleToGroup(savedGroup.id, accessRuleId)

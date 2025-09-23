@@ -2,6 +2,7 @@ import type { QueryParams, User } from '@/types'
 import { defineStore } from 'pinia'
 import { UsersService } from '@/services'
 import userGroupsService from '@/services/user_groups'
+import router from '@/router'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -44,6 +45,7 @@ export const useUserStore = defineStore('user', {
         throw error
       } finally {
         this.saving = false
+        router.go()
       }
     },
 
@@ -61,6 +63,7 @@ export const useUserStore = defineStore('user', {
         throw error
       } finally {
         this.saving = false
+        router.go()
       }
     },
 
