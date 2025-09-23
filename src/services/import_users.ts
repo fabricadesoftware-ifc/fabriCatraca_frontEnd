@@ -1,12 +1,10 @@
 import { controlIdApi as api } from '@/plugins/api'
 
 class ImportUsersService {
-  async importUsers (file: File): Promise<any> {
-    const formData = new FormData()
-    formData.append('file', file)
+  async importUsers (formData: FormData): Promise<any> {
     const response = await api.post('/import-users/', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 120_000, // 60 seconds timeout
+      timeout: 120_000, // 120 seconds timeout
     })
     return response.data
   }

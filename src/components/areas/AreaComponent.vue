@@ -114,22 +114,4 @@
     @update:page="ChangePage"
   />
   <AreaDialog v-model="dialog" :area="selectedArea" @save="atualizarArea" />
-
-  <!-- <p> v-model="selection.selected"
-    class="rounded-lg"
-    :headers="headers"
-    hover
-    item-key="id"
-    :items="groups"
-    :items-length="totalItems ?? 0"
-    :items-per-page="pageSize ?? 10"
-    :loading="groups.length === 0"
-    :page="currentPage ?? 1"
-    return-object
-    select-strategy="all"
-    show-select
-    @click:row="showGroupDetails"
-    @update:items-per-page="itemsPerPageChanged"
-    @update:page="trocarPagina"
-    @update:selected="onSelect"</p> -->
 </template>

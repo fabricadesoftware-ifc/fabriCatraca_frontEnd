@@ -1,6 +1,8 @@
 <script lang="ts" setup>
   import type { AccessRule, Group as BaseGroup } from '@/types'
   import { onMounted, ref, watch } from 'vue'
+  import exportUsersService from '@/services/export_users'
+  import importUsersService from '@/services/import_users'
   import { useAccessRuleStore } from '@/stores'
 
   interface Group extends Omit<BaseGroup, 'access_rules'> {
@@ -12,13 +14,28 @@
     group: Group | null
   }>()
 
+  const emit = defineEmits<{
+    (e: 'update:modelValue', value: boolean): void
+    (e: 'save', value: Group): void
+    (e: 'saved'): void
+  }>()
+
   const accessRuleStore = useAccessRuleStore()
   const tab = ref('dados')
   const name = ref('')
   const loading = ref(false)
   const groupAccessRules = ref<number[]>([])
 
-  const toggleAccessRule = (ruleId: number, value: boolean) => {
+  // Estados para importação
+  const importFile = ref<File | null>(null)
+  const importError = ref('')
+  const importing = ref(false)
+
+  // Estados para exportação
+  const exportFormat = ref<'csv' | 'xlsx'>('csv')
+  const exporting = ref(false)
+
+  const toggleAccessRule = (ruleId: number, value: boolean): void => {
     const currentRules = [...groupAccessRules.value]
     if (value) {
       if (!currentRules.includes(ruleId)) {
@@ -33,11 +50,6 @@
     groupAccessRules.value = currentRules
   }
 
-  const emit = defineEmits<{
-    (e: 'update:modelValue', value: boolean): void
-    (e: 'save', value: Group): void
-  }>()
-
   // Atualiza os campos locais quando o props.group mudar
   watch(
     () => props.group,
@@ -50,19 +62,52 @@
     { immediate: true },
   )
 
-  function closeDialog () {
+  async function importarUsuarios (): Promise<void> {
+    if (!importFile.value || !props.group) return
+
+    importing.value = true
+    importError.value = ''
+
+    try {
+      const formData = new FormData()
+      formData.append('file', importFile.value)
+      formData.append('group_id', String(props.group.id))
+
+      await importUsersService.importUsers(formData)
+      importFile.value = null
+      emit('saved')
+    } catch (error: any) {
+      importError.value = error?.response?.data?.message || 'Erro ao importar usuários'
+    } finally {
+      importing.value = false
+    }
+  }
+
+  async function exportarUsuarios (): Promise<void> {
+    if (!props.group) return
+
+    exporting.value = true
+    try {
+      await exportUsersService.exportUsers(props.group.id, exportFormat.value)
+    } catch (error) {
+      console.error('Erro ao exportar usuários:', error)
+    } finally {
+      exporting.value = false
+    }
+  }
+
+  function close (): void {
     emit('update:modelValue', false)
   }
 
-  async function salvarGrupo () {
-    if (props.group) {
-      emit('save', {
-        ...props.group,
-        name: name.value,
-        access_rules: groupAccessRules.value,
-      })
-      closeDialog()
-    }
+  function save (): void {
+    if (!props.group) return
+    emit('save', {
+      ...props.group,
+      name: name.value,
+      access_rules: groupAccessRules.value,
+    })
+    close()
   }
 
   onMounted(async () => {
@@ -80,12 +125,14 @@
 <template>
   <v-dialog max-width="900" :model-value="props.modelValue" @update:model-value="emit('update:modelValue', $event)">
     <v-card v-if="props.group">
-      <v-card-title class="text-h5">Editar Grupo</v-card-title>
+      <v-card-title class="text-h5">{{ props.group.id ? 'Editar Grupo' : 'Novo Grupo' }}</v-card-title>
 
       <v-card-text>
         <v-tabs v-model="tab" bg-color="transparent" color="primary">
           <v-tab value="dados">Dados Gerais</v-tab>
           <v-tab value="regras">Regras de Acesso</v-tab>
+          <v-tab value="importar">Importar Usuários</v-tab>
+          <v-tab value="exportar">Exportar Usuários</v-tab>
         </v-tabs>
 
         <v-window v-model="tab">
@@ -127,7 +174,6 @@
                           <v-list-item
                             v-for="rule in accessRuleStore.accessRules"
                             :key="rule.id"
-                            :subtitle="rule.description"
                             :title="rule.name"
                           >
                             <template #prepend>
@@ -160,13 +206,105 @@
               </v-row>
             </v-container>
           </v-window-item>
+
+          <!-- Aba Importar Usuários -->
+          <v-window-item value="importar">
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-card>
+                    <v-card-text class="pa-4">
+                      <div class="text-subtitle-1 mb-4">
+                        Importar usuários para este grupo
+                      </div>
+
+                      <v-alert class="mb-4" type="info" variant="tonal">
+                        Envie um arquivo .xlsx/.xls com a lista de usuários. Os usuários serão automaticamente adicionados a este grupo.
+                      </v-alert>
+
+                      <v-file-input
+                        v-model="importFile"
+                        accept=".xlsx,.xls"
+                        counter
+                        density="comfortable"
+                        :error-messages="importError"
+                        label="Selecionar arquivo (.xlsx, .xls)"
+                        :loading="importing"
+                        prepend-inner-icon="mdi-file-excel"
+                        show-size
+                        variant="outlined"
+                        @error="importError = $event?.toString() || ''"
+                      />
+
+                      <div class="text-caption text-grey">Limite recomendado: 100 linhas por arquivo.</div>
+
+                      <v-btn
+                        class="mt-4"
+                        color="primary"
+                        :disabled="!importFile"
+                        :loading="importing"
+                        prepend-icon="mdi-upload"
+                        @click="importarUsuarios"
+                      >
+                        Importar Usuários
+                      </v-btn>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-window-item>
+
+          <!-- Aba Exportar Usuários -->
+          <v-window-item value="exportar">
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-card>
+                    <v-card-text class="pa-4">
+                      <div class="text-subtitle-1 mb-4">
+                        Exportar usuários deste grupo
+                      </div>
+
+                      <v-alert class="mb-4" type="info" variant="tonal">
+                        Selecione o formato desejado para exportar a lista de usuários deste grupo.
+                      </v-alert>
+
+                      <v-select
+                        v-model="exportFormat"
+                        density="comfortable"
+                        item-title="title"
+                        item-value="value"
+                        :items="[
+                          { title: 'CSV', value: 'csv' },
+                          { title: 'Excel (XLSX)', value: 'xlsx' }
+                        ]"
+                        label="Formato do Arquivo"
+                        variant="outlined"
+                      />
+
+                      <v-btn
+                        class="mt-4"
+                        color="primary"
+                        :loading="exporting"
+                        prepend-icon="mdi-download"
+                        @click="exportarUsuarios"
+                      >
+                        Exportar Usuários
+                      </v-btn>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-window-item>
         </v-window>
       </v-card-text>
 
       <v-card-actions>
         <v-spacer />
-        <v-btn color="error" variant="text" @click="closeDialog">Cancelar</v-btn>
-        <v-btn color="primary" variant="flat" @click="salvarGrupo">Salvar</v-btn>
+        <v-btn color="error" variant="text" @click="close">Cancelar</v-btn>
+        <v-btn color="primary" variant="flat" @click="save">Salvar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
