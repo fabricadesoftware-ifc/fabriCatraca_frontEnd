@@ -15,7 +15,7 @@
   const exportStore = useExportUserStore()
   const groupStore = useGroupStore()
   const selectedGroup = ref<number | null>(null)
-  const fileType = ref<'csv' | 'txt' | 'xlsx'>('csv')
+  const fileType = ref<'csv' | 'xlsx'>('csv')
   const loading = ref(false)
 
   const fileTypes = [
