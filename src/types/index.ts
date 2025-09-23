@@ -89,6 +89,10 @@ export interface Group {
   access_rules?: AccessRule[]
 }
 
+export interface GroupCreate {
+  name: string
+}
+
 export interface GroupAccessRule {
   id: number
   group: Group

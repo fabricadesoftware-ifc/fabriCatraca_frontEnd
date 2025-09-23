@@ -130,66 +130,7 @@
     :device="selectedDevice"
     @save="salvarDispositivo"
   />
-  <v-dialog v-model="dialog" max-width="500">
-    <v-card v-if="selectedDevice">
-      <v-card-title class="text-h5">
-        Detalhes do Dispositivo
-      </v-card-title>
 
-      <v-card-text>
-        <v-list>
-          <v-list-item>
-            <v-list-item-title>ID:</v-list-item-title>
-            <v-list-item-subtitle>{{ selectedDevice.id }}</v-list-item-subtitle>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-title>Nome:</v-list-item-title>
-            <v-list-item-subtitle>{{ selectedDevice.name }}</v-list-item-subtitle>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-title>IP:</v-list-item-title>
-            <v-list-item-subtitle>{{ selectedDevice.ip }}</v-list-item-subtitle>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-title>Status:</v-list-item-title>
-            <v-list-item-subtitle>
-              <v-chip
-                :color="selectedDevice.is_active ? 'success' : 'error'"
-                size="small"
-                :text="selectedDevice.is_active ? 'Ativo' : 'Inativo'"
-              />
-            </v-list-item-subtitle>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-title>Dispositivo Padrão:</v-list-item-title>
-            <v-list-item-subtitle>
-              {{ selectedDevice.is_default ? 'Sim' : 'Não' }}
-            </v-list-item-subtitle>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-title>Usuário:</v-list-item-title>
-            <v-list-item-subtitle>{{ selectedDevice.username }}</v-list-item-subtitle>
-          </v-list-item>
-        </v-list>
-      </v-card-text>
-
-      <v-card-actions>
-        <v-spacer />
-        <v-btn
-          color="primary"
-          variant="text"
-          @click="dialog = false"
-        >
-          Fechar
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
 </template>
 
 <style scoped>

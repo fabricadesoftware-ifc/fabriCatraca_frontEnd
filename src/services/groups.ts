@@ -1,4 +1,4 @@
-import type { BaseResponse, Group, PaginatedResponse, QueryParams } from '@/types'
+import type { BaseResponse, Group, GroupCreate, PaginatedResponse, QueryParams } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
 
 class GroupsService {
@@ -22,7 +22,7 @@ class GroupsService {
     }
   }
 
-  async createGroup (data: Partial<Group>): Promise<BaseResponse<Group>> {
+  async createGroup (data: Partial<GroupCreate>): Promise<BaseResponse<Group>> {
     try {
       const response = await api.post('/groups/', data)
       return response.data
