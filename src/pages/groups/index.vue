@@ -20,7 +20,6 @@
     await groupStore.loadGroups()
   })
 </script>
-
 <template>
   <v-container>
     <h1 class="text-h4 font-weight-bold mb-4">Grupos</h1>
