@@ -1,24 +1,30 @@
-import type { Area } from '@/types'
+import type { Area, QueryParams } from '@/types'
 import { defineStore } from 'pinia'
-import { AreasService } from '@/services'
 import router from '@/router'
+import { AreasService } from '@/services'
 
 export const useAreaStore = defineStore('area', {
   state: () => ({
     areas: [] as Area[],
-    area: [] as Area[],
     selectedArea: null as Area | null,
     loading: false,
     saving: false,
+    current_page: 1,
+    page_size: 10,
+    count: 0,
+    total_pages: 0,
   }),
 
   actions: {
-    async loadAreas() {
+    async loadAreas(params?: QueryParams) {
       this.loading = true
       try {
-        const response = await AreasService.getAreas()
+        const response = await AreasService.getAreas(params)
+        this.current_page = response.current_page || 1
+        this.page_size = response.page_size
+        this.count = response.count
+        this.total_pages = response.total_pages || 1
         this.areas = response.results
-        console.log('areas pegas')
       } catch (error) {
         console.error('Erro ao carregar áreas:', error)
         throw error
@@ -61,16 +67,12 @@ export const useAreaStore = defineStore('area', {
     },
 
     async getAreaById(id: number) {
-      this.loading = true
       try {
         const response = await AreasService.getAreaById(id)
-        this.area = response
-      }
-      catch (error) {
-        console.log('Erro ao atualizar área:', error)
-      }
-      finally {
-        this.loading = false
+        return response.data || response
+      } catch (error) {
+        console.error('Erro ao buscar área:', error)
+        throw error
       }
     },
 

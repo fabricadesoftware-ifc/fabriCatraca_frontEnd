@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useAreaStore } from '@/stores'
+import AreaComponent from '@/components/areas/AreaComponent.vue'
+
 const areaStore = useAreaStore()
 
 async function pageChanger (page: number) {
@@ -8,7 +11,7 @@ async function pageChanger (page: number) {
 
 async function itemsPerPageChanger (pageSize: number) {
   await areaStore.loadAreas({
-    page: groupStore.current_page,
+    page: areaStore.current_page,
     page_size: pageSize,
   })
 }
