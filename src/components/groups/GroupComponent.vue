@@ -1,10 +1,12 @@
 <script lang="ts" setup>
-  import type { Group as BaseGroup } from '@/types'
-  import { ref, watch } from 'vue'
+  import type { AccessRule, Group as BaseGroup } from '@/types'
+  import { ref } from 'vue'
+  import groupAccessRulesService from '@/services/group_access_rules'
   import { useGroupStore } from '@/stores'
+  import GroupDialog from './GroupDialog.vue'
 
-  interface Group extends BaseGroup {
-    access_rules?: (number | { id: number, name: string })[]
+  interface Group extends Omit<BaseGroup, 'access_rules'> {
+    access_rules?: (number | AccessRule)[]
   }
 
   defineProps<{
@@ -33,14 +35,7 @@
     { title: 'Regras de Acesso', key: 'access_rules', align: 'start' as const },
   ]
 
-  // Debug para verificar se a seleção está funcionando
-  watch(() => selection.value.selected, newSelected => {
-    console.log('Seleção atualizada:', {
-      items: newSelected,
-      count: newSelected.length,
-      ids: newSelected.map(item => item.id),
-    })
-  }, { deep: true })
+  // Mantém seleção como no componente de usuários
 
   async function salvarGrupo (group: Group) {
     try {
@@ -73,9 +68,14 @@
           })
           : currentGroup
 
-        // Gerenciar regras de acesso do grupo
+        // Gerenciar regras de acesso do grupo (apenas diffs)
         const groupAccessRuleIds = (group.access_rules || []).map(r => typeof r === 'number' ? r : r.id)
-        const currentAccessRules = (currentGroup as any).access_rules?.map((r: any) => typeof r === 'number' ? r : r.id) || []
+        // Fonte da verdade: buscar relações atuais no backend
+        const relations = await groupAccessRulesService.getGroupAccessRules({ group_id: group.id })
+        const currentAccessRules = (relations.results || [])
+          .filter((rel: any) => ((rel?.group?.id ?? rel?.group_id) === group.id))
+          .map((rel: any) => rel?.access_rule?.id ?? rel?.access_rule_id)
+          .filter((id: any) => typeof id === 'number')
 
         const rulesToAdd = groupAccessRuleIds.filter((ruleId: number) => !currentAccessRules.includes(ruleId))
         const rulesToRemove = currentAccessRules.filter((ruleId: number) => !groupAccessRuleIds.includes(ruleId))
@@ -99,9 +99,27 @@
     }
   }
 
-  function showGroupDetails (event: Event, { item }: { item: Group }) {
-    selectedGroup.value = item
-    dialog.value = true
+  async function showGroupDetails (event: Event, { item }: { item: Group }) {
+    try {
+      const fullGroup = await groupStore.getGroupById(item.id)
+      // Busca segura das relações no backend (fonte da verdade)
+      const relations = await groupAccessRulesService.getGroupAccessRules({ group_id: item.id })
+      const relationIds = (relations.results || [])
+        .filter((rel: any) => ((rel?.group?.id ?? rel?.group_id) === item.id))
+        .map((rel: any) => rel?.access_rule?.id ?? rel?.access_rule_id)
+        .filter((id: any) => typeof id === 'number')
+
+      // Fallback: se não veio nada do endpoint, tenta extrair do fullGroup
+      const normalizedIds = relationIds.length > 0
+        ? relationIds
+        : ((fullGroup as any)?.access_rules || []).map((r: any) => typeof r === 'number' ? r : r.id)
+
+      selectedGroup.value = Object.assign({}, item, fullGroup || {}, { access_rules: normalizedIds })
+    } catch {
+      selectedGroup.value = item
+    } finally {
+      dialog.value = true
+    }
   }
 
   async function removerSelecionados () {

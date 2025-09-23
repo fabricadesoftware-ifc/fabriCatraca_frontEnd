@@ -1,4 +1,4 @@
-import type { AccessRuleTimeZone, BaseResponse, PaginatedResponse, QueryParams } from '@/types'
+import type { AccessRuleTimeZone, AccessRuleTimeZoneCreate, BaseResponse, PaginatedResponse, QueryParams } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
 
 class AccessRuleTimeZonesService {
@@ -22,7 +22,7 @@ class AccessRuleTimeZonesService {
     }
   }
 
-  async createAccessRuleTimeZone (data: Partial<AccessRuleTimeZone>): Promise<BaseResponse<AccessRuleTimeZone>> {
+  async createAccessRuleTimeZone (data: Partial<AccessRuleTimeZoneCreate>): Promise<BaseResponse<AccessRuleTimeZone>> {
     try {
       const response = await api.post('/access_rule_time_zones/', data)
       return response.data

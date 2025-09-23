@@ -2,7 +2,7 @@
 
 </script>
 <template>
-portals
+Exportar Dados
 </template>
 
 <style scoped>

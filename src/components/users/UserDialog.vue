@@ -2,6 +2,7 @@
   import type { User as BaseUser } from '@/types'
   import { onMounted, ref, toValue, watch } from 'vue'
   import { useGroupStore } from '@/stores'
+  import UserBioPanel from './UserBioPanel.vue'
 
   interface User extends Omit<BaseUser, 'user_groups'> {
     user_groups?: (number | { id: number, name: string })[]
@@ -173,7 +174,9 @@
           <v-window-item value="cartoes"><p>Gerenciar cartões...</p></v-window-item>
           <v-window-item value="horarios"><p>Configurar horários...</p></v-window-item>
           <v-window-item value="pin"><p>Definir PIN...</p></v-window-item>
-          <v-window-item value="biometria"><p>Gerenciar biometria...</p></v-window-item>
+          <v-window-item value="biometria">
+            <UserBioPanel :user-id="props.user.id" />
+          </v-window-item>
         </v-window>
       </v-card-text>
 

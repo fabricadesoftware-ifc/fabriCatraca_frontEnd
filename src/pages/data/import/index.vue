@@ -2,7 +2,7 @@
 
 </script>
 <template>
-REALTORIOS
+Importar Dados
 </template>
 
 <style scoped>

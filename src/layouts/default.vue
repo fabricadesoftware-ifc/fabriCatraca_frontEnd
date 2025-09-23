@@ -21,16 +21,6 @@
       to: '/areas',
     },
     {
-      title: 'Biometria',
-      icon: 'mdi-fingerprint',
-      to: '/bio',
-    },
-    {
-      title: 'Tags',
-      icon: 'mdi-card',
-      to: '/tags',
-    },
-    {
       title: 'Grupos',
       icon: 'mdi-account-group',
       to: '/groups',
@@ -40,6 +30,27 @@
       icon: 'mdi-turnstile',
       to: '/devices',
     },
+    {
+      title: 'Dados',
+      icon: 'mdi-database',
+      subitems: [
+        {
+          title: 'Exportar',
+          icon: 'mdi-database-export',
+          to: '/data/export',
+        },
+        {
+          title: 'Importar',
+          icon: 'mdi-database-import',
+          to: '/data/import',
+        },
+      ],
+    },
+    {
+      title: 'Configurações',
+      icon: 'mdi-cog',
+      to: '/config',
+    }
   ]
 </script>
 <template>

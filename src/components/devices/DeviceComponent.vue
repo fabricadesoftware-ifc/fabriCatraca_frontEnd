@@ -1,6 +1,8 @@
 <script lang="ts" setup>
   import type { Device } from '@/types'
   import { ref } from 'vue'
+  import { useDeviceStore } from '@/stores'
+  import DeviceDialog from './DeviceDialog.vue'
   defineProps<{
     devices: Device[]
     currentPage: number
@@ -15,10 +17,45 @@
 
   const dialog = ref(false)
   const selectedDevice = ref<Device | null>(null)
+  const creating = ref(false)
+  const deviceStore = useDeviceStore()
 
   const showDeviceDetails = (device: Device) => {
     selectedDevice.value = device
     dialog.value = true
+  }
+
+  function novoDispositivo () {
+    creating.value = true
+    selectedDevice.value = {
+      id: 0,
+      name: '',
+      ip: '',
+      username: '',
+      is_active: true,
+      is_default: false,
+    } as Device
+    dialog.value = true
+  }
+
+  async function salvarDispositivo (device: Device) {
+    try {
+      const payload = {
+        name: device.name,
+        ip: device.ip,
+        username: device.username,
+        is_active: device.is_active,
+        is_default: device.is_default,
+      }
+      device.id === 0
+        ? await deviceStore.createDevice(payload)
+        : await deviceStore.updateDevice(device.id, payload)
+      await deviceStore.loadDevices()
+    } catch {
+      alert('Erro ao salvar dispositivo')
+    } finally {
+      creating.value = false
+    }
   }
 
   async function trocarPagina (page: number) {
@@ -36,6 +73,9 @@
 </script>
 
 <template>
+  <div class="d-flex justify-end mb-4">
+    <v-btn color="primary" prepend-icon="mdi-plus" @click="novoDispositivo">Adicionar Dispositivo</v-btn>
+  </div>
   <v-data-table-server
     class="rounded-lg"
     :headers="[
@@ -85,6 +125,11 @@
     </template>
   </v-data-table-server>
 
+  <DeviceDialog
+    v-model="dialog"
+    :device="selectedDevice"
+    @save="salvarDispositivo"
+  />
   <v-dialog v-model="dialog" max-width="500">
     <v-card v-if="selectedDevice">
       <v-card-title class="text-h5">
