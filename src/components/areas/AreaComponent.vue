@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import type { Area } from '@/types'
-  import { ref } from 'vue';
-  import { useAreaStore } from '@/stores';
+  import { ref } from 'vue'
+  import { useAreaStore } from '@/stores'
   const selectedArea = ref({})
   const dialog = ref(false)
 
@@ -15,6 +15,7 @@
 
   const emit = defineEmits<{
     (e: 'page-changed', value: number): void
+    // eslint-disable-next-line @typescript-eslint/unified-signatures
     (e: 'item-per-page', value: number): void
   }>()
 
@@ -28,17 +29,11 @@
   const selection = ref({
     selected: [] as Area[],
   })
-
-  async function atualizarArea(area) {
-    if ('id' in area) {
-      await areaStore.updateArea(area.id, area)
-    }
-    else {
-      await areaStore.createArea(area)
-    }
+  async function atualizarArea (area: Partial<Area>) {
+    await ('id' in area && area.id ? areaStore.updateArea(area.id, area) : areaStore.createArea(area))
   }
 
-  async function removerSelecionados() {
+  async function removerSelecionados () {
     const selectedItems = selection.value.selected
     if (selectedItems.length === 0) return
 
@@ -64,7 +59,7 @@
     }
   }
 
-  function showAreaDetails(event: Event, { item }: { item: Area }) {
+  function showAreaDetails (event: Event, { item }: { item: Area }) {
     selectedArea.value = item
     dialog.value = true
   }
@@ -119,6 +114,7 @@
     @update:page="ChangePage"
   />
   <AreaDialog v-model="dialog" :area="selectedArea" @save="atualizarArea" />
+
   <!-- <p> v-model="selection.selected"
     class="rounded-lg"
     :headers="headers"

@@ -16,7 +16,7 @@ export const useAreaStore = defineStore('area', {
   }),
 
   actions: {
-    async loadAreas(params?: QueryParams) {
+    async loadAreas (params?: QueryParams) {
       this.loading = true
       try {
         const response = await AreasService.getAreas(params)
@@ -33,7 +33,7 @@ export const useAreaStore = defineStore('area', {
       }
     },
 
-    async createArea(data: Partial<Area>) {
+    async createArea (data: Partial<Area>) {
       this.saving = true
       try {
         const response = await AreasService.createArea(data)
@@ -44,11 +44,11 @@ export const useAreaStore = defineStore('area', {
         throw error
       } finally {
         this.saving = false
-        router.go()
+        router.go(0)
       }
     },
 
-    async updateArea(id: number, data: Partial<Area>) {
+    async updateArea (id: number, data: Partial<Area>) {
       this.saving = true
       try {
         const response = await AreasService.updateArea(id, data)
@@ -62,11 +62,11 @@ export const useAreaStore = defineStore('area', {
         throw error
       } finally {
         this.saving = false
-        router.go()
+        router.go(0)
       }
     },
 
-    async getAreaById(id: number) {
+    async getAreaById (id: number) {
       try {
         const response = await AreasService.getAreaById(id)
         return response.data || response
@@ -76,7 +76,7 @@ export const useAreaStore = defineStore('area', {
       }
     },
 
-    async deleteArea(id: number) {
+    async deleteArea (id: number) {
       this.saving = true
       try {
         await AreasService.deleteArea(id)
@@ -89,10 +89,9 @@ export const useAreaStore = defineStore('area', {
       }
     },
 
-    getAreaColor(areaId: number) {
+    getAreaColor (areaId: number) {
       const colors = ['primary', 'secondary', 'success', 'warning', 'error', 'info']
       return colors[areaId % colors.length]
     },
   },
 })
-
