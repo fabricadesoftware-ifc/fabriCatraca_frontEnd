@@ -3,6 +3,7 @@
   import { onMounted, ref, watch } from 'vue'
   import exportUsersService from '@/services/export_users'
   import importUsersService from '@/services/import_users'
+  import userGroupsImportService from '@/services/user_groups_import'
   import { useAccessRuleStore } from '@/stores'
 
   interface Group extends Omit<BaseGroup, 'access_rules'> {
@@ -73,11 +74,15 @@
       formData.append('file', importFile.value)
       formData.append('group_id', String(props.group.id))
 
-      await importUsersService.importUsers(formData)
+      await userGroupsImportService.importUsersToGroup(formData)
       importFile.value = null
       emit('saved')
     } catch (error: any) {
-      importError.value = error?.response?.data?.message || 'Erro ao importar usuários'
+      const resp = error?.response?.data
+      const parsed = typeof resp === 'string'
+        ? resp
+        : (resp?.error || resp?.message || resp?.detail || (resp ? JSON.stringify(resp) : 'Falha ao importar usuários'))
+      importError.value = parsed
     } finally {
       importing.value = false
     }
@@ -88,7 +93,16 @@
 
     exporting.value = true
     try {
-      await exportUsersService.exportUsers(props.group.id, exportFormat.value)
+      const blobData = await exportUsersService.exportUsers(props.group.id, exportFormat.value)
+      const blob = new Blob([blobData], { type: 'application/octet-stream' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `usuarios_grupo_${props.group.id}.${exportFormat.value}`
+      document.body.append(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
     } catch (error) {
       console.error('Erro ao exportar usuários:', error)
     } finally {
@@ -178,9 +192,9 @@
                           >
                             <template #prepend>
                               <v-chip
-                                :color="accessRuleStore.getRuleTypeColor(rule.type)"
+                                :color="String(accessRuleStore.getRuleTypeColor(String(rule.type)))"
                                 size="small"
-                                :text="accessRuleStore.getRuleTypeLabel(rule.type)"
+                                :text="String(accessRuleStore.getRuleTypeLabel(String(rule.type)))"
                               />
                             </template>
 
@@ -221,6 +235,13 @@
                       <v-alert class="mb-4" type="info" variant="tonal">
                         Envie um arquivo .xlsx/.xls com a lista de usuários. Os usuários serão automaticamente adicionados a este grupo.
                       </v-alert>
+
+                      <v-alert
+                        v-if="importError"
+                        class="mb-4"
+                        type="error"
+                        variant="tonal"
+                      >{{ importError }}</v-alert>
 
                       <v-file-input
                         v-model="importFile"
