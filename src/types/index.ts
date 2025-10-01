@@ -193,3 +193,15 @@ export interface AccessLogs {
   confidence: number
   mask: string
 }
+
+export interface getToken {
+  email: string
+  password: string
+}
+
+export interface AuthState {
+  access: string | null
+  refresh: string | null
+  loading: boolean
+  error: Error | null
+}
