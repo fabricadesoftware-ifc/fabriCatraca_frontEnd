@@ -1,4 +1,4 @@
-import type { Area, QueryParams } from '@/types'
+import type { Area, AreaCreate, QueryParams } from '@/types'
 import { defineStore } from 'pinia'
 import router from '@/router'
 import { AreasService } from '@/services'
@@ -33,7 +33,7 @@ export const useAreaStore = defineStore('area', {
       }
     },
 
-    async createArea (data: Partial<Area>) {
+    async createArea (data: Partial<AreaCreate>) {
       this.saving = true
       try {
         const response = await AreasService.createArea(data)

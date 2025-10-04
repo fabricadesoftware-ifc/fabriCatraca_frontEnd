@@ -116,6 +116,7 @@
         page: userStore.current_page,
         page_size: userStore.page_size,
       })
+      toast.success('Usuário salvo com sucesso!')
     } catch (error) {
       console.error('Erro ao salvar usuário:', error)
       toast.error('Erro ao salvar usuário. Por favor, tente novamente.')
@@ -153,8 +154,10 @@
           page_size: userStore.page_size,
         })
 
+        const removedCount = validUsers.length
         // Limpar seleção
         selection.value.selected = []
+        toast.success(`${removedCount} usuário(s) removido(s) com sucesso!`)
       } catch (error) {
         console.error('Erro ao remover usuários:', error)
         toast.error('Erro ao remover usuários. Por favor, tente novamente.')

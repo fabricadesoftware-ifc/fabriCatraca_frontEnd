@@ -94,6 +94,7 @@
 
       // Recarrega a lista de grupos
       await groupStore.loadGroups()
+      toast.success('Grupo salvo com sucesso!')
     } catch (error) {
       console.error('Erro ao salvar grupo:', error)
       toast.error('Erro ao salvar grupo. Por favor, tente novamente.')
@@ -140,8 +141,10 @@
         // Recarregar a lista após deletar
         await groupStore.loadGroups()
 
+        const removedCount = validGroups.length
         // Limpar seleção
         selection.value.selected = []
+        toast.success(`${removedCount} grupo(s) removido(s) com sucesso!`)
       } catch (error) {
         console.error('Erro ao remover grupos:', error)
         toast.error('Erro ao remover grupos. Por favor, tente novamente.')

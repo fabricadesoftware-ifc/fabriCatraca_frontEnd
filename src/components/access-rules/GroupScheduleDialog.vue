@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-  import { onMounted, reactive, ref } from 'vue'
-  import { useGroupStore } from '@/stores'
-  import timeZonesService from '@/services/time_zones'
-  import timeSpansService from '@/services/time_spans'
-  import groupAccessRulesService from '@/services/group_access_rules'
-  import accessRuleTimeZonesService from '@/services/access_rule_time_zones'
   import type { AccessRule } from '@/types'
+  import { onMounted, reactive, ref } from 'vue'
+  import { toast } from 'vue3-toastify'
+  import accessRuleTimeZonesService from '@/services/access_rule_time_zones'
+  import groupAccessRulesService from '@/services/group_access_rules'
+  import timeSpansService from '@/services/time_spans'
+  import timeZonesService from '@/services/time_zones'
+  import { useGroupStore } from '@/stores'
 
   const props = defineProps<{ modelValue: boolean, accessRule: AccessRule | null }>()
   const emit = defineEmits<{ (e: 'update:modelValue', v: boolean): void, (e: 'saved'): void }>()
@@ -29,10 +30,13 @@
     sat: { enabled: false, start: '07:00', end: '17:00' },
   })
 
-  function close () { emit('update:modelValue', false) }
+  // eslint-disable-next-line @stylistic/max-statements-per-line
+  function close () {
+    emit('update:modelValue', false)
+  }
 
   function parseHHMMToSeconds (hhmm: string): number {
-    const [h, m] = hhmm.split(':').map(v => Number(v))
+    const [h, m] = hhmm.split(':').map(Number)
     const hours = Number.isFinite(h) ? h : 0
     const mins = Number.isFinite(m) ? m : 0
     return hours * 3600 + mins * 60
@@ -56,15 +60,15 @@
     }
 
     // reset schedule
-    (Object.keys(schedule) as DayKey[]).forEach(d => {
+    for (const d of (Object.keys(schedule) as DayKey[])) {
       schedule[d].enabled = false
-    })
+    }
 
     try {
       // Primeiro verifica se existe vínculo grupo-regra
       const groupRules = await groupAccessRulesService.getGroupAccessRules({
         group_id: groupId,
-        access_rule_id: props.accessRule.id
+        access_rule_id: props.accessRule.id,
       })
 
       if (!groupRules.results?.length) {
@@ -75,7 +79,7 @@
       // Busca TZ vinculadas à regra
       console.log('Buscando timezones da regra:', props.accessRule.id)
       const relations = await accessRuleTimeZonesService.getAccessRuleTimeZones({
-        access_rule_id: props.accessRule.id
+        access_rule_id: props.accessRule.id,
       })
       console.log('Relações encontradas:', relations)
 
@@ -105,14 +109,14 @@
           ]
 
           // Habilita todos os dias que estão marcados como true
-          map.forEach(({ key, val }) => {
+          for (const { key, val } of map) {
             if (val) {
               console.log('Configurando horário para:', key)
               schedule[key].enabled = true
               schedule[key].start = secondsToHHMM((ts as any).start)
               schedule[key].end = secondsToHHMM((ts as any).end)
             }
-          })
+          }
         }
       }
     } catch (error) {
@@ -129,8 +133,8 @@
 
   async function saveSchedule () {
     if (!props.accessRule || !selectedGroupId.value) return
+    saving.value = true
     try {
-      saving.value = true
       const groupId = selectedGroupId.value
       const ruleId = props.accessRule.id
 
@@ -138,7 +142,7 @@
       await ensureGroupAccessRule(groupId, ruleId)
 
       // Para cada dia habilitado cria uma TimeZone e um TimeSpan exclusivo daquele dia
-      const dayOrder: DayKey[] = ['sun','mon','tue','wed','thu','fri','sat']
+      const dayOrder: DayKey[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
       for (const day of dayOrder) {
         const cfg = schedule[day]
         if (!cfg.enabled) continue
@@ -153,7 +157,7 @@
         const tzId = (tz as any)?.data?.id ?? (tz as any)?.data ?? (tz as any)?.id
 
         // Cria timespan com flags do dia
-        const flags: Record<DayKey, boolean> = { sun:false, mon:false, tue:false, wed:false, thu:false, fri:false, sat:false }
+        const flags: Record<DayKey, boolean> = { sun: false, mon: false, tue: false, wed: false, thu: false, fri: false, sat: false }
         flags[day] = true
         await timeSpansService.createTimeSpan({
           time_zone: tzId,
@@ -175,8 +179,12 @@
         await accessRuleTimeZonesService.createAccessRuleTimeZone({ access_rule_id: ruleId, time_zone_id: tzId })
       }
 
+      toast.success('Horário salvo com sucesso!')
       emit('saved')
       close()
+    } catch (error) {
+      console.error('Erro ao salvar horário:', error)
+      toast.error('Erro ao salvar horário. Por favor, tente novamente.')
     } finally {
       saving.value = false
     }
@@ -218,19 +226,19 @@
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" max-width="800" @update:model-value="emit('update:modelValue', $event)">
+  <v-dialog max-width="800" :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
     <v-card>
       <v-card-title class="text-h6">Definir horários por turma</v-card-title>
       <v-card-text>
         <v-select
           v-model="selectedGroupId"
-          :items="groupStore.groups"
+          density="comfortable"
           item-title="name"
           item-value="id"
+          :items="groupStore.groups"
           label="Turma (Grupo)"
-          density="comfortable"
-          variant="outlined"
           prepend-inner-icon="mdi-account-group"
+          variant="outlined"
         />
 
         <v-alert class="mt-3 mb-5" density="comfortable" type="info" variant="tonal">
@@ -238,31 +246,37 @@
         </v-alert>
 
         <v-row>
-          <v-col v-for="(label, key) in dayLabels" :key="key" cols="12" sm="6" md="4">
+          <v-col
+            v-for="(label, key) in dayLabels"
+            :key="key"
+            cols="12"
+            md="4"
+            sm="6"
+          >
             <v-card class="day-card" variant="tonal">
               <v-card-title class="d-flex align-center justify-space-between py-2">
                 <span class="text-subtitle-2">{{ label }}</span>
-                <v-switch v-model="schedule[key as DayKey].enabled" color="primary" hide-details density="compact" />
+                <v-switch v-model="schedule[key as DayKey].enabled" color="primary" density="compact" hide-details />
               </v-card-title>
               <v-card-text class="pt-0">
                 <div class="time-fields">
                   <v-text-field
                     v-model="schedule[key as DayKey].start"
-                    type="time"
-                    label="Início"
-                    variant="outlined"
                     density="compact"
                     :disabled="!schedule[key as DayKey].enabled"
                     hide-details
+                    label="Início"
+                    type="time"
+                    variant="outlined"
                   />
                   <v-text-field
                     v-model="schedule[key as DayKey].end"
-                    type="time"
-                    label="Fim"
-                    variant="outlined"
                     density="compact"
                     :disabled="!schedule[key as DayKey].enabled"
                     hide-details
+                    label="Fim"
+                    type="time"
+                    variant="outlined"
                   />
                 </div>
               </v-card-text>
@@ -273,7 +287,7 @@
       <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="close">Cancelar</v-btn>
-        <v-btn color="primary" :loading="saving" :disabled="!selectedGroupId" @click="saveSchedule">Salvar</v-btn>
+        <v-btn color="primary" :disabled="!selectedGroupId" :loading="saving" @click="saveSchedule">Salvar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -289,5 +303,3 @@
   gap: 12px;
 }
 </style>
-
-

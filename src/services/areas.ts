@@ -1,4 +1,4 @@
-import type { Area, BaseResponse, PaginatedResponse, QueryParams } from '@/types'
+import type { Area, AreaCreate, BaseResponse, PaginatedResponse, QueryParams } from '@/types'
 import { controlIdApi as api } from '@/plugins/api'
 
 class AreasService {
@@ -22,7 +22,7 @@ class AreasService {
     }
   }
 
-  async createArea (data: Partial<Area>): Promise<BaseResponse<Area>> {
+  async createArea (data: Partial<AreaCreate>): Promise<BaseResponse<Area>> {
     try {
       const response = await api.post('/areas/', data)
       return response.data as BaseResponse<Area>

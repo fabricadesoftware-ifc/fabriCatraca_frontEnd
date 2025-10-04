@@ -52,6 +52,10 @@ export interface Area {
   name: string
 }
 
+export interface AreaCreate {
+  name: string
+}
+
 export interface AreaAccessRule {
   id: number
   area: Area

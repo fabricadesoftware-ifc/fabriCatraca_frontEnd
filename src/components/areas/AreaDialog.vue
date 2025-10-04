@@ -1,14 +1,10 @@
 <script lang="ts" setup>
-  import type { Area } from '@/types'
-  import { onMounted, ref, toValue, watch } from 'vue'
-  import { useAccessRuleStore } from '@/stores'
-  import { useAreaStore } from '@/stores';
-
-  const areaStore = useAreaStore()
+  import type { Area, AreaCreate } from '@/types'
+  import { ref, watch } from 'vue'
 
   const props = defineProps<{
     modelValue: boolean
-    area: Area | null
+    area?: Partial<Area>
   }>()
 
   const tab = ref('dados')
@@ -16,18 +12,19 @@
 
   const emit = defineEmits<{
     (e: 'update:modelValue', value: boolean): void
-    (e: 'save', value: Area): void
+    (e: 'save', value: Area | AreaCreate): void
   }>()
 
   async function salvarArea () {
-    if (props.area) {
+    if (props.area?.id) {
       emit('save', {
-        ...props.area,
+        id: props.area.id,
         name: name.value,
       })
-    }
-    else {
-      emit('save', name.value)
+    } else {
+      emit('save', {
+        name: name.value,
+      })
     }
     closeDialog()
   }
@@ -42,7 +39,7 @@
     () => props.area,
     newArea => {
       if (newArea) {
-        name.value = newArea.name
+        name.value = newArea.name ?? ''
       }
     },
     { immediate: true },

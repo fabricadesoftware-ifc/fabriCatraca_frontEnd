@@ -1,6 +1,7 @@
 <script lang="ts" setup>
   import type { AccessRule } from '@/types'
   import { computed, ref } from 'vue'
+  import { toast } from 'vue3-toastify'
   import portalAccessRulesService from '@/services/portal_access_rules'
   import { useAccessRuleStore } from '@/stores'
   import AccessRuleDialog from './AccessRuleDialog.vue'
@@ -130,9 +131,10 @@
       }
 
       await store.loadAccessRules()
+      toast.success('Regra de acesso salva com sucesso!')
     } catch (error) {
       console.error('Erro ao salvar regra:', error)
-      alert('Erro ao salvar regra')
+      toast.error('Erro ao salvar regra de acesso')
     }
   }
 
@@ -140,7 +142,7 @@
     console.log('Iniciando remoção. Selecionados:', selection.value.selected)
 
     if (!selection.value.selected || selection.value.selected.length === 0) {
-      alert('Nenhuma regra selecionada para remoção')
+      toast.warning('Nenhuma regra selecionada para remoção')
       return
     }
 
@@ -167,7 +169,7 @@
     console.log('Regras válidas:', validRules)
 
     if (validRules.length === 0) {
-      alert('Nenhuma regra válida selecionada para remoção')
+      toast.warning('Nenhuma regra válida selecionada para remoção')
       return
     }
 
@@ -187,9 +189,10 @@
       await Promise.all(ids.map(id => store.deleteAccessRule(id)))
       await store.loadAccessRules()
       selection.value.selected = []
+      toast.success(`${ids.length} regra(s) removida(s) com sucesso!`)
     } catch (error) {
       console.error('Erro ao remover regras:', error)
-      alert('Erro ao remover regras')
+      toast.error('Erro ao remover regras de acesso')
     }
   }
 </script>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-  import type { Area } from '@/types'
+  import type { Area, AreaCreate } from '@/types'
   import { ref } from 'vue'
+  import { toast } from 'vue3-toastify'
   import { useAreaStore } from '@/stores'
-  const selectedArea = ref({})
+  const selectedArea = ref<Partial<Area>>({ id: 0, name: '' })
   const dialog = ref(false)
 
   defineProps<{
@@ -29,7 +30,7 @@
   const selection = ref({
     selected: [] as Area[],
   })
-  async function atualizarArea (area: Partial<Area>) {
+  async function atualizarArea (area: Partial<Area> | Partial<AreaCreate>) {
     await ('id' in area && area.id ? areaStore.updateArea(area.id, area) : areaStore.createArea(area))
   }
 
@@ -50,11 +51,13 @@
         // Recarregar a lista após deletar
         await areaStore.loadAreas()
 
+        const removedCount = validAreas.length
         // Limpar seleção
         selection.value.selected = []
+        toast.success(`${removedCount} área(s) removida(s) com sucesso!`)
       } catch (error) {
         console.error('Erro ao remover grupos:', error)
-        alert('Erro ao remover grupos. Por favor, tente novamente.')
+        toast.error('Erro ao remover áreas. Por favor, tente novamente.')
       }
     }
   }
