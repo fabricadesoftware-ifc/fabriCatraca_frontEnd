@@ -32,11 +32,11 @@
     if (!file.value) return
     try {
       uploading.value = true
-      
+
       // Criar FormData com o arquivo
       const formData = new FormData()
       formData.append('file', file.value)
-      
+
       await importUsersService.importUsers(formData)
       emit('imported')
       close()

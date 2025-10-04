@@ -46,7 +46,7 @@
   function close () {
     emit('update:modelValue', false)
   }
-  
+
   function save () {
     if (!props.rule) return
     emit('save', {
@@ -86,7 +86,7 @@
       const relations = await portalAccessRulesService.getPortalAccessRules({ access_rule_id: ruleId })
       console.log('📥 Relações portal-access_rule do backend:', relations)
       console.log('📥 Results:', relations.results)
-      
+
       const extractedIds = (relations.results || [])
         .map((rel: any) => {
           // Extrai o ID do portal (pode ser objeto ou número)
@@ -95,10 +95,10 @@
           return portalId
         })
         .filter((id: any) => typeof id === 'number' && !Number.isNaN(id))
-      
+
       console.log('✅ IDs de portals extraídos:', extractedIds)
       console.log('📋 Portals disponíveis no store:', portalStore.portals.map(p => ({ id: p.id, name: p.name })))
-      
+
       rulePortals.value = extractedIds
     } catch (error) {
       console.error('Erro ao carregar portals da regra:', error)
@@ -278,5 +278,3 @@
     </v-card>
   </v-dialog>
 </template>
-
-

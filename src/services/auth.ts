@@ -1,9 +1,8 @@
-import type { BaseResponse, getToken } from '@/types'
-import { api } from '@/plugins/api'
-import { usersApi  } from '@/plugins/api'
+import type { BaseResponse, getToken, User } from '@/types'
+import { api, usersApi } from '@/plugins/api'
 
 class AuthService {
-  async getToken(user: getToken): Promise<BaseResponse<getToken>> {
+  async getToken (user: getToken): Promise<BaseResponse<getToken>> {
     try {
       const response = await api.post('token/', user)
       return response.data as BaseResponse<getToken>
@@ -13,7 +12,7 @@ class AuthService {
     }
   }
 
-  async getMe(): Promise<BaseResponse<getToken>> {
+  async getMe (): Promise<BaseResponse<User>> {
     try {
       const accessToken = localStorage.getItem('access_token')
       const response = await usersApi.get('users/me/', {
@@ -21,7 +20,7 @@ class AuthService {
           Authorization: `Bearer ${accessToken}`,
         },
       })
-      return response.data as BaseResponse<getToken>
+      return response.data as BaseResponse<User>
     } catch (error) {
       console.error('❌ Erro ao buscar logs de acesso dos últimos dias:', error)
       throw error

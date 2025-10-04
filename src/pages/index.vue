@@ -14,7 +14,7 @@
     await userStore.loadUsers()
     const acceptResponse = await accessLogStore.returnedLogsByLastDays(10, 7)
     const rejectedResponse = await accessLogStore.returnedLogsByLastDays(10, 6)
-    
+
     // Extrair arrays de results ou usar o próprio valor se já for array
     acces_accept.value = Array.isArray(acceptResponse) ? acceptResponse : (acceptResponse as any)?.results || []
     acces_rejected.value = Array.isArray(rejectedResponse) ? rejectedResponse : (rejectedResponse as any)?.results || []
@@ -71,7 +71,7 @@
   const approvedLogs = computed(() => {
     return Array.isArray(acces_accept.value) ? acces_accept.value : []
   })
-  
+
   const rejectedLogs = computed(() => {
     return Array.isArray(acces_rejected.value) ? acces_rejected.value : []
   })

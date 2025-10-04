@@ -1,7 +1,6 @@
 import type {
   CatraConfig,
   HardwareConfig,
-  MonitorConfig,
   PaginatedResponse,
   PushServerConfig,
   QueryParams,

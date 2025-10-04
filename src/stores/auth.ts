@@ -1,12 +1,12 @@
+import type { getToken, User } from '@/types'
 import { defineStore } from 'pinia'
-import { AuthService } from '@/services'
-import type { getToken } from '@/types'
-import { showMessage } from '@/utils/showmsg'
 import router from '@/router'
+import { AuthService } from '@/services'
+import { showMessage } from '@/utils/showmsg'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    me: [],
+    me: null as User | null,
     access: '' as string,
     refresh: '' as string,
     loading: false as boolean,
@@ -14,16 +14,16 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    user: (state) => state.me,
-    isAuthenticated: (state) => !!state.access,
-    getAccessToken: (state) => state.access,
-    getRefreshToken: (state) => state.refresh,
-    isLoading: (state) => state.loading,
-    getError: (state) => state.error,
+    user: state => state.me,
+    isAuthenticated: state => !!state.access,
+    getAccessToken: state => state.access,
+    getRefreshToken: state => state.refresh,
+    isLoading: state => state.loading,
+    getError: state => state.error,
   },
 
   actions: {
-    async GetToken(user: getToken) {
+    async GetToken (user: getToken) {
       this.loading = true
       try {
         const response = await AuthService.getToken(user)
@@ -35,10 +35,10 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         console.error('Erro ao se logar:', error)
         showMessage('Erro ao se logar, verifique suas credenciais!', 'error', 1500, 'top-right')
-        this.error = error
+        this.error = error instanceof Error ? error.message : String(error)
         throw error
       } finally {
-        if(!this.error){
+        if (!this.error) {
           showMessage('logado com sucesso', 'success', 1500, 'top-right')
           router.push('/')
         }
@@ -46,12 +46,12 @@ export const useAuthStore = defineStore('auth', {
         this.error = null
       }
     },
-    async getMe() {
+    async getMe () {
       this.loading = true
       try {
         const response = await AuthService.getMe()
-        this.me = response
-        console.log('Usuário carregado com sucesso:', response)
+        this.me = response.data
+        console.log('Usuário carregado com sucesso:', response.data)
       } catch (error) {
         console.error('Erro ao carregar usuários:', error)
         throw error
@@ -59,9 +59,9 @@ export const useAuthStore = defineStore('auth', {
         this.loading = false
       }
     },
-    async takeDatas(user: Array) {
-      const values = user.map(u => u.value)
-      const User: Object = {
+    async takeDatas (user: Array<{ value: getToken }>) {
+      const values = user.map((u: { value: any }) => u.value)
+      const User: getToken = {
         email: values[0],
         password: values[1],
       }

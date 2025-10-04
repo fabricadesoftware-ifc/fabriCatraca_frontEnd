@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-  import { useAuthStore } from '@/stores';
-  const authStore = useAuthStore();
+  import type { User } from '@/types'
+  import { useAuthStore } from '@/stores'
+  const authStore = useAuthStore()
   const items = [
     {
       title: 'Home',
@@ -62,7 +63,7 @@
 
   onMounted(async () => {
     await authStore.getMe()
-  });
+  })
 </script>
 <template>
   <v-app>
@@ -171,10 +172,10 @@
 
             <div class="ml-2">
               <div class="text-subtitle-2 font-weight-medium">
-                {{ authStore.user.name }}
+                {{ authStore.user?.name || 'Usuário' }}
               </div>
               <div class="text-caption text-medium-emphasis">
-                {{ authStore.user.registration }}
+                {{ authStore.user?.registration || '' }}
               </div>
             </div>
           </v-card>

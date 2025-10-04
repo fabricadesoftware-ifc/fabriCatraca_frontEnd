@@ -42,7 +42,7 @@
     if (searchTimeout) {
       clearTimeout(searchTimeout)
     }
-    
+
     searchTimeout = setTimeout(() => {
       emit('search-changed', newSearch)
     }, 500)

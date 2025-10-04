@@ -1,4 +1,6 @@
 export interface BaseResponse<T> {
+  refresh: string
+  access: string
   data: T
   message?: string
   status?: number

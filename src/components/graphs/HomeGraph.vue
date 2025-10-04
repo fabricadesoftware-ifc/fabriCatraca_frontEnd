@@ -255,6 +255,7 @@
       console.log('Dados agrupados:', Object.fromEntries(groupedData))
 
       // Ordenar por data/hora
+      // eslint-disable-next-line unicorn/no-array-sort
       const sortedDates = Array.from(groupedData.keys()).slice().sort((a: string, b: string) => {
         // Formato: "dd/MM, HH:mm"
         const [dateA, timeA] = a.split(', ')
