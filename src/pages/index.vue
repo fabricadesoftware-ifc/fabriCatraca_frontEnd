@@ -1,6 +1,5 @@
 <script setup lang="ts">
-  import type { AccessLogs } from '@/types'
-  import { computed } from 'vue'
+  import { computed, onMounted, ref } from 'vue'
   import { useAccessLogStore, useUserStore } from '@/stores'
 
   const accessLogStore = useAccessLogStore()
@@ -13,8 +12,19 @@
   onMounted(async () => {
     await accessLogStore.loadLogs()
     await userStore.loadUsers()
-    acces_accept.value = await accessLogStore.returnedLogsByLastDays(10, 7) as unknown as AccessLogs
-    acces_rejected.value = await accessLogStore.returnedLogsByLastDays(10, 6) as unknown as AccessLogs
+    const acceptResponse = await accessLogStore.returnedLogsByLastDays(10, 7)
+    const rejectedResponse = await accessLogStore.returnedLogsByLastDays(10, 6)
+    
+    // Extrair arrays de results ou usar o próprio valor se já for array
+    acces_accept.value = Array.isArray(acceptResponse) ? acceptResponse : (acceptResponse as any)?.results || []
+    acces_rejected.value = Array.isArray(rejectedResponse) ? rejectedResponse : (rejectedResponse as any)?.results || []
+
+    console.log('📊 Dados do gráfico:', {
+      aprovados: acces_accept.value,
+      negados: acces_rejected.value,
+      totalAprovados: acces_accept.value?.length || 0,
+      totalNegados: acces_rejected.value?.length || 0,
+    })
 
     // Contar os logs
     count_approved.value = (await accessLogStore.returnedTypedLogs(7)).count
@@ -57,18 +67,13 @@
     },
   ])
 
-  // Dados para o gráfico (últimos 30 logs)
+  // Dados para o gráfico
   const approvedLogs = computed(() => {
-    if (acces_accept.value && acces_accept.value) {
-      return acces_accept.value
-    }
-    return []
+    return Array.isArray(acces_accept.value) ? acces_accept.value : []
   })
+  
   const rejectedLogs = computed(() => {
-    if (acces_rejected.value && acces_rejected.value) {
-      return acces_rejected.value
-    }
-    return []
+    return Array.isArray(acces_rejected.value) ? acces_rejected.value : []
   })
 </script>
 

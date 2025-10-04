@@ -161,26 +161,24 @@
   }))
 
   // Gerar intervalo de datas para as últimas 24 horas
-  const generateDateRange = () => {
+  function generateDateRange () {
     const dates = []
     const end = new Date()
     const start = new Date()
-    start.setHours(end.getHours() - 24)
+    start.setUTCHours(end.getUTCHours() - 24)
 
     // Ajusta para o início da hora
-    start.setMinutes(0)
-    start.setSeconds(0)
-    start.setMilliseconds(0)
+    start.setUTCMinutes(0)
+    start.setUTCSeconds(0)
+    start.setUTCMilliseconds(0)
 
     // Gera um ponto a cada hora
-    for (let d = new Date(start); d <= end; d.setHours(d.getHours() + 1)) {
-      const dateStr = d.toLocaleString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-        day: '2-digit',
-        month: '2-digit',
-      })
+    for (let d = new Date(start); d <= end; d.setUTCHours(d.getUTCHours() + 1)) {
+      const day = String(d.getUTCDate()).padStart(2, '0')
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0')
+      const hour = String(d.getUTCHours()).padStart(2, '0')
+      const minute = String(d.getUTCMinutes()).padStart(2, '0')
+      const dateStr = `${day}/${month}, ${hour}:${minute}`
       dates.push(dateStr)
     }
 
@@ -188,14 +186,23 @@
   }
 
   // Processar dados dos logs recebidos via props
-  const processLogData = () => {
+  function processLogData () {
     try {
-      console.log('Processando logs:', {
-        aprovados: props.approvedLogs?.length || 0,
-        negados: props.rejectedLogs?.length || 0,
+      console.log('🔍 Processando logs:', {
+        aprovados: props.approvedLogs,
+        negados: props.rejectedLogs,
+        totalAprovados: props.approvedLogs?.length || 0,
+        totalNegados: props.rejectedLogs?.length || 0,
+        tipoAprovados: typeof props.approvedLogs,
+        tipoNegados: typeof props.rejectedLogs,
       })
 
-      // Inicializar dados com zeros para todas as horas dos últimos 30 dias
+      // Verificar se temos dados válidos
+      if (!Array.isArray(props.approvedLogs) && !Array.isArray(props.rejectedLogs)) {
+        console.warn('⚠️ Nenhum array de logs válido recebido')
+      }
+
+      // Inicializar dados com zeros para todas as horas das últimas 24 horas
       const groupedData = new Map<string, { approved: number, denied: number }>()
 
       // Preencher com zeros para todas as horas
@@ -207,14 +214,11 @@
       if (props.approvedLogs) {
         for (const log of props.approvedLogs) {
           const date = new Date(log.time)
-          const dateTime = date.toLocaleString('pt-BR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-          })
+          const day = String(date.getUTCDate()).padStart(2, '0')
+          const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+          const hour = String(date.getUTCHours()).padStart(2, '0')
+          const minute = String(date.getUTCMinutes()).padStart(2, '0')
+          const dateTime = `${day}/${month}, ${hour}:${minute}`
 
           console.log('Log aprovado:', {
             original: log.time,
@@ -231,14 +235,11 @@
       if (props.rejectedLogs) {
         for (const log of props.rejectedLogs) {
           const date = new Date(log.time)
-          const dateTime = date.toLocaleString('pt-BR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-          })
+          const day = String(date.getUTCDate()).padStart(2, '0')
+          const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+          const hour = String(date.getUTCHours()).padStart(2, '0')
+          const minute = String(date.getUTCMinutes()).padStart(2, '0')
+          const dateTime = `${day}/${month}, ${hour}:${minute}`
 
           console.log('Log negado:', {
             original: log.time,
@@ -254,15 +255,18 @@
       console.log('Dados agrupados:', Object.fromEntries(groupedData))
 
       // Ordenar por data/hora
-      const sortedDates = Array.from(groupedData.keys()).sort((a, b) => {
-        const [dateA, timeA] = a.split(' ')
-        const [dateB, timeB] = b.split(' ')
+      const sortedDates = Array.from(groupedData.keys()).slice().sort((a: string, b: string) => {
+        // Formato: "dd/MM, HH:mm"
+        const [dateA, timeA] = a.split(', ')
+        const [dateB, timeB] = b.split(', ')
 
-        const [dayA, monthA, yearA] = dateA.split('/')
-        const [dayB, monthB, yearB] = dateB.split('/')
+        const [dayA, monthA] = dateA.split('/')
+        const [dayB, monthB] = dateB.split('/')
 
-        const dateStrA = `${yearA}-${monthA}-${dayA}T${timeA}`
-        const dateStrB = `${yearB}-${monthB}-${dayB}T${timeB}`
+        // Assumir ano atual
+        const year = new Date().getUTCFullYear()
+        const dateStrA = `${year}-${monthA}-${dayA}T${timeA}:00Z`
+        const dateStrB = `${year}-${monthB}-${dayB}T${timeB}:00Z`
 
         return new Date(dateStrA).getTime() - new Date(dateStrB).getTime()
       })
@@ -270,8 +274,8 @@
       // Preparar dados para o gráfico
       chartData.value = {
         dates: sortedDates,
-        approved: sortedDates.map(date => groupedData.get(date)?.approved || 0),
-        denied: sortedDates.map(date => groupedData.get(date)?.denied || 0),
+        approved: sortedDates.map((date: string) => groupedData.get(date)?.approved || 0),
+        denied: sortedDates.map((date: string) => groupedData.get(date)?.denied || 0),
       }
 
       updateChart()
@@ -281,14 +285,14 @@
   }
 
   // Atualizar gráfico
-  const updateChart = () => {
+  function updateChart () {
     if (chartInstance) {
       chartInstance.setOption(chartOption.value)
     }
   }
 
   // Inicializar gráfico
-  const initChart = () => {
+  function initChart () {
     if (chartRef.value) {
       chartInstance = echarts.init(chartRef.value, 'light')
       chartInstance.setOption(chartOption.value)
