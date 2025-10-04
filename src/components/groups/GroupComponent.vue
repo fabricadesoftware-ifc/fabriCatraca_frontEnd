@@ -1,6 +1,7 @@
 <script lang="ts" setup>
   import type { AccessRule, Group as BaseGroup } from '@/types'
   import { ref } from 'vue'
+  import { toast } from 'vue3-toastify'
   import groupAccessRulesService from '@/services/group_access_rules'
   import { useGroupStore } from '@/stores'
   import GroupDialog from './GroupDialog.vue'
@@ -95,7 +96,7 @@
       await groupStore.loadGroups()
     } catch (error) {
       console.error('Erro ao salvar grupo:', error)
-      alert('Erro ao salvar grupo. Por favor, tente novamente.')
+      toast.error('Erro ao salvar grupo. Por favor, tente novamente.')
     }
   }
 
@@ -143,7 +144,7 @@
         selection.value.selected = []
       } catch (error) {
         console.error('Erro ao remover grupos:', error)
-        alert('Erro ao remover grupos. Por favor, tente novamente.')
+        toast.error('Erro ao remover grupos. Por favor, tente novamente.')
       }
     }
   }

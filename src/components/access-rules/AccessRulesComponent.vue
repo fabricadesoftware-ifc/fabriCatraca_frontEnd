@@ -1,6 +1,7 @@
 <script lang="ts" setup>
   import type { AccessRule } from '@/types'
-  import { ref, computed } from 'vue'
+  import { computed, ref } from 'vue'
+  import portalAccessRulesService from '@/services/portal_access_rules'
   import { useAccessRuleStore } from '@/stores'
   import AccessRuleDialog from './AccessRuleDialog.vue'
   import GroupScheduleDialog from './GroupScheduleDialog.vue'
@@ -15,24 +16,26 @@
   const selection = ref({ selected: [] as AccessRule[] })
 
   // Watch para debug da seleção
-  watch(() => selection.value.selected, (newSelection) => {
+  watch(() => selection.value.selected, newSelection => {
     console.log('Seleção atualizada:', {
       selecionados: newSelection,
       quantidade: newSelection.length,
-      ids: newSelection.map(item => item.id)
+      ids: newSelection.map(item => item.id),
     })
   }, { deep: true })
 
-  function onSelectionChanged(items: (AccessRule | number)[]) {
+  function onSelectionChanged (items: (AccessRule | number)[]) {
     // Se o item for um número, converte para objeto AccessRule
-    const selectedRules = Array.isArray(items) ? items.map(item => {
-      if (typeof item === 'number') {
-        const rule = rules.find(r => r.id === item)
-        console.log('Convertendo número para regra:', item, rule)
-        return rule
-      }
-      return item
-    }).filter(Boolean) : []
+    const selectedRules = Array.isArray(items)
+      ? items.map(item => {
+        if (typeof item === 'number') {
+          const rule = rules.value.find(r => r.id === item)
+          console.log('Convertendo número para regra:', item, rule)
+          return rule
+        }
+        return item
+      }).filter((rule): rule is AccessRule => rule !== undefined)
+      : []
 
     selection.value.selected = selectedRules
     console.log('Seleção alterada:', selection.value.selected)
@@ -51,6 +54,11 @@
     dialog.value = true
   }
 
+  function showAccessRuleDetails (event: Event, { item }: { item: AccessRule }) {
+    selected.value = item
+    dialog.value = true
+  }
+
   function abrirHorario (rule: AccessRule) {
     selected.value = rule
     scheduleDialog.value = true
@@ -58,11 +66,59 @@
 
   async function salvar (rule: AccessRule) {
     try {
-      rule.id === 0
-        ? await store.createAccessRule({ name: rule.name, type: rule.type, priority: rule.priority })
-        : await store.updateAccessRule(rule.id, { name: rule.name, type: rule.type, priority: rule.priority })
+      const ruleData = {
+        name: rule.name,
+        type: rule.type,
+        priority: rule.priority,
+        areas: rule.areas || [],
+      }
+
+      let savedRule: AccessRule
+      if (rule.id === 0) {
+        const response = await store.createAccessRule(ruleData)
+        savedRule = response
+      } else {
+        savedRule = await store.updateAccessRule(rule.id, ruleData)
+      }
+
+      // Gerenciar portals associados
+      if (rule.portals && savedRule.id) {
+        const portalIds = Array.isArray(rule.portals)
+          ? rule.portals.map(p => typeof p === 'number' ? p : p.id)
+          : []
+
+        // Buscar relações atuais
+        const currentRelations = await portalAccessRulesService.getPortalAccessRules({ access_rule: savedRule.id })
+        const currentPortalIds = (currentRelations.results || [])
+          .filter((rel: any) => ((rel?.access_rule?.id ?? rel?.access_rule) === savedRule.id))
+          .map((rel: any) => ({
+            id: rel.id,
+            portalId: rel?.portal?.id ?? rel?.portal,
+          }))
+
+        // Adicionar novos portals
+        const portalsToAdd = portalIds.filter(
+          portalId => !currentPortalIds.some((rel: any) => rel.portalId === portalId),
+        )
+        for (const portalId of portalsToAdd) {
+          await portalAccessRulesService.createPortalAccessRule({
+            portal: portalId,
+            access_rule: savedRule.id,
+          })
+        }
+
+        // Remover portals desassociados
+        const portalsToRemove = currentPortalIds.filter(
+          (rel: any) => !portalIds.includes(rel.portalId),
+        )
+        for (const rel of portalsToRemove) {
+          await portalAccessRulesService.deletePortalAccessRule(rel.id)
+        }
+      }
+
       await store.loadAccessRules()
-    } catch {
+    } catch (error) {
+      console.error('Erro ao salvar regra:', error)
       alert('Erro ao salvar regra')
     }
   }
@@ -88,7 +144,7 @@
       }
 
       // Se for um objeto, verifica se tem ID válido
-      const isValid = rule && typeof rule.id === 'number' && !isNaN(rule.id)
+      const isValid = rule && typeof rule.id === 'number' && !Number.isNaN(rule.id)
       if (!isValid) {
         console.warn('Regra inválida encontrada:', rule)
       }
@@ -146,10 +202,12 @@
     v-model="selection.selected"
     class="rounded-lg"
     :headers="headers"
+    hover
     item-value="id"
     :items="rules"
     show-select
-    @update:modelValue="onSelectionChanged"
+    @click:row="showAccessRuleDetails"
+    @update:model-value="onSelectionChanged"
   >
     <template #item.actions="{ item }">
       <v-btn

@@ -28,6 +28,11 @@
       to: '/groups',
     },
     {
+      title: 'Entradas e Saidas',
+      icon: 'mdi-login-variant',
+      to: '/portal',
+    },
+    {
       title: 'Dispositivos',
       icon: 'mdi-turnstile',
       to: '/devices',
@@ -52,7 +57,7 @@
       title: 'Configurações',
       icon: 'mdi-cog',
       to: '/config',
-    }
+    },
   ]
 
   onMounted(async () => {

@@ -31,6 +31,7 @@ export interface AccessRule {
   priority: number
   time_zones: TimeZone[] | []
   areas: Area[] | []
+  portals?: Portal[] | number[] | []
 }
 
 export interface AccessRuleTimeZone {
@@ -47,6 +48,12 @@ export interface AccessRuleTimeZoneCreate {
 export interface Area {
   id: number
   name: string
+}
+
+export interface AreaAccessRule {
+  id: number
+  area: Area
+  access_rule: AccessRule
 }
 
 export interface Bio {
@@ -204,4 +211,97 @@ export interface AuthState {
   refresh: string | null
   loading: boolean
   error: Error | null
+}
+
+export interface SystemConfig {
+  id?: number
+  device: number
+  device_name?: string
+  online?: boolean
+  auto_reboot?: boolean
+  catra_timeout?: number
+  local_identification?: boolean
+  exception_mode?: 'none' | 'free' | 'blocked'
+  language?: 'pt_BR' | 'en_US' | 'es_ES'
+  daylight_savings_time_start?: string
+  daylight_savings_time_end?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export interface HardwareConfig {
+  id?: number
+  device: number
+  device_name?: string
+  beep_enabled?: boolean
+  bell_enabled?: boolean
+  bell_relay?: number
+  exception_mode?: boolean
+  siren_enabled?: boolean
+  siren_relay?: number
+  created_at?: string
+  updated_at?: string
+}
+
+export interface SecurityConfig {
+  id?: number
+  device: number
+  device_name?: string
+  verbose_logging?: boolean
+  log_type?: 0 | 1 | 2
+  multi_factor_authentication?: boolean
+  created_at?: string
+  updated_at?: string
+}
+
+export interface UIConfig {
+  id?: number
+  device: number
+  device_name?: string
+  display_brightness?: number
+  display_timeout?: number
+  keyboard_backlight?: boolean
+  welcome_message?: string
+  access_denied_message?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export interface CatraConfig {
+  id?: number
+  device: number
+  device_name?: string
+  anti_passback?: boolean
+  daily_reset?: boolean
+  gateway?: 'clockwise' | 'anticlockwise'
+  operation_mode?: 'blocked' | 'entrance_open' | 'exit_open' | 'both_open'
+  created_at?: string
+  updated_at?: string
+}
+
+export interface PushServerConfig {
+  id?: number
+  device: number
+  device_name?: string
+  push_request_timeout?: number
+  push_request_period?: number
+  push_remote_address?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export interface MonitorConfig {
+  id?: number
+  device: number
+  device_name?: string
+  hostname: string
+  port: string
+  path?: string
+  request_timeout?: number
+  is_configured?: boolean
+  full_url?: string
+  notification_url?: string
+  status?: string
+  created_at?: string
+  updated_at?: string
 }

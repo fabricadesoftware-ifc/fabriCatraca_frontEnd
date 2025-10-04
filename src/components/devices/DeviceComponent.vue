@@ -1,7 +1,9 @@
 <script lang="ts" setup>
   import type { Device } from '@/types'
   import { ref } from 'vue'
+  import { toast } from 'vue3-toastify'
   import { useDeviceStore } from '@/stores'
+  import DeviceConfigDialog from './DeviceConfigDialog.vue'
   import DeviceDialog from './DeviceDialog.vue'
   defineProps<{
     devices: Device[]
@@ -16,13 +18,19 @@
   }>()
 
   const dialog = ref(false)
+  const configDialog = ref(false)
   const selectedDevice = ref<Device | null>(null)
   const creating = ref(false)
   const deviceStore = useDeviceStore()
 
-  const showDeviceDetails = (device: Device) => {
+  function showDeviceDetails (device: Device) {
     selectedDevice.value = device
     dialog.value = true
+  }
+
+  function showDeviceConfig (device: Device) {
+    selectedDevice.value = device
+    configDialog.value = true
   }
 
   function novoDispositivo () {
@@ -52,7 +60,7 @@
         : await deviceStore.updateDevice(device.id, payload)
       await deviceStore.loadDevices()
     } catch {
-      alert('Erro ao salvar dispositivo')
+      toast.error('Erro ao salvar dispositivo')
     } finally {
       creating.value = false
     }
@@ -111,6 +119,18 @@
             class="mr-2"
             color="primary"
             icon
+            size="small"
+            @click.stop="showDeviceConfig(item)"
+          >
+            <v-icon>mdi-cog</v-icon>
+            <v-tooltip activator="parent">
+              Configurações
+            </v-tooltip>
+          </v-btn>
+          <v-btn
+            class="mr-2"
+            color="primary"
+            icon
             :loading="item.updating"
             size="small"
             @click.stop="testConnection(item.id)"
@@ -131,6 +151,11 @@
     @save="salvarDispositivo"
   />
 
+  <DeviceConfigDialog
+    v-model="configDialog"
+    :device="selectedDevice"
+    @saved="deviceStore.loadDevices()"
+  />
 </template>
 
 <style scoped>

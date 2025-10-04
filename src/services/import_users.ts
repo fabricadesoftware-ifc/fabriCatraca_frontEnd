@@ -2,11 +2,19 @@ import { controlIdApi as api } from '@/plugins/api'
 
 class ImportUsersService {
   async importUsers (formData: FormData): Promise<any> {
-    const response = await api.post('/import-users/', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 120_000, // 120 seconds timeout
-    })
-    return response.data
+    try {
+      const response = await api.post('/import_users/', formData, {
+        timeout: 120_000, // 120 seconds timeout
+        headers: {
+          // Explicitamente não definir Content-Type para FormData
+          'Content-Type': undefined,
+        },
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error importing users:', error)
+      throw error
+    }
   }
 }
 

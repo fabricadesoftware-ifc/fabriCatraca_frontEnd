@@ -1,6 +1,7 @@
-<script lang="ts" setup>
+<script setup lang="ts">
   import type { User as BaseUser } from '@/types'
   import { ref, watch } from 'vue'
+  import { toast } from 'vue3-toastify'
   import { useUserStore } from '@/stores'
   import UserDialog from './UserDialog.vue'
 
@@ -104,7 +105,7 @@
       })
     } catch (error) {
       console.error('Erro ao salvar usuário:', error)
-      alert('Erro ao salvar usuário. Por favor, tente novamente.')
+      toast.error('Erro ao salvar usuário. Por favor, tente novamente.')
     }
   }
 
@@ -143,7 +144,7 @@
         selection.value.selected = []
       } catch (error) {
         console.error('Erro ao remover usuários:', error)
-        alert('Erro ao remover usuários. Por favor, tente novamente.')
+        toast.error('Erro ao remover usuários. Por favor, tente novamente.')
       }
     }
   }
