@@ -18,7 +18,7 @@
   }>()
 
   const emit = defineEmits<{
-    (e: 'page-changed' | 'item-per-page', value: number): void
+    (e: 'page-changed' | 'item-per-page' | 'search-changed', value: number | string): void
   }>()
 
   const userStore = useUserStore()
@@ -27,6 +27,8 @@
   const selection = ref({
     selected: [] as User[],
   })
+  const search = ref('')
+  let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
   const headers = [
     { title: 'ID', key: 'id', align: 'start' as const },
@@ -34,6 +36,17 @@
     { title: 'Turma', key: 'user_groups', align: 'start' as const },
     { title: 'Matrícula', key: 'registration', align: 'start' as const },
   ]
+
+  // Watch para debounce na pesquisa (aguarda 500ms após parar de digitar)
+  watch(search, newSearch => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout)
+    }
+    
+    searchTimeout = setTimeout(() => {
+      emit('search-changed', newSearch)
+    }, 500)
+  })
 
   // Debug para verificar se a seleção está funcionando
   watch(() => selection.value.selected, newSelected => {
@@ -211,6 +224,19 @@
       </v-btn>
     </div>
   </div>
+
+  <!-- Campo de pesquisa -->
+  <v-text-field
+    v-model="search"
+    append-inner-icon="mdi-magnify"
+    class="mb-4"
+    clearable
+    density="comfortable"
+    hide-details
+    label="Pesquisar por nome ou matrícula"
+    single-line
+    variant="outlined"
+  />
 
   <v-data-table-server
     v-model="selection.selected"
