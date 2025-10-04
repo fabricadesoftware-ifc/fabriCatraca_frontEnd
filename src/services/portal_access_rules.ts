@@ -12,20 +12,20 @@ class PortalAccessRulesService {
     }
   }
 
-  async getPortalAccessRuleById (id: number): Promise<BaseResponse<PortalAccessRule>> {
+  async getPortalAccessRuleById (id: number): Promise<PortalAccessRule> {
     try {
       const response = await api.get(`/portal_access_rules/${id}/`)
-      return response.data
+      return response.data as PortalAccessRule
     } catch (error) {
       console.error(error)
       throw error
     }
   }
 
-  async createPortalAccessRule (data: Partial<PortalAccessRuleCreate>): Promise<BaseResponse<PortalAccessRule>> {
+  async createPortalAccessRule (data: Partial<PortalAccessRuleCreate>): Promise<PortalAccessRule> {
     try {
       const response = await api.post('/portal_access_rules/', data)
-      return response.data
+      return response.data as PortalAccessRule
     } catch (error) {
       console.error(error)
       throw error

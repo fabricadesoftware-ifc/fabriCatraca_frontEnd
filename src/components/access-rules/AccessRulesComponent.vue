@@ -73,12 +73,25 @@
         areas: rule.areas || [],
       }
 
-      let savedRule: AccessRule
+      let savedRule: AccessRule | undefined
       if (rule.id === 0) {
         const response = await store.createAccessRule(ruleData)
+        console.log('📤 Resposta do createAccessRule:', response)
         savedRule = response
       } else {
-        savedRule = await store.updateAccessRule(rule.id, ruleData)
+        const response = await store.updateAccessRule(rule.id, ruleData)
+        console.log('📤 Resposta do updateAccessRule:', response)
+        savedRule = response
+      }
+
+      console.log('💾 savedRule após salvar:', savedRule)
+
+      // Validação: verificar se savedRule foi retornado corretamente
+      if (!savedRule || !savedRule.id) {
+        console.error('❌ savedRule está undefined ou sem id:', savedRule)
+        console.warn('⚠️ Pulando gerenciamento de portals porque savedRule.id não está disponível')
+        await store.loadAccessRules()
+        return
       }
 
       // Gerenciar portals associados
@@ -88,7 +101,7 @@
           : []
 
         // Buscar relações atuais
-        const currentRelations = await portalAccessRulesService.getPortalAccessRules({ access_rule: savedRule.id })
+        const currentRelations = await portalAccessRulesService.getPortalAccessRules({ access_rule_id: savedRule.id })
         const currentPortalIds = (currentRelations.results || [])
           .filter((rel: any) => ((rel?.access_rule?.id ?? rel?.access_rule) === savedRule.id))
           .map((rel: any) => ({
@@ -102,8 +115,8 @@
         )
         for (const portalId of portalsToAdd) {
           await portalAccessRulesService.createPortalAccessRule({
-            portal: portalId,
-            access_rule: savedRule.id,
+            portal_id: portalId,
+            access_rule_id: savedRule.id,
           })
         }
 

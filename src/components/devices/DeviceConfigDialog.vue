@@ -870,12 +870,40 @@
   }
 
   async function activateMonitor () {
+    // Validação do hostname antes de tentar ativar o monitor
+    const hostname = (monitorForm.hostname || configStore.monitorConfig?.hostname || '').toString().trim()
+    if (!hostname) {
+      // Força exibir a aba do Monitor para que o usuário preencha o hostname
+      tab.value = 'monitor'
+      toast.error('Hostname/IP é obrigatório para ativar o monitor. Forneça o hostname/IP do servidor que receberá as notificações')
+      return
+    }
+
+    // Se a configuração atual no servidor difere do formulário, ou não existe, salva antes de ativar
     try {
-      await configStore.activateMonitor()
+      const current = configStore.monitorConfig
+      const needsSave = !current?.id
+        || (String(current?.hostname ?? '') !== String(monitorForm.hostname ?? ''))
+        || (String(current?.port ?? '') !== String(monitorForm.port ?? ''))
+        || (String(current?.path ?? '') !== String(monitorForm.path ?? ''))
+        || (Number(current?.request_timeout ?? 0) !== Number(monitorForm.request_timeout ?? 0))
+
+      if (needsSave) {
+        if (!props.device?.id) {
+          toast.error('Dispositivo inválido. Não foi possível salvar configuração do monitor.')
+          return
+        }
+        // Reutiliza a função existente para salvar e mostrar toasts
+        await saveMonitorConfig()
+      }
+
+      await configStore.activateMonitor(monitorForm)
       toast.success('Monitor ativado com sucesso!')
     } catch (error) {
       console.error('Erro ao ativar monitor:', error)
-      toast.error('Erro ao ativar monitor')
+      // Tenta extrair mensagem do backend quando disponível
+      const msg = (error && (error as any).response?.data?.error) || (error && (error as any).message) || 'Erro ao ativar monitor'
+      toast.error(msg)
     }
   }
 

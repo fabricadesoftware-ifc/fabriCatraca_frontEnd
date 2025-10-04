@@ -29,9 +29,9 @@ export const useAccessRuleStore = defineStore('accessRule', {
     async createAccessRule (data: Partial<AccessRule>) {
       this.saving = true
       try {
-        const response = await accessRulesService.createAccessRule(data)
-        this.accessRules.push(response.data)
-        return response.data
+        const newRule = await accessRulesService.createAccessRule(data)
+        this.accessRules.push(newRule)
+        return newRule
       } catch (error) {
         console.error('Erro ao criar regra de acesso:', error)
         throw error
@@ -43,12 +43,12 @@ export const useAccessRuleStore = defineStore('accessRule', {
     async updateAccessRule (id: number, data: Partial<AccessRule>) {
       this.saving = true
       try {
-        const response = await accessRulesService.updateAccessRule(id, data)
+        const updatedRule = await accessRulesService.updateAccessRule(id, data)
         const index = this.accessRules.findIndex(r => r.id === id)
         if (index !== -1) {
-          this.accessRules[index] = response.data
+          this.accessRules[index] = updatedRule
         }
-        return response.data
+        return updatedRule
       } catch (error) {
         console.error('Erro ao atualizar regra de acesso:', error)
         throw error

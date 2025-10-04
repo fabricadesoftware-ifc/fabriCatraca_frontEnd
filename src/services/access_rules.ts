@@ -22,20 +22,20 @@ class AccessRulesService {
     }
   }
 
-  async createAccessRule (data: Partial<AccessRule>): Promise<BaseResponse<AccessRule>> {
+  async createAccessRule (data: Partial<AccessRule>): Promise<AccessRule> {
     try {
       const response = await api.post('/access_rules/', data)
-      return response.data as BaseResponse<AccessRule>
+      return response.data as AccessRule
     } catch (error) {
       console.error(error)
       throw error
     }
   }
 
-  async updateAccessRule (id: number, data: Partial<AccessRule>): Promise<BaseResponse<AccessRule>> {
+  async updateAccessRule (id: number, data: Partial<AccessRule>): Promise<AccessRule> {
     try {
       const response = await api.patch(`/access_rules/${id}/`, data)
-      return response.data as BaseResponse<AccessRule>
+      return response.data as AccessRule
     } catch (error) {
       console.error(error)
       throw error

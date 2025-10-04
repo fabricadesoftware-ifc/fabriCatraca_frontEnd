@@ -125,8 +125,8 @@ export interface PortalAccessRule {
 }
 
 export interface PortalAccessRuleCreate {
-  portal: number
-  access_rule: number
+  portal_id: number
+  access_rule_id: number
 }
 
 export interface TimeSpan {

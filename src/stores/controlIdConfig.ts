@@ -168,7 +168,8 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
   }
 
   // Ativar/Desativar Monitor
-  const activateMonitor = async () => {
+  // Agora aceita um payload opcional com dados do monitor (hostname, port, path, request_timeout)
+  const activateMonitor = async (data?: Partial<MonitorConfig>) => {
     if (!monitorConfig.value?.id) {
       return
     }
@@ -176,6 +177,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
     try {
       await ControlIdMonitorService.activateMonitor(
         monitorConfig.value.id,
+        data,
       )
     } catch (error) {
       console.error('Erro ao ativar monitor:', error)

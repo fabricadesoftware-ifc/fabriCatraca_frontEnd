@@ -49,9 +49,10 @@ class ControlIdMonitorService {
     }
   }
 
-  async activateMonitor (id: number): Promise<any> {
+  // Agora aceita um payload opcional com dados do monitor (hostname, port, path, request_timeout)
+  async activateMonitor (id: number, data?: Partial<MonitorConfig>): Promise<any> {
     try {
-      const response = await api.post(`/monitor-configs/${id}/activate/`)
+      const response = await api.post(`/monitor-configs/${id}/activate/`, data ?? {})
       return response.data
     } catch (error) {
       console.error(error)
