@@ -50,8 +50,8 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       try {
         const response = await AuthService.getMe()
-        this.me = response.data
-        console.log('Usuário carregado com sucesso:', response.data)
+        this.me = response
+        console.log('Usuário carregado com sucesso:', response)
       } catch (error) {
         console.error('Erro ao carregar usuários:', error)
         throw error

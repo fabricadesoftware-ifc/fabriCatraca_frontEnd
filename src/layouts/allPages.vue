@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-  import type { User } from '@/types'
   import { useAuthStore } from '@/stores'
   const authStore = useAuthStore()
   const items = [

@@ -12,7 +12,7 @@ class AuthService {
     }
   }
 
-  async getMe (): Promise<BaseResponse<User>> {
+  async getMe (): Promise<User> {
     try {
       const accessToken = localStorage.getItem('access_token')
       const response = await usersApi.get('users/me/', {
@@ -20,7 +20,7 @@ class AuthService {
           Authorization: `Bearer ${accessToken}`,
         },
       })
-      return response.data as BaseResponse<User>
+      return response.data as User
     } catch (error) {
       console.error('❌ Erro ao buscar logs de acesso dos últimos dias:', error)
       throw error
