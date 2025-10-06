@@ -67,7 +67,7 @@
 <template>
   <v-app>
     <v-navigation-drawer
-      border="none"
+      border="false"
       permanent
       width="210"
     >
