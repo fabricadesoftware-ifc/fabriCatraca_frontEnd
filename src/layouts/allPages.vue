@@ -1,6 +1,5 @@
 <script lang="ts" setup>
   import { useAuthStore } from '@/stores'
-  import { showMessage } from '@/utils/showmsg'
   const authStore = useAuthStore()
   const items = [
     {
@@ -76,7 +75,6 @@
             width="40"
           />
         </template>
-        <v-btn @click="showMessage('teste do toastify', 'info', 1000, 'bottom-center')"> teste do toastify</v-btn>
         <v-list-item-title class="text-h6">
           FabriCatraca
         </v-list-item-title>
