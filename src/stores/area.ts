@@ -26,7 +26,7 @@ export const useAreaStore = defineStore('area', {
         this.total_pages = response.total_pages || 1
         this.areas = response.results
       } catch (error) {
-        console.error('Erro ao carregar áreas:', error)
+        console.error(error)
         throw error
       } finally {
         this.loading = false
@@ -40,7 +40,7 @@ export const useAreaStore = defineStore('area', {
         this.areas.push(response.data)
         return response.data
       } catch (error) {
-        console.error('Erro ao criar área:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -58,7 +58,7 @@ export const useAreaStore = defineStore('area', {
         }
         return response.data
       } catch (error) {
-        console.error('Erro ao atualizar área:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -71,7 +71,7 @@ export const useAreaStore = defineStore('area', {
         const response = await AreasService.getAreaById(id)
         return response.data || response
       } catch (error) {
-        console.error('Erro ao buscar área:', error)
+        console.error(error)
         throw error
       }
     },
@@ -82,7 +82,7 @@ export const useAreaStore = defineStore('area', {
         await AreasService.deleteArea(id)
         this.areas = this.areas.filter(a => a.id !== id)
       } catch (error) {
-        console.error('Erro ao excluir área:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false

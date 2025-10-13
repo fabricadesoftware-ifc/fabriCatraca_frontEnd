@@ -49,7 +49,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
       pushServerConfig.value = pushServer.status === 'fulfilled' ? pushServer.value : null
       monitorConfig.value = monitor.status === 'fulfilled' ? monitor.value : null
     } catch (error) {
-      console.error('Erro ao carregar configurações:', error)
+      console.error(error)
       throw error
     } finally {
       loading.value = false
@@ -64,7 +64,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
         ? await ControlIdConfigService.updateSystemConfig(systemConfig.value.id, data)
         : await ControlIdConfigService.createSystemConfig({ ...data, device: deviceId })
     } catch (error) {
-      console.error('Erro ao salvar configuração do sistema:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -79,7 +79,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
         ? await ControlIdConfigService.updateHardwareConfig(hardwareConfig.value.id, data)
         : await ControlIdConfigService.createHardwareConfig({ ...data, device: deviceId })
     } catch (error) {
-      console.error('Erro ao salvar configuração de hardware:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -94,7 +94,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
         ? await ControlIdConfigService.updateSecurityConfig(securityConfig.value.id, data)
         : await ControlIdConfigService.createSecurityConfig({ ...data, device: deviceId })
     } catch (error) {
-      console.error('Erro ao salvar configuração de segurança:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -109,7 +109,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
         ? await ControlIdConfigService.updateUIConfig(uiConfig.value.id, data)
         : await ControlIdConfigService.createUIConfig({ ...data, device: deviceId })
     } catch (error) {
-      console.error('Erro ao salvar configuração de interface:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -124,7 +124,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
         ? await ControlIdConfigService.updateCatraConfig(catraConfig.value.id, data)
         : await ControlIdConfigService.createCatraConfig({ ...data, device: deviceId })
     } catch (error) {
-      console.error('Erro ao salvar configuração da catraca:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -139,7 +139,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
         ? await ControlIdConfigService.updatePushServerConfig(pushServerConfig.value.id, data)
         : await ControlIdConfigService.createPushServerConfig({ ...data, device: deviceId })
     } catch (error) {
-      console.error('Erro ao salvar configuração do servidor push:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -160,7 +160,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
             device: deviceId,
           })
     } catch (error) {
-      console.error('Erro ao salvar configuração de monitor:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -180,7 +180,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
         data,
       )
     } catch (error) {
-      console.error('Erro ao ativar monitor:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -195,7 +195,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
     try {
       await ControlIdMonitorService.deactivateMonitor(monitorConfig.value.id)
     } catch (error) {
-      console.error('Erro ao desativar monitor:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -208,7 +208,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
     try {
       await ControlIdConfigService.syncAll()
     } catch (error) {
-      console.error('Erro ao sincronizar:', error)
+      console.error(error)
       throw error
     } finally {
       syncing.value = false
@@ -223,7 +223,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
     try {
       systemConfig.value = await ControlIdConfigService.syncSystemConfigFromCatraca(systemConfig.value.id)
     } catch (error) {
-      console.error('Erro ao sincronizar configuração da catraca:', error)
+      console.error(error)
       throw error
     } finally {
       syncing.value = false

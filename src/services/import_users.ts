@@ -12,7 +12,7 @@ class ImportUsersService {
       })
       return response.data
     } catch (error) {
-      console.error('Error importing users:', error)
+      console.error(error)
       throw error
     }
   }

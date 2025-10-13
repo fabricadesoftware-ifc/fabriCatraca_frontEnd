@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import type { AccessRule } from '@/types'
-  import { onMounted, reactive, ref } from 'vue'
+  import { onMounted, reactive, ref, watch } from 'vue'
   import { toast } from 'vue3-toastify'
   import accessRuleTimeZonesService from '@/services/access_rule_time_zones'
   import groupAccessRulesService from '@/services/group_access_rules'
@@ -30,7 +30,6 @@
     sat: { enabled: false, start: '07:00', end: '17:00' },
   })
 
-  // eslint-disable-next-line @stylistic/max-statements-per-line
   function close () {
     emit('update:modelValue', false)
   }
@@ -52,10 +51,7 @@
   }
 
   async function loadExistingForGroup (groupId: number) {
-    console.log('Carregando horários para grupo:', groupId)
-
     if (!props.accessRule) {
-      console.warn('Nenhuma regra de acesso selecionada')
       return
     }
 
@@ -72,29 +68,23 @@
       })
 
       if (!groupRules.results?.length) {
-        console.log('Grupo não tem vínculo com esta regra')
         return
       }
 
       // Busca TZ vinculadas à regra
-      console.log('Buscando timezones da regra:', props.accessRule.id)
       const relations = await accessRuleTimeZonesService.getAccessRuleTimeZones({
         access_rule_id: props.accessRule.id,
       })
-      console.log('Relações encontradas:', relations)
 
       const items = relations.results || []
       for (const rel of items) {
         const tzId = (rel?.time_zone as any)?.id ?? (rel as any)?.time_zone_id
         if (!tzId) {
-          console.warn('TimeZone ID não encontrado na relação:', rel)
           continue
         }
 
         // carrega timespans do tz
-        console.log('Buscando timespans da timezone:', tzId)
         const spansResp = await timeSpansService.getTimeSpans({ time_zone: tzId })
-        console.log('Timespans encontrados:', spansResp)
 
         const spans = spansResp.results || []
         for (const ts of spans) {
@@ -111,7 +101,6 @@
           // Habilita todos os dias que estão marcados como true
           for (const { key, val } of map) {
             if (val) {
-              console.log('Configurando horário para:', key)
               schedule[key].enabled = true
               schedule[key].start = secondsToHHMM((ts as any).start)
               schedule[key].end = secondsToHHMM((ts as any).end)
@@ -120,7 +109,7 @@
         }
       }
     } catch (error) {
-      console.error('Erro ao carregar horários:', error)
+      console.error(error)
     }
   }
 
@@ -131,34 +120,161 @@
     }
   }
 
+  async function deleteExistingSchedulesForGroup (groupId: number, ruleId: number) {
+    try {
+      // 1. Busca relações grupo-regra-timezone
+      const relations = await accessRuleTimeZonesService.getAccessRuleTimeZones({
+        access_rule_id: ruleId,
+      })
+
+      // 2. Para cada relação, deletar na ordem reversa (relação → timezone → timespan)
+      for (const rel of relations.results || []) {
+        const relId = (rel as any)?.id
+        const tzId = (rel as any)?.time_zone?.id ?? (rel as any)?.time_zone_id
+
+        if (!tzId) continue
+
+        try {
+          // PRIMEIRO: Deleta relação access_rule_time_zone (desvincula)
+          if (relId) {
+            try {
+              await accessRuleTimeZonesService.deleteAccessRuleTimeZone(relId)
+            } catch (error: any) {
+              if (error?.response?.status === 404) {
+                console.log('  ⚠️ Relação já foi deletada:', relId)
+              } else {
+                console.warn('  ⚠️ Erro ao deletar relação:', error?.message)
+              }
+            }
+          }
+
+          // SEGUNDO: Deleta timespans do timezone
+          const spansResp = await timeSpansService.getTimeSpans({ time_zone: tzId })
+
+          for (const span of spansResp.results || []) {
+            const spanId = (span as any)?.id
+            if (spanId) {
+              try {
+                await timeSpansService.deleteTimeSpan(spanId)
+              } catch (error: any) {
+                if (error?.response?.status === 404) {
+                  console.log('  ⚠️ TimeSpan já foi deletado:', spanId)
+                } else {
+                  console.warn('  ⚠️ Erro ao deletar TimeSpan:', error?.message)
+                }
+              }
+            }
+          }
+
+          // TERCEIRO: Deleta o timezone
+          try {
+            await timeZonesService.deleteTimeZone(tzId)
+          } catch (error: any) {
+            if (error?.response?.status === 404) {
+              console.log('  ⚠️ TimeZone já foi deletado:', tzId)
+            } else {
+              console.warn('  ⚠️ Erro ao deletar TimeZone:', error?.message)
+            }
+          }
+        } catch (error) {
+          // Erro geral nesta relação, continua com as próximas
+          console.warn('  ⚠️ Erro ao processar relação, continuando...', error)
+        }
+      }
+    } catch (error) {
+      console.error(error)
+      // Não propaga o erro - permite que o salvamento continue mesmo com falha na limpeza
+    }
+  }
+
   async function saveSchedule () {
     if (!props.accessRule || !selectedGroupId.value) return
-    saving.value = true
-    try {
-      const groupId = selectedGroupId.value
-      const ruleId = props.accessRule.id
 
+    const groupId = selectedGroupId.value
+    const ruleId = props.accessRule.id
+
+    // Valida horários e coleta dias habilitados
+    const dayOrder: DayKey[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+    const validSchedules: { day: DayKey, start: number, end: number }[] = []
+
+    for (const day of dayOrder) {
+      const cfg = schedule[day]
+      if (!cfg.enabled) continue
+
+      const start = parseHHMMToSeconds(cfg.start)
+      const end = parseHHMMToSeconds(cfg.end)
+
+      // Validação: início deve ser menor que fim
+      if (!(start < end)) {
+        toast.error(`Horário inválido para ${dayLabels[day]}: início (${cfg.start}) deve ser antes do fim (${cfg.end})`)
+        return
+      }
+
+      validSchedules.push({ day, start, end })
+    }
+
+    saving.value = true
+
+    try {
       // Garante vínculo grupo-regra
       await ensureGroupAccessRule(groupId, ruleId)
 
-      // Para cada dia habilitado cria uma TimeZone e um TimeSpan exclusivo daquele dia
-      const dayOrder: DayKey[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
-      for (const day of dayOrder) {
-        const cfg = schedule[day]
-        if (!cfg.enabled) continue
+      // PASSO 1: DELETAR TODOS OS HORÁRIOS EXISTENTES (substituição completa)
+      await deleteExistingSchedulesForGroup(groupId, ruleId)
 
-        const start = parseHHMMToSeconds(cfg.start)
-        const end = parseHHMMToSeconds(cfg.end)
-        if (!(start < end)) continue
+      // Se nenhum dia está habilitado, apenas limpa e sai
+      if (validSchedules.length === 0) {
+        toast.success('Horários removidos com sucesso!')
+        emit('saved')
+        close()
+        return
+      }
+
+      // PASSO 2: AGRUPAR DIAS COM HORÁRIOS IDÊNTICOS (otimização)
+      // Map<"start-end", DayKey[]>
+      const scheduleGroups = new Map<string, DayKey[]>()
+
+      for (const { day, start, end } of validSchedules) {
+        const key = `${start}-${end}`
+        const existing = scheduleGroups.get(key) || []
+        existing.push(day)
+        scheduleGroups.set(key, existing)
+      }
+
+      // PASSO 3: CRIAR UM TIMEZONE/TIMESPAN POR GRUPO DE HORÁRIOS
+      for (const [timeKey, days] of scheduleGroups.entries()) {
+        const [startStr, endStr] = timeKey.split('-')
+        const start = Number.parseInt(startStr)
+        const end = Number.parseInt(endStr)
+
+        // Nome descritivo para o timezone
+        const dayNames = days.map(d => d.toUpperCase()).join('-')
+        const tzName = `G${groupId}-R${ruleId}-${dayNames}-${start}to${end}`
 
         // Cria timezone
-        const tzName = `TZ-${groupId}-${day.toUpperCase()}`
         const tz = await timeZonesService.createTimeZone({ name: tzName })
         const tzId = (tz as any)?.data?.id ?? (tz as any)?.data ?? (tz as any)?.id
 
-        // Cria timespan com flags do dia
-        const flags: Record<DayKey, boolean> = { sun: false, mon: false, tue: false, wed: false, thu: false, fri: false, sat: false }
-        flags[day] = true
+        if (!tzId) {
+          throw new Error('Falha ao criar TimeZone - ID não retornado')
+        }
+
+        // Cria flags para os dias deste grupo
+        const flags: Record<DayKey, boolean> = {
+          sun: false,
+          mon: false,
+          tue: false,
+          wed: false,
+          thu: false,
+          fri: false,
+          sat: false,
+        }
+
+        for (const day of days) {
+          flags[day] = true
+        }
+
+        // Cria timespan com múltiplas flags (otimizado!)
         await timeSpansService.createTimeSpan({
           time_zone: tzId,
           start,
@@ -176,15 +292,18 @@
         })
 
         // Vincula timezone à access rule
-        await accessRuleTimeZonesService.createAccessRuleTimeZone({ access_rule_id: ruleId, time_zone_id: tzId })
+        await accessRuleTimeZonesService.createAccessRuleTimeZone({
+          access_rule_id: ruleId,
+          time_zone_id: tzId,
+        })
       }
 
-      toast.success('Horário salvo com sucesso!')
+      toast.success(`Horários salvos com sucesso! (${validSchedules.length} dia(s) configurado(s))`)
       emit('saved')
       close()
     } catch (error) {
-      console.error('Erro ao salvar horário:', error)
-      toast.error('Erro ao salvar horário. Por favor, tente novamente.')
+      console.error(error)
+      toast.error('Erro ao salvar horários. Por favor, tente novamente.')
     } finally {
       saving.value = false
     }
@@ -209,7 +328,6 @@
         const relations = await groupAccessRulesService.getGroupAccessRules({ access_rule_id: props.accessRule.id })
         const existingGroup = relations.results?.[0]?.group
         if (existingGroup) {
-          console.log('Grupo encontrado:', existingGroup)
           selectedGroupId.value = existingGroup.id
           await loadExistingForGroup(existingGroup.id)
         }

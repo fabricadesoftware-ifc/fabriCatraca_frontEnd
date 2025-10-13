@@ -14,7 +14,7 @@ export const useConfigStore = defineStore('config', {
         await ConfigService.syncData()
         this.lastSyncTime = new Date()
       } catch (error) {
-        console.error('Erro ao sincronizar dados:', error)
+        console.error(error)
         throw error
       } finally {
         this.syncing = false

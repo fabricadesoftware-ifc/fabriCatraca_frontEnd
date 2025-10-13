@@ -30,7 +30,7 @@ export const useGroupStore = defineStore('group', {
         this.total_pages = response.total_pages || 1
         this.groups = response.results.map(group => adaptGroup(group))
       } catch (error) {
-        console.error('Erro ao carregar grupos:', error)
+        console.error(error)
         throw error
       } finally {
         this.loading = false
@@ -44,7 +44,7 @@ export const useGroupStore = defineStore('group', {
         this.groups.push(response.data)
         return response.data
       } catch (error) {
-        console.error('Erro ao criar grupo:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -61,7 +61,7 @@ export const useGroupStore = defineStore('group', {
         }
         return response.data
       } catch (error) {
-        console.error('Erro ao atualizar grupo:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -74,7 +74,7 @@ export const useGroupStore = defineStore('group', {
         await groupsService.deleteGroup(id)
         this.groups = this.groups.filter(g => g.id !== id)
       } catch (error) {
-        console.error('Erro ao excluir grupo:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -93,7 +93,7 @@ export const useGroupStore = defineStore('group', {
           this.selectedGroup = response.data
         }
       } catch (error) {
-        console.error('Erro ao adicionar usuário ao grupo:', error)
+        console.error(error)
         throw error
       } finally {
         this.loadingMembers = false
@@ -109,7 +109,7 @@ export const useGroupStore = defineStore('group', {
           await userGroupsService.deleteUserGroup(response.results[0].id)
         }
       } catch (error) {
-        console.error('Erro ao remover usuário do grupo:', error)
+        console.error(error)
         throw error
       } finally {
         this.loadingMembers = false
@@ -125,7 +125,7 @@ export const useGroupStore = defineStore('group', {
         const response = await groupsService.getGroupById(id)
         return response.data || response
       } catch (error) {
-        console.error('Erro ao buscar grupo:', error)
+        console.error(error)
         throw error
       }
     },
@@ -137,7 +137,7 @@ export const useGroupStore = defineStore('group', {
           access_rule_id: accessRuleId,
         })
       } catch (error) {
-        console.error('Erro ao adicionar regra de acesso ao grupo:', error)
+        console.error(error)
         throw error
       }
     },
@@ -154,7 +154,7 @@ export const useGroupStore = defineStore('group', {
           await groupAccessRulesService.deleteGroupAccessRule(relation.id)
         }
       } catch (error) {
-        console.error('Erro ao remover regra de acesso do grupo:', error)
+        console.error(error)
         throw error
       }
     },

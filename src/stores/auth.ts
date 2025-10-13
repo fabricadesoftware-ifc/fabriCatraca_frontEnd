@@ -31,9 +31,8 @@ export const useAuthStore = defineStore('auth', {
         this.refresh = response.refresh
         localStorage.setItem('access_token', this.access)
         localStorage.setItem('refresh_token', this.refresh)
-        console.log('Token obtido com sucesso:', response)
       } catch (error) {
-        console.error('Erro ao se logar:', error)
+        console.error(error)
         showMessage('Erro ao se logar, verifique suas credenciais!', 'error', 1500, 'top-right')
         this.error = error instanceof Error ? error.message : String(error)
         throw error
@@ -51,9 +50,8 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await AuthService.getMe()
         this.me = response
-        console.log('Usuário carregado com sucesso:', response)
       } catch (error) {
-        console.error('Erro ao carregar usuários:', error)
+        console.error(error)
         throw error
       } finally {
         this.loading = false
@@ -67,6 +65,14 @@ export const useAuthStore = defineStore('auth', {
       }
       await this.GetToken(User)
     },
+    logout () {
+      this.me = null
+      this.access = ''
+      this.refresh = ''
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      router.push('/login')
+      showMessage('Deslogado com sucesso', 'success', 1500, 'top-right')
+    },
   },
-},
-)
+})

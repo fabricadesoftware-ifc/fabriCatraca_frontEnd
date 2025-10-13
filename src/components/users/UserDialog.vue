@@ -14,7 +14,7 @@
   }>()
 
   const userGroups = ref<number[]>([])
-  const setUserGroups = (newGroups: number[]) => {
+  function setUserGroups (newGroups: number[]) {
     userGroups.value = newGroups
   }
 
@@ -64,7 +64,7 @@
     try {
       await groupStore.loadGroups()
     } catch (error) {
-      console.error('Erro ao carregar grupos:', error)
+      console.error(error)
     } finally {
       loading.value = false
     }

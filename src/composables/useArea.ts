@@ -1,8 +1,8 @@
-import { ref } from 'vue'
 import type { Area } from '@/types'
+import { ref } from 'vue'
 import { AreasService } from '@/services'
 
-export function useArea() {
+export function useArea () {
   // Estado
   const areas = ref<Area[]>([])
   const selectedArea = ref<Area | null>(null)
@@ -16,7 +16,7 @@ export function useArea() {
       const response = await AreasService.getAreas()
       areas.value = response.results
     } catch (error) {
-      console.error('Erro ao carregar áreas:', error)
+      console.error(error)
       throw error
     } finally {
       loading.value = false
@@ -30,7 +30,7 @@ export function useArea() {
       await loadAreas()
       return response.data
     } catch (error) {
-      console.error('Erro ao criar área:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -44,7 +44,7 @@ export function useArea() {
       await loadAreas()
       return response.data
     } catch (error) {
-      console.error('Erro ao atualizar área:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -56,7 +56,7 @@ export function useArea() {
       await AreasService.deleteArea(id)
       await loadAreas()
     } catch (error) {
-      console.error('Erro ao excluir área:', error)
+      console.error(error)
       throw error
     }
   }

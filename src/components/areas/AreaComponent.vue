@@ -56,7 +56,7 @@
         selection.value.selected = []
         toast.success(`${removedCount} área(s) removida(s) com sucesso!`)
       } catch (error) {
-        console.error('Erro ao remover grupos:', error)
+        console.error(error)
         toast.error('Erro ao remover áreas. Por favor, tente novamente.')
       }
     }

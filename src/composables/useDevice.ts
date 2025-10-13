@@ -1,9 +1,9 @@
-import { ref } from 'vue'
 import type { Device } from '@/types'
+import { ref } from 'vue'
 import { DeviceService } from '@/services'
 import { useUIState } from './useUIState'
 
-export function useDevice() {
+export function useDevice () {
   // Estado
   const devices = ref<Device[]>([])
   const selectedDevice = ref<Device | null>(null)
@@ -20,7 +20,7 @@ export function useDevice() {
       const response = await DeviceService.getDevices()
       devices.value = response.results.map(device => adaptDevice(device))
     } catch (error) {
-      console.error('Erro ao carregar dispositivos:', error)
+      console.error(error)
       throw error
     } finally {
       loading.value = false
@@ -34,7 +34,7 @@ export function useDevice() {
       await loadDevices()
       return response.data
     } catch (error) {
-      console.error('Erro ao criar dispositivo:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -48,7 +48,7 @@ export function useDevice() {
       await loadDevices()
       return response.data
     } catch (error) {
-      console.error('Erro ao atualizar dispositivo:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -60,7 +60,7 @@ export function useDevice() {
       await DeviceService.deleteDevice(id)
       await loadDevices()
     } catch (error) {
-      console.error('Erro ao excluir dispositivo:', error)
+      console.error(error)
       throw error
     }
   }
@@ -69,7 +69,7 @@ export function useDevice() {
     try {
       await DeviceService.testConnection(id)
     } catch (error) {
-      console.error('Erro ao testar conexão:', error)
+      console.error(error)
       throw error
     }
   }
@@ -81,7 +81,7 @@ export function useDevice() {
       await new Promise(resolve => setTimeout(resolve, 2000))
       await loadDevices()
     } catch (error) {
-      console.error('Erro ao sincronizar dispositivos:', error)
+      console.error(error)
       throw error
     } finally {
       syncing.value = false

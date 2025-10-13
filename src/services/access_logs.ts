@@ -7,7 +7,7 @@ class AccessLogsService {
       const response = await api.get('/access_logs/', { params })
       return response.data as PaginatedResponse<AccessLogs>
     } catch (error) {
-      console.error('❌ Erro ao buscar logs de acesso:', error)
+      console.error(error)
       throw error
     }
   }
@@ -27,7 +27,7 @@ class AccessLogsService {
       const response = await api.get('/access_logs/logs_by_days/', { params })
       return response.data as BaseResponse<AccessLogs>
     } catch (error) {
-      console.error('❌ Erro ao buscar logs de acesso dos últimos dias:', error)
+      console.error(error)
       throw error
     }
   }

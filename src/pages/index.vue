@@ -19,13 +19,6 @@
     acces_accept.value = Array.isArray(acceptResponse) ? acceptResponse : (acceptResponse as any)?.results || []
     acces_rejected.value = Array.isArray(rejectedResponse) ? rejectedResponse : (rejectedResponse as any)?.results || []
 
-    console.log('📊 Dados do gráfico:', {
-      aprovados: acces_accept.value,
-      negados: acces_rejected.value,
-      totalAprovados: acces_accept.value?.length || 0,
-      totalNegados: acces_rejected.value?.length || 0,
-    })
-
     // Contar os logs
     count_approved.value = (await accessLogStore.returnedTypedLogs(7)).count
     count_rejected.value = (await accessLogStore.returnedTypedLogs(6)).count

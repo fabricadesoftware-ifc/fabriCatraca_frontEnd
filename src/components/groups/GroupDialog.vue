@@ -2,7 +2,6 @@
   import type { AccessRule, Group as BaseGroup } from '@/types'
   import { onMounted, ref, watch } from 'vue'
   import exportUsersService from '@/services/export_users'
-  import importUsersService from '@/services/import_users'
   import userGroupsImportService from '@/services/user_groups_import'
   import { useAccessRuleStore } from '@/stores'
 
@@ -36,7 +35,7 @@
   const exportFormat = ref<'csv' | 'xlsx'>('csv')
   const exporting = ref(false)
 
-  const toggleAccessRule = (ruleId: number, value: boolean): void => {
+  function toggleAccessRule (ruleId: number, value: boolean): void {
     const currentRules = [...groupAccessRules.value]
     if (value) {
       if (!currentRules.includes(ruleId)) {

@@ -2,7 +2,7 @@
 
 </script>
 <template>
-Configurações
+  Configurações
 </template>
 
 <style scoped>

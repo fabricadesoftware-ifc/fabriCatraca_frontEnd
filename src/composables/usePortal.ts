@@ -1,9 +1,9 @@
-import { ref } from 'vue'
 import type { Portal } from '@/types'
+import { ref } from 'vue'
 import portalsService from '@/services/portals'
 import { useUIState } from './useUIState'
 
-export function usePortal() {
+export function usePortal () {
   // Estado
   const portals = ref<Portal[]>([])
   const selectedPortal = ref<Portal | null>(null)
@@ -19,7 +19,7 @@ export function usePortal() {
       const response = await portalsService.getPortals()
       portals.value = response.results.map(portal => adaptPortal(portal))
     } catch (error) {
-      console.error('Erro ao carregar portais:', error)
+      console.error(error)
       throw error
     } finally {
       loading.value = false
@@ -33,7 +33,7 @@ export function usePortal() {
       await loadPortals()
       return response.data
     } catch (error) {
-      console.error('Erro ao criar portal:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -47,7 +47,7 @@ export function usePortal() {
       await loadPortals()
       return response.data
     } catch (error) {
-      console.error('Erro ao atualizar portal:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -59,7 +59,7 @@ export function usePortal() {
       await portalsService.deletePortal(id)
       await loadPortals()
     } catch (error) {
-      console.error('Erro ao excluir portal:', error)
+      console.error(error)
       throw error
     }
   }

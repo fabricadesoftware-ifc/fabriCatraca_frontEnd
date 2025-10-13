@@ -1,8 +1,8 @@
+import type { User } from '@/types'
 import { ref } from 'vue'
-import type { User, Device } from '@/types'
 import { UsersService } from '@/services'
 
-export function useUser() {
+export function useUser () {
   // Estado
   const users = ref<User[]>([])
   const selectedUser = ref<User | null>(null)
@@ -16,7 +16,7 @@ export function useUser() {
       const response = await UsersService.getUsers()
       users.value = response.results
     } catch (error) {
-      console.error('Erro ao carregar usuários:', error)
+      console.error(error)
       throw error
     } finally {
       loading.value = false
@@ -30,7 +30,7 @@ export function useUser() {
       await loadUsers()
       return response.data
     } catch (error) {
-      console.error('Erro ao criar usuário:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -44,7 +44,7 @@ export function useUser() {
       await loadUsers()
       return response.data
     } catch (error) {
-      console.error('Erro ao atualizar usuário:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -56,7 +56,7 @@ export function useUser() {
       await UsersService.deleteUser(id)
       await loadUsers()
     } catch (error) {
-      console.error('Erro ao excluir usuário:', error)
+      console.error(error)
       throw error
     }
   }

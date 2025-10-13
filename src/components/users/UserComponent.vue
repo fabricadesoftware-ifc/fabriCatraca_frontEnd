@@ -49,13 +49,6 @@
   })
 
   // Debug para verificar se a seleção está funcionando
-  watch(() => selection.value.selected, newSelected => {
-    console.log('Seleção atualizada:', {
-      items: newSelected,
-      count: newSelected.length,
-      ids: newSelected.map(item => item.id),
-    })
-  }, { deep: true })
 
   async function salvarUsuario (user: User) {
     try {
@@ -118,7 +111,7 @@
       })
       toast.success('Usuário salvo com sucesso!')
     } catch (error) {
-      console.error('Erro ao salvar usuário:', error)
+      console.error(error)
       toast.error('Erro ao salvar usuário. Por favor, tente novamente.')
     }
   }
@@ -133,10 +126,6 @@
     if (selectedItems.length === 0) return
 
     // Debug para verificar os IDs
-    console.log('IDs dos usuários selecionados:', selectedItems.map(user => ({
-      id: user.id,
-      name: user.name,
-    })))
 
     if (confirm(`Remover ${selectedItems.length} usuário(s)?`)) {
       try {
@@ -159,7 +148,7 @@
         selection.value.selected = []
         toast.success(`${removedCount} usuário(s) removido(s) com sucesso!`)
       } catch (error) {
-        console.error('Erro ao remover usuários:', error)
+        console.error(error)
         toast.error('Erro ao remover usuários. Por favor, tente novamente.')
       }
     }

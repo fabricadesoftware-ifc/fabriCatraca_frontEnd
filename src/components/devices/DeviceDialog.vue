@@ -46,7 +46,7 @@
 </script>
 
 <template>
-  <v-dialog :model-value="props.modelValue" max-width="600" @update:model-value="emit('update:modelValue', $event)">
+  <v-dialog max-width="600" :model-value="props.modelValue" @update:model-value="emit('update:modelValue', $event)">
     <v-card>
       <v-card-title class="text-h6">{{ props.device?.id ? 'Editar Dispositivo' : 'Novo Dispositivo' }}</v-card-title>
       <v-card-text>
@@ -54,8 +54,8 @@
         <v-text-field v-model="ip" label="IP (host:porta)" required :rules="[v => !!v || 'Obrigatório']" />
         <v-text-field v-model="username" label="Usuário" />
         <div class="d-flex ga-4 mt-2">
-          <v-switch v-model="is_active" label="Ativo" color="primary" hide-details />
-          <v-switch v-model="is_default" label="Padrão" color="primary" hide-details />
+          <v-switch v-model="is_active" color="primary" hide-details label="Ativo" />
+          <v-switch v-model="is_default" color="primary" hide-details label="Padrão" />
         </div>
       </v-card-text>
       <v-card-actions>
@@ -66,5 +66,3 @@
     </v-card>
   </v-dialog>
 </template>
-
-

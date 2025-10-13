@@ -1,5 +1,6 @@
 <script lang="ts" setup>
   import { useAuthStore } from '@/stores'
+  import { showMessage } from '@/utils/showmsg'
   const authStore = useAuthStore()
   const items = [
     {
@@ -13,24 +14,24 @@
       to: '/users',
     },
     {
-      title: 'Permissões',
-      icon: 'mdi-lock',
-      to: '/access-rules',
-    },
-    {
-      title: 'Areas',
-      icon: 'mdi-map-marker',
-      to: '/areas',
-    },
-    {
       title: 'Grupos',
       icon: 'mdi-account-group',
       to: '/groups',
     },
     {
+      title: 'Regras de Acesso',
+      icon: 'mdi-lock',
+      to: '/access-rules',
+    },
+    {
       title: 'Entradas e Saidas',
       icon: 'mdi-login-variant',
       to: '/portal',
+    },
+    {
+      title: 'Areas',
+      icon: 'mdi-map-marker',
+      to: '/areas',
     },
     {
       title: 'Dispositivos',
@@ -53,11 +54,6 @@
         },
       ],
     },
-    {
-      title: 'Configurações',
-      icon: 'mdi-cog',
-      to: '/config',
-    },
   ]
 
   onMounted(async () => {
@@ -67,8 +63,8 @@
 <template>
   <v-app>
     <v-navigation-drawer
-      border="false"
-      permanent
+      border="none"
+      class="mx-h-1"
       width="210"
     >
       <v-list-item class="pt-6 pb-0 d-flex align-center mb-5">
@@ -80,7 +76,7 @@
             width="40"
           />
         </template>
-
+        <v-btn @click="showMessage('teste do toastify', 'info', 1000, 'bottom-center')"> teste do toastify</v-btn>
         <v-list-item-title class="text-h6">
           FabriCatraca
         </v-list-item-title>
@@ -93,8 +89,7 @@
               :to="item.to"
             >
               <v-icon :icon="item.icon" />
-              <v-title class="pl-3">{{ item.title }}</v-title>
-            </v-list-item>
+              {{ item.title }}</v-list-item>
           </template>
 
           <template v-else>
@@ -105,8 +100,7 @@
                   v-bind="props"
                 >
                   <v-icon :icon="item.icon" />
-                  <v-title class="pl-3">{{ item.title }}</v-title>
-                </v-list-item></template>
+                  {{ item.title }}    </v-list-item></template>
               <v-list-item
                 v-for="(subitem, index) in item?.subitems || []"
                 :key="index"
@@ -114,9 +108,7 @@
                 :to="subitem.to"
               >
                 <v-icon :icon="subitem.icon" />
-                <v-title class="pl-3">{{ subitem.title }}</v-title>
-
-              </v-list-item></v-list-group>
+                {{ subitem.title }}   </v-list-item></v-list-group>
           </template>
         </template>
       </v-list>
@@ -133,14 +125,12 @@
         scroll-threshold="985"
       >
         <v-autocomplete
-          append-inner-icon="mdi-microphone"
           auto-select-first
           class="pt-5"
           density="compact"
           item-props
           :items="items"
           menu-icon=""
-          placeholder="Search Google or type a URL"
           prepend-inner-icon="mdi-magnify"
           rounded="sm"
           style="max-width: 350px;"
@@ -149,32 +139,16 @@
         />
         <v-spacer />
         <v-sheet class="d-flex align-center pr-5" elevation="0">
-          <v-sheet class="d-flex align-center">
-            <v-btn stacked>
-              <v-badge color="error" content="1" location="top right">
-                <v-icon>mdi-email-outline</v-icon>
-              </v-badge>
-            </v-btn>
 
-            <v-btn stacked>
-              <v-badge color="error" dot location="top right">
-                <v-icon>mdi-bell-outline</v-icon>
-              </v-badge>
-            </v-btn>
-          </v-sheet>
           <v-card
             class="d-flex align-center px-3"
             elevation="0"
             rounded="lg"
           >
-            <v-avatar image="https://tse3.mm.bing.net/th/id/OIP.4yQU3p-Cx4P_mLF7QcesFwAAAA?pid=Api&P=0&h=180" size="32" />
 
             <div class="ml-2">
-              <div class="text-subtitle-2 font-weight-medium">
+              <div class="text-subtitle-2 font-weight-medium cursor-pointer" @click="authStore.logout()">
                 {{ authStore.user?.name || 'Usuário' }}
-              </div>
-              <div class="text-caption text-medium-emphasis">
-                {{ authStore.user?.registration || '' }}
               </div>
             </div>
           </v-card>
@@ -185,7 +159,6 @@
         <router-view />
       </v-sheet>
     </v-main>
-
   </v-app>
   <AppFooter />
 </template>

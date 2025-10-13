@@ -19,7 +19,7 @@ export const useAccessRuleStore = defineStore('accessRule', {
         const response = await accessRulesService.getAccessRules()
         this.accessRules = response.results.map(rule => adaptAccessRule(rule))
       } catch (error) {
-        console.error('Erro ao carregar regras de acesso:', error)
+        console.error(error)
         throw error
       } finally {
         this.loading = false
@@ -33,7 +33,7 @@ export const useAccessRuleStore = defineStore('accessRule', {
         this.accessRules.push(newRule)
         return newRule
       } catch (error) {
-        console.error('Erro ao criar regra de acesso:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -50,7 +50,7 @@ export const useAccessRuleStore = defineStore('accessRule', {
         }
         return updatedRule
       } catch (error) {
-        console.error('Erro ao atualizar regra de acesso:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -63,7 +63,7 @@ export const useAccessRuleStore = defineStore('accessRule', {
         await accessRulesService.deleteAccessRule(id)
         this.accessRules = this.accessRules.filter(r => r.id !== id)
       } catch (error) {
-        console.error('Erro ao excluir regra de acesso:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false

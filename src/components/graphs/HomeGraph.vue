@@ -18,8 +18,6 @@
     denied: [] as number[],
   })
 
-  console.log(props)
-
   // Configuração do gráfico
   const chartOption = computed(() => ({
     backgroundColor: '#ffffff',
@@ -188,15 +186,6 @@
   // Processar dados dos logs recebidos via props
   function processLogData () {
     try {
-      console.log('🔍 Processando logs:', {
-        aprovados: props.approvedLogs,
-        negados: props.rejectedLogs,
-        totalAprovados: props.approvedLogs?.length || 0,
-        totalNegados: props.rejectedLogs?.length || 0,
-        tipoAprovados: typeof props.approvedLogs,
-        tipoNegados: typeof props.rejectedLogs,
-      })
-
       // Verificar se temos dados válidos
       if (!Array.isArray(props.approvedLogs) && !Array.isArray(props.rejectedLogs)) {
         console.warn('⚠️ Nenhum array de logs válido recebido')
@@ -220,11 +209,6 @@
           const minute = String(date.getUTCMinutes()).padStart(2, '0')
           const dateTime = `${day}/${month}, ${hour}:${minute}`
 
-          console.log('Log aprovado:', {
-            original: log.time,
-            convertido: dateTime,
-          })
-
           const data = groupedData.get(dateTime) || { approved: 0, denied: 0 }
           data.approved++
           groupedData.set(dateTime, data)
@@ -241,18 +225,11 @@
           const minute = String(date.getUTCMinutes()).padStart(2, '0')
           const dateTime = `${day}/${month}, ${hour}:${minute}`
 
-          console.log('Log negado:', {
-            original: log.time,
-            convertido: dateTime,
-          })
-
           const data = groupedData.get(dateTime) || { approved: 0, denied: 0 }
           data.denied++
           groupedData.set(dateTime, data)
         }
       }
-
-      console.log('Dados agrupados:', Object.fromEntries(groupedData))
 
       // Ordenar por data/hora
       // eslint-disable-next-line unicorn/no-array-sort

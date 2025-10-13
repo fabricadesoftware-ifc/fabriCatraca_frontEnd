@@ -21,7 +21,7 @@ export function useTimeZone () {
       const response = await timeZonesService.getTimeZones()
       timeZones.value = response.results.map(tz => adaptTimeZone(tz))
     } catch (error) {
-      console.error('Erro ao carregar fusos horários:', error)
+      console.error(error)
       throw error
     } finally {
       loading.value = false
@@ -35,7 +35,7 @@ export function useTimeZone () {
       await loadTimeZones()
       return response.data
     } catch (error) {
-      console.error('Erro ao criar fuso horário:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -49,7 +49,7 @@ export function useTimeZone () {
       await loadTimeZones()
       return response.data
     } catch (error) {
-      console.error('Erro ao atualizar fuso horário:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -61,7 +61,7 @@ export function useTimeZone () {
       await timeZonesService.deleteTimeZone(id)
       await loadTimeZones()
     } catch (error) {
-      console.error('Erro ao excluir fuso horário:', error)
+      console.error(error)
       throw error
     }
   }
@@ -76,7 +76,7 @@ export function useTimeZone () {
       }
       return response.data
     } catch (error) {
-      console.error('Erro ao criar período:', error)
+      console.error(error)
       throw error
     } finally {
       loadingTimeSpans.value = false
@@ -93,7 +93,7 @@ export function useTimeZone () {
       }
       return response.data
     } catch (error) {
-      console.error('Erro ao atualizar período:', error)
+      console.error(error)
       throw error
     } finally {
       loadingTimeSpans.value = false
@@ -109,7 +109,7 @@ export function useTimeZone () {
         selectedTimeZone.value = updatedTimeZone.data
       }
     } catch (error) {
-      console.error('Erro ao excluir período:', error)
+      console.error(error)
       throw error
     } finally {
       loadingTimeSpans.value = false

@@ -3,7 +3,7 @@
   import { useGroupStore } from '@/stores'
   import { useExportUserStore } from '@/stores/exportUser'
 
-  const props = defineProps<{
+  defineProps<{
     modelValue: boolean
   }>()
 
@@ -36,7 +36,7 @@
       emit('exported')
       close()
     } catch (error) {
-      console.error('Erro ao exportar:', error)
+      console.error(error)
     } finally {
       loading.value = false
     }

@@ -19,8 +19,14 @@ export default defineConfig({
     port: 3000,
   },
   plugins: [
-    VueRouter({
-      dts: 'src/typed-router.d.ts',
+    Vue({
+      template: { transformAssetUrls },
+    }),
+    Vuetify({
+      autoImport: true,
+      styles: {
+        configFile: 'src/styles/settings.scss',
+      },
     }),
     Layouts(),
     AutoImport({
@@ -37,19 +43,13 @@ export default defineConfig({
       },
       vueTemplate: true,
     }),
+    VueRouter({
+      dts: 'src/typed-router.d.ts',
+    }),
     Components({
       dts: 'src/components.d.ts',
     }),
-    Vue({
-      template: { transformAssetUrls },
-    }),
     // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
-    Vuetify({
-      autoImport: true,
-      styles: {
-        configFile: 'src/styles/settings.scss',
-      },
-    }),
     Fonts({
       fontsource: {
         families: [

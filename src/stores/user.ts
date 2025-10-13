@@ -27,7 +27,7 @@ export const useUserStore = defineStore('user', {
         this.total_pages = response.total_pages || 1
         this.users = response.results
       } catch (error) {
-        console.error('Erro ao carregar usuários:', error)
+        console.error(error)
         throw error
       } finally {
         this.loading = false
@@ -41,7 +41,7 @@ export const useUserStore = defineStore('user', {
         this.users.push(response.data)
         return response.data
       } catch (error) {
-        console.error('Erro ao criar usuário:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -59,7 +59,7 @@ export const useUserStore = defineStore('user', {
         }
         return response.data
       } catch (error) {
-        console.error('Erro ao atualizar usuário:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -73,7 +73,7 @@ export const useUserStore = defineStore('user', {
         await UsersService.deleteUser(id)
         this.users = this.users.filter(u => u.id !== id)
       } catch (error) {
-        console.error('Erro ao excluir usuário:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -86,7 +86,7 @@ export const useUserStore = defineStore('user', {
         // Se a API retorna o usuário diretamente, não dentro de { data: ... }
         return response.data || response
       } catch (error) {
-        console.error('Erro ao buscar usuário:', error)
+        console.error(error)
         throw error
       }
     },
@@ -98,7 +98,7 @@ export const useUserStore = defineStore('user', {
           group: groupId,
         } as any)
       } catch (error) {
-        console.error('Erro ao adicionar usuário ao grupo:', error)
+        console.error(error)
         throw error
       }
     },
@@ -110,7 +110,7 @@ export const useUserStore = defineStore('user', {
           await userGroupsService.deleteUserGroup(response.results[0].id)
         }
       } catch (error) {
-        console.error('Erro ao remover usuário do grupo:', error)
+        console.error(error)
         throw error
       }
     },

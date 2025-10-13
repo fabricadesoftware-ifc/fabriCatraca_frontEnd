@@ -7,7 +7,7 @@ class AuthService {
       const response = await api.post('token/', user)
       return response.data as BaseResponse<getToken>
     } catch (error) {
-      console.error('❌ Erro ao buscar logs de acesso dos últimos dias:', error)
+      console.error(error)
       throw error
     }
   }
@@ -22,7 +22,7 @@ class AuthService {
       })
       return response.data as User
     } catch (error) {
-      console.error('❌ Erro ao buscar logs de acesso dos últimos dias:', error)
+      console.error(error)
       throw error
     }
   }

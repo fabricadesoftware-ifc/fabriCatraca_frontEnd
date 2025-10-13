@@ -7,7 +7,7 @@ export const useExportUserStore = defineStore('exportUser', {
   }),
 
   actions: {
-    async exportUsers(groupId: number, typeFile: 'csv' | 'txt' | 'xlsx') {
+    async exportUsers (groupId: number, typeFile: 'csv' | 'txt' | 'xlsx') {
       this.loading = true
       try {
         const response = await exportUsersService.exportUsers(groupId, typeFile)
@@ -22,16 +22,16 @@ export const useExportUserStore = defineStore('exportUser', {
         const link = document.createElement('a')
         link.href = url
         link.download = `usuarios_grupo_${groupId}.${typeFile}`
-        document.body.appendChild(link)
+        document.body.append(link)
         link.click()
-        document.body.removeChild(link)
+        link.remove()
 
         // Limpar URL
         window.URL.revokeObjectURL(url)
 
         return response
       } catch (error) {
-        console.error('Erro ao exportar usuários:', error)
+        console.error(error)
         throw error
       } finally {
         this.loading = false

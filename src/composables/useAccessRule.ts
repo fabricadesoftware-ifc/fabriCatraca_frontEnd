@@ -1,9 +1,9 @@
-import { ref } from 'vue'
 import type { AccessRule } from '@/types'
+import { ref } from 'vue'
 import accessRulesService from '@/services/access_rules'
 import { useUIState } from './useUIState'
 
-export function useAccessRule() {
+export function useAccessRule () {
   // Estado
   const accessRules = ref<AccessRule[]>([])
   const selectedRule = ref<AccessRule | null>(null)
@@ -19,7 +19,7 @@ export function useAccessRule() {
       const response = await accessRulesService.getAccessRules()
       accessRules.value = response.results.map(rule => adaptAccessRule(rule))
     } catch (error) {
-      console.error('Erro ao carregar regras de acesso:', error)
+      console.error(error)
       throw error
     } finally {
       loading.value = false
@@ -33,7 +33,7 @@ export function useAccessRule() {
       await loadAccessRules()
       return response.data
     } catch (error) {
-      console.error('Erro ao criar regra de acesso:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -47,7 +47,7 @@ export function useAccessRule() {
       await loadAccessRules()
       return response.data
     } catch (error) {
-      console.error('Erro ao atualizar regra de acesso:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -59,7 +59,7 @@ export function useAccessRule() {
       await accessRulesService.deleteAccessRule(id)
       await loadAccessRules()
     } catch (error) {
-      console.error('Erro ao excluir regra de acesso:', error)
+      console.error(error)
       throw error
     }
   }

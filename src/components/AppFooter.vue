@@ -1,8 +1,6 @@
 <template>
   <v-footer
-    app
     height="40"
-    relative
   >
     <a
       v-for="item in items"

@@ -12,7 +12,6 @@
   const selectedDevice = ref<number | null>(null)
   const saving = ref(false)
 
-  // eslint-disable-next-line @stylistic/max-statements-per-line
   async function close () {
     emit('update:modelValue', false)
   }
@@ -26,7 +25,7 @@
       emit('saved')
       await close()
     } catch (error) {
-      console.error('Erro ao cadastrar biometria:', error)
+      console.error(error)
       toast.error('Erro ao cadastrar biometria. Por favor, tente novamente.')
     } finally {
       saving.value = false

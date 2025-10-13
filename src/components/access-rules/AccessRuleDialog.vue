@@ -27,7 +27,6 @@
 
   watch(() => props.rule, async r => {
     if (!r) return
-    console.log('🔄 Watch props.rule disparado:', r)
     name.value = r.name || ''
     type.value = Number(r.type) || 1
     priority.value = Number(r.priority) || 0
@@ -35,9 +34,7 @@
 
     // Carregar portals associados se a regra já existe
     if (r.id && r.id !== 0) {
-      console.log('⏳ Carregando portals para regra ID:', r.id)
       await loadPortalsForRule(r.id)
-      console.log('✅ rulePortals após carregar:', rulePortals.value)
     } else {
       rulePortals.value = []
     }
@@ -84,24 +81,17 @@
     loadingPortals.value = true
     try {
       const relations = await portalAccessRulesService.getPortalAccessRules({ access_rule_id: ruleId })
-      console.log('📥 Relações portal-access_rule do backend:', relations)
-      console.log('📥 Results:', relations.results)
-
       const extractedIds = (relations.results || [])
         .map((rel: any) => {
           // Extrai o ID do portal (pode ser objeto ou número)
           const portalId = typeof rel?.portal === 'object' ? rel?.portal?.id : rel?.portal
-          console.log('  - Relação:', rel, '→ Portal ID extraído:', portalId)
           return portalId
         })
         .filter((id: any) => typeof id === 'number' && !Number.isNaN(id))
 
-      console.log('✅ IDs de portals extraídos:', extractedIds)
-      console.log('📋 Portals disponíveis no store:', portalStore.portals.map(p => ({ id: p.id, name: p.name })))
-
       rulePortals.value = extractedIds
     } catch (error) {
-      console.error('Erro ao carregar portals da regra:', error)
+      console.error(error)
       rulePortals.value = []
     } finally {
       loadingPortals.value = false
@@ -116,7 +106,7 @@
         portalStore.loadPortals(),
       ])
     } catch (error) {
-      console.error('Erro ao carregar dados:', error)
+      console.error(error)
     } finally {
       loading.value = false
     }

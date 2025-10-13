@@ -19,7 +19,7 @@ export const usePortalStore = defineStore('portal', {
         const response = await portalsService.getPortals()
         this.portals = response.results.map(portal => adaptPortal(portal))
       } catch (error) {
-        console.error('Erro ao carregar portais:', error)
+        console.error(error)
         throw error
       } finally {
         this.loading = false
@@ -33,7 +33,7 @@ export const usePortalStore = defineStore('portal', {
         this.portals.push(response.data)
         return response.data
       } catch (error) {
-        console.error('Erro ao criar portal:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -50,7 +50,7 @@ export const usePortalStore = defineStore('portal', {
         }
         return response.data
       } catch (error) {
-        console.error('Erro ao atualizar portal:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -63,7 +63,7 @@ export const usePortalStore = defineStore('portal', {
         await portalsService.deletePortal(id)
         this.portals = this.portals.filter(p => p.id !== id)
       } catch (error) {
-        console.error('Erro ao excluir portal:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -98,4 +98,3 @@ export const usePortalStore = defineStore('portal', {
     },
   },
 })
-

@@ -1,8 +1,8 @@
-import { ref } from 'vue'
 import type { AccessLogs } from '@/types'
+import { ref } from 'vue'
 import { AccessLogsService } from '@/services'
 
-export function useAccessLog() {
+export function useAccessLog () {
   // Estado
   const logs = ref<AccessLogs[]>([])
   const selectedLog = ref<AccessLogs | null>(null)
@@ -29,7 +29,7 @@ export function useAccessLog() {
         updateStats()
       }
     } catch (error) {
-      console.error('Erro ao carregar logs:', error)
+      console.error(error)
       throw error
     } finally {
       loading.value = false
@@ -42,7 +42,7 @@ export function useAccessLog() {
       // TODO: Implementar exportação
       await new Promise(resolve => setTimeout(resolve, 2000))
     } catch (error) {
-      console.error('Erro ao exportar logs:', error)
+      console.error(error)
       throw error
     } finally {
       exporting.value = false

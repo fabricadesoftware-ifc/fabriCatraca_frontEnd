@@ -21,7 +21,7 @@ export const useTimeZoneStore = defineStore('timeZone', {
         const response = await timeZonesService.getTimeZones()
         this.timeZones = response.results.map(tz => adaptTimeZone(tz))
       } catch (error) {
-        console.error('Erro ao carregar fusos horários:', error)
+        console.error(error)
         throw error
       } finally {
         this.loading = false
@@ -35,7 +35,7 @@ export const useTimeZoneStore = defineStore('timeZone', {
         this.timeZones.push(response.data)
         return response.data
       } catch (error) {
-        console.error('Erro ao criar fuso horário:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -52,7 +52,7 @@ export const useTimeZoneStore = defineStore('timeZone', {
         }
         return response.data
       } catch (error) {
-        console.error('Erro ao atualizar fuso horário:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -65,7 +65,7 @@ export const useTimeZoneStore = defineStore('timeZone', {
         await timeZonesService.deleteTimeZone(id)
         this.timeZones = this.timeZones.filter(tz => tz.id !== id)
       } catch (error) {
-        console.error('Erro ao excluir fuso horário:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -82,7 +82,7 @@ export const useTimeZoneStore = defineStore('timeZone', {
         }
         return response.data
       } catch (error) {
-        console.error('Erro ao criar período:', error)
+        console.error(error)
         throw error
       } finally {
         this.loadingTimeSpans = false
@@ -99,7 +99,7 @@ export const useTimeZoneStore = defineStore('timeZone', {
         }
         return response.data
       } catch (error) {
-        console.error('Erro ao atualizar período:', error)
+        console.error(error)
         throw error
       } finally {
         this.loadingTimeSpans = false
@@ -115,7 +115,7 @@ export const useTimeZoneStore = defineStore('timeZone', {
           this.selectedTimeZone = updatedTimeZone.data
         }
       } catch (error) {
-        console.error('Erro ao excluir período:', error)
+        console.error(error)
         throw error
       } finally {
         this.loadingTimeSpans = false
@@ -138,4 +138,3 @@ export const useTimeZoneStore = defineStore('timeZone', {
     },
   },
 })
-

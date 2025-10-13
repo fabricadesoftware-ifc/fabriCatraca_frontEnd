@@ -27,6 +27,7 @@ export interface QueryParams {
 }
 
 export interface AccessRule {
+  data: any
   id: number
   name: string
   type: number

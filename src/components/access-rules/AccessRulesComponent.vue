@@ -16,22 +16,12 @@
   const selected = ref<AccessRule | null>(null)
   const selection = ref({ selected: [] as AccessRule[] })
 
-  // Watch para debug da seleção
-  watch(() => selection.value.selected, newSelection => {
-    console.log('Seleção atualizada:', {
-      selecionados: newSelection,
-      quantidade: newSelection.length,
-      ids: newSelection.map(item => item.id),
-    })
-  }, { deep: true })
-
   function onSelectionChanged (items: (AccessRule | number)[]) {
     // Se o item for um número, converte para objeto AccessRule
     const selectedRules = Array.isArray(items)
       ? items.map(item => {
         if (typeof item === 'number') {
           const rule = rules.value.find(r => r.id === item)
-          console.log('Convertendo número para regra:', item, rule)
           return rule
         }
         return item
@@ -39,7 +29,7 @@
       : []
 
     selection.value.selected = selectedRules
-    console.log('Seleção alterada:', selection.value.selected)
+    console.log(selection.value.selected)
   }
 
   const headers = [
@@ -77,11 +67,11 @@
       let savedRule: AccessRule | undefined
       if (rule.id === 0) {
         const response = await store.createAccessRule(ruleData)
-        console.log('📤 Resposta do createAccessRule:', response)
+        console.log(response)
         savedRule = response
       } else {
         const response = await store.updateAccessRule(rule.id, ruleData)
-        console.log('📤 Resposta do updateAccessRule:', response)
+        console.log(response)
         savedRule = response
       }
 
@@ -133,14 +123,12 @@
       await store.loadAccessRules()
       toast.success('Regra de acesso salva com sucesso!')
     } catch (error) {
-      console.error('Erro ao salvar regra:', error)
+      console.error(error)
       toast.error('Erro ao salvar regra de acesso')
     }
   }
 
   async function removerSelecionadas () {
-    console.log('Iniciando remoção. Selecionados:', selection.value.selected)
-
     if (!selection.value.selected || selection.value.selected.length === 0) {
       toast.warning('Nenhuma regra selecionada para remoção')
       return
@@ -152,7 +140,6 @@
       if (typeof rule === 'number') {
         const foundRule = rules.value.find(r => r.id === rule)
         if (!foundRule) {
-          console.warn('Regra não encontrada para ID:', rule)
           return false
         }
         return true
@@ -165,8 +152,6 @@
       }
       return isValid
     })
-
-    console.log('Regras válidas:', validRules)
 
     if (validRules.length === 0) {
       toast.warning('Nenhuma regra válida selecionada para remoção')
@@ -181,8 +166,6 @@
       return rule.id
     })
 
-    console.log('IDs para remover:', ids)
-
     if (!confirm(`Remover ${ids.length} regra(s)?`)) return
 
     try {
@@ -191,7 +174,7 @@
       selection.value.selected = []
       toast.success(`${ids.length} regra(s) removida(s) com sucesso!`)
     } catch (error) {
-      console.error('Erro ao remover regras:', error)
+      console.error(error)
       toast.error('Erro ao remover regras de acesso')
     }
   }

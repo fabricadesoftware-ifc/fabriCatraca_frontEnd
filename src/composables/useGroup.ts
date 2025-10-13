@@ -1,10 +1,10 @@
-import { ref } from 'vue'
 import type { Group, User } from '@/types'
+import { ref } from 'vue'
 import groupsService from '@/services/groups'
-import { useUIState } from './useUIState'
 import userGroupsService from '@/services/user_groups'
+import { useUIState } from './useUIState'
 
-export function useGroup() {
+export function useGroup () {
   // Estado
   const groups = ref<Group[]>([])
   const selectedGroup = ref<Group | null>(null)
@@ -21,7 +21,7 @@ export function useGroup() {
       const response = await groupsService.getGroups()
       groups.value = response.results.map(group => adaptGroup(group))
     } catch (error) {
-      console.error('Erro ao carregar grupos:', error)
+      console.error(error)
       throw error
     } finally {
       loading.value = false
@@ -35,7 +35,7 @@ export function useGroup() {
       await loadGroups()
       return response.data
     } catch (error) {
-      console.error('Erro ao criar grupo:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -49,7 +49,7 @@ export function useGroup() {
       await loadGroups()
       return response.data
     } catch (error) {
-      console.error('Erro ao atualizar grupo:', error)
+      console.error(error)
       throw error
     } finally {
       saving.value = false
@@ -61,7 +61,7 @@ export function useGroup() {
       await groupsService.deleteGroup(id)
       await loadGroups()
     } catch (error) {
-      console.error('Erro ao excluir grupo:', error)
+      console.error(error)
       throw error
     }
   }
@@ -78,7 +78,7 @@ export function useGroup() {
         selectedGroup.value = response.data
       }
     } catch (error) {
-      console.error('Erro ao adicionar usuário ao grupo:', error)
+      console.error(error)
       throw error
     } finally {
       loadingMembers.value = false
@@ -94,7 +94,7 @@ export function useGroup() {
         selectedGroup.value = response.data
       }
     } catch (error) {
-      console.error('Erro ao remover usuário do grupo:', error)
+      console.error(error)
       throw error
     } finally {
       loadingMembers.value = false

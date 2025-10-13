@@ -30,7 +30,7 @@ export const useAccessLogStore = defineStore('accessLog', {
           this.updateStats()
         }
       } catch (error) {
-        console.error('Erro ao carregar logs:', error)
+        console.error(error)
         throw error
       } finally {
         this.loading = false
@@ -43,7 +43,7 @@ export const useAccessLogStore = defineStore('accessLog', {
         // TODO: Implementar exportação
         await new Promise(resolve => setTimeout(resolve, 2000))
       } catch (error) {
-        console.error('Erro ao exportar logs:', error)
+        console.error(error)
         throw error
       } finally {
         this.exporting = false
@@ -120,6 +120,6 @@ export const useAccessLogStore = defineStore('accessLog', {
       const response = await AccessLogsService.getAccessLogByLastDays(params)
       console.log(response)
       return response
-    }
+    },
   },
 })

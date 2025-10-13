@@ -28,7 +28,7 @@ export const useDeviceStore = defineStore('device', {
         this.current_page = response.current_page
         this.total_pages = response.total_pages
       } catch (error) {
-        console.error('Erro ao carregar dispositivos:', error)
+        console.error(error)
         throw error
       } finally {
         this.loading = false
@@ -42,7 +42,7 @@ export const useDeviceStore = defineStore('device', {
         this.devices.push(response.data)
         return response.data
       } catch (error) {
-        console.error('Erro ao criar dispositivo:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -59,7 +59,7 @@ export const useDeviceStore = defineStore('device', {
         }
         return response.data
       } catch (error) {
-        console.error('Erro ao atualizar dispositivo:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -72,7 +72,7 @@ export const useDeviceStore = defineStore('device', {
         await DeviceService.deleteDevice(id)
         this.devices = this.devices.filter(d => d.id !== id)
       } catch (error) {
-        console.error('Erro ao excluir dispositivo:', error)
+        console.error(error)
         throw error
       } finally {
         this.saving = false
@@ -87,7 +87,7 @@ export const useDeviceStore = defineStore('device', {
         if (device) {
           device.status = 'offline'
         }
-        console.error('Erro ao testar conexão:', error)
+        console.error(error)
         throw error
       }
     },
@@ -98,7 +98,7 @@ export const useDeviceStore = defineStore('device', {
         await ConfigService.syncData()
         await this.loadDevices()
       } catch (error) {
-        console.error('Erro ao sincronizar dispositivos:', error)
+        console.error(error)
         throw error
       } finally {
         this.syncing = false

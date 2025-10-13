@@ -1,4 +1,3 @@
-/* eslint-disable import/no-duplicates */
 /**
  * router/index.ts
  *
@@ -9,7 +8,6 @@ import { setupLayouts } from 'virtual:generated-layouts'
 // Composables
 import { createRouter, createWebHistory } from 'vue-router/auto'
 import { routes } from 'vue-router/auto-routes'
-import { includes } from 'vuetify/lib/util/helpers.mjs'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

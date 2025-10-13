@@ -1,14 +1,14 @@
-import { toast } from "vue3-toastify";
+import { toast, type ToastPosition, type ToastType } from 'vue3-toastify'
 
-export function showMessage(
+export function showMessage (
   message: string,
-  type: string,
+  type: ToastType,
   duration: number,
-  position: string,
+  position: ToastPosition,
 ) {
   toast(message, {
     type,
     autoClose: duration,
-    position: position,
-  });
+    position,
+  })
 }
