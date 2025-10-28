@@ -1,194 +1,89 @@
-# Sistema de Controle de Acesso Escolar
+<div id="top" class="">
 
-Sistema completo para gerenciamento de controle de acesso em instituições educacionais, desenvolvido com Vue 3, TypeScript e Vuetify.
+<div align="center" class="text-center">
+<h1>FABRICATRACA_FRONTEND</h1>
+<p><em>Seamless Access, Empowered Security, Limitless Possibilities</em></p>
 
-## 🚀 Funcionalidades
-
-### Painel Administrativo
-- **Dashboard**: Visão geral com estatísticas em tempo real
-- **Gerenciamento de Usuários**: CRUD completo para alunos e funcionários
-- **Controle de Catracas**: Configuração e monitoramento de dispositivos
-- **Gestão de Áreas**: Definição de zonas de acesso
-- **Logs de Acesso**: Histórico detalhado com filtros avançados
-- **Regras de Acesso**: Configuração de permissões e políticas
-- **Horários**: Definição de janelas de acesso
-- **Portais**: Gerenciamento de pontos de acesso
-
-### Características Técnicas
-- ✅ **Vue 3 Composition API** com TypeScript
-- ✅ **Vuetify 3** para interface moderna e responsiva
-- ✅ **Pinia** para gerenciamento de estado
-- ✅ **Vue Router** com roteamento automático
-- ✅ **Axios** para comunicação com API
-- ✅ **Validação de formulários** integrada
-- ✅ **Design responsivo** para tablets e smartphones
-
-## 📁 Estrutura do Projeto
-
-```
-src/
-├── components/          # Componentes reutilizáveis
-├── pages/              # Páginas da aplicação
-│   ├── index.vue       # Página inicial
-│   └── admin/          # Páginas administrativas
-│       ├── index.vue   # Dashboard
-│       ├── users.vue   # Gerenciamento de usuários
-│       ├── devices.vue # Gerenciamento de catracas
-│       ├── areas.vue   # Gerenciamento de áreas
-│       └── access-logs.vue # Logs de acesso
-├── layouts/            # Layouts da aplicação
-│   ├── default.vue     # Layout padrão
-│   └── admin.vue       # Layout administrativo
-├── services/           # Serviços de API (TypeScript)
-├── types/              # Definições de tipos TypeScript
-├── stores/             # Stores Pinia
-└── plugins/            # Plugins (Vuetify, Axios)
-```
-
-## 🛠️ Instalação e Configuração
-
-### Pré-requisitos
-- Node.js 18+ 
-- npm, yarn ou pnpm
-
-### Instalação
-```bash
-# Instalar dependências
-npm install
-
-# Executar em modo desenvolvimento
-npm run dev
-
-# Build para produção
-npm run build
-
-# Verificação de tipos TypeScript
-npm run type-check
-```
-
-### Variáveis de Ambiente
-Crie um arquivo `.env` na raiz do projeto:
-
-```env
-VITE_API_URL=http://localhost:8000/api
-```
-
-## 🎯 Uso da Interface
-
-### 1. Página Inicial
-- Acesse a aplicação e veja as opções disponíveis
-- Clique em "Painel Administrativo" para acessar o sistema
-
-### 2. Dashboard Administrativo
-- **Cards de Status**: Visualize estatísticas em tempo real
-- **Navegação Rápida**: Acesso direto às principais funcionalidades
-- **Últimos Acessos**: Monitoramento dos eventos recentes
-
-### 3. Gerenciamento de Usuários
-- **Listagem**: Visualize todos os usuários cadastrados
-- **Filtros**: Busque por nome, tipo de usuário ou status
-- **CRUD**: Crie, edite e exclua usuários
-- **Associação**: Vincule usuários a dispositivos de acesso
-
-### 4. Controle de Catracas
-- **Status**: Monitore dispositivos online/offline
-- **Configuração**: Configure IP, usuário e parâmetros
-- **Teste**: Teste conectividade com dispositivos
-- **Sincronização**: Sincronize dados com catracas
-
-### 5. Logs de Acesso
-- **Filtros Avançados**: Filtre por data, usuário, dispositivo, tipo de evento
-- **Estatísticas**: Visualize resumos de acessos concedidos/negados
-- **Detalhes**: Veja informações completas de cada evento
-- **Exportação**: Exporte logs para análise
-
-## 🔧 Desenvolvimento
-
-### Adicionando Novas Páginas
-1. Crie o arquivo em `src/pages/admin/`
-2. Use o layout administrativo automaticamente
-3. Adicione a rota no menu do layout
-
-### Adicionando Novos Serviços
-1. Crie o serviço em `src/services/`
-2. Defina os tipos em `src/types/`
-3. Importe e use nos componentes
-
-### Padrões de Código
-- Use **Composition API** com `<script setup>`
-- Implemente **validação de formulários**
-- Use **TypeScript** para tipagem
-- Siga os **padrões do Vuetify**
-
-## 📊 API Integration
-
-O sistema está preparado para integrar com APIs REST que retornem dados no formato:
-
-```typescript
-// Resposta paginada
-{
-  count: number,
-  next: string | null,
-  previous: string | null,
-  results: T[]
-}
-
-// Resposta individual
-{
-  data: T,
-  message?: string,
-  status?: number
-}
-```
-
-## 🎨 Personalização
-
-### Temas
-- O sistema suporta temas claro/escuro
-- Personalize cores no arquivo `src/plugins/vuetify.ts`
-
-### Componentes
-- Todos os componentes são customizáveis
-- Use as variáveis CSS do Vuetify para consistência
-
-## 📱 Responsividade
-
-A interface é totalmente responsiva e funciona em:
-- ✅ Desktop
-- ✅ Tablet
-- ✅ Smartphone
-
-## 🔒 Segurança
-
-- Validação de formulários no frontend
-- Sanitização de dados
-- Controle de acesso por rotas
-- Logs de auditoria
-
-## 🚀 Deploy
-
-### Build para Produção
-```bash
-npm run build
-```
-
-### Servidor de Produção
-```bash
-npm run preview
-```
-
-## 📝 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie uma branch para sua feature
-3. Commit suas mudanças
-4. Push para a branch
-5. Abra um Pull Request
-
----
-
-Desenvolvido com ❤️ para instituições educacionais
+<img alt="last-commit" src="https://img.shields.io/github/last-commit/fabricadesoftware-ifc/fabriCatraca_frontEnd?style=flat&amp;logo=git&amp;logoColor=white&amp;color=0080ff" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="repo-top-language" src="https://img.shields.io/github/languages/top/fabricadesoftware-ifc/fabriCatraca_frontEnd?style=flat&amp;color=0080ff" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="repo-language-count" src="https://img.shields.io/github/languages/count/fabricadesoftware-ifc/fabriCatraca_frontEnd?style=flat&amp;color=0080ff" class="inline-block mx-1" style="margin: 0px 2px;">
+<p><em>Built with the tools and technologies:</em></p>
+<img alt="JSON" src="https://img.shields.io/badge/JSON-000000.svg?style=flat&amp;logo=JSON&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="Markdown" src="https://img.shields.io/badge/Markdown-000000.svg?style=flat&amp;logo=Markdown&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="npm" src="https://img.shields.io/badge/npm-CB3837.svg?style=flat&amp;logo=npm&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="JavaScript" src="https://img.shields.io/badge/JavaScript-F7DF1E.svg?style=flat&amp;logo=JavaScript&amp;logoColor=black" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="Vue.js" src="https://img.shields.io/badge/Vue.js-4FC08D.svg?style=flat&amp;logo=vuedotjs&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<br>
+<img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6.svg?style=flat&amp;logo=TypeScript&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="Vuetify" src="https://img.shields.io/badge/Vuetify-1867C0.svg?style=flat&amp;logo=Vuetify&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="Vite" src="https://img.shields.io/badge/Vite-646CFF.svg?style=flat&amp;logo=Vite&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="ESLint" src="https://img.shields.io/badge/ESLint-4B32C3.svg?style=flat&amp;logo=ESLint&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="Axios" src="https://img.shields.io/badge/Axios-5A29E4.svg?style=flat&amp;logo=Axios&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+</div>
+<br>
+<hr>
+<h2>Table of Contents</h2>
+<ul class="list-disc pl-4 my-0">
+<li class="my-0"><a href="#overview">Overview</a></li>
+<li class="my-0"><a href="#getting-started">Getting Started</a>
+<ul class="list-disc pl-4 my-0">
+<li class="my-0"><a href="#prerequisites">Prerequisites</a></li>
+<li class="my-0"><a href="#installation">Installation</a></li>
+<li class="my-0"><a href="#usage">Usage</a></li>
+<li class="my-0"><a href="#testing">Testing</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>Overview</h2>
+<p>fabriCatraca_frontEnd is a modern, Vue.js-based frontend application tailored for managing access control systems, including turnstile configurations, user management, and real-time monitoring. Built with TypeScript, Vuetify, and Vite, it offers a scalable and maintainable architecture for security-focused projects.</p>
+<p><strong>Why fabriCatraca_frontEnd?</strong></p>
+<p>This project simplifies the development of secure access control solutions. The core features include:</p>
+<ul class="list-disc pl-4 my-0">
+<li class="my-0">🛠️ <strong>API Configuration Management:</strong> Centralized API documentation and interfaces for seamless system customization.</li>
+<li class="my-0">🎨 <strong>Component-Based UI:</strong> Modular Vue components for managing users, devices, portals, and access rules.</li>
+<li class="my-0">🚦 <strong>Real-Time Monitoring:</strong> Access logs, statistics, and device status updates for proactive security oversight.</li>
+<li class="my-0">🔗 <strong>Backend Integration:</strong> Robust service layer for consistent, secure communication with backend APIs.</li>
+<li class="my-0">⚙️ <strong>Scalable Architecture:</strong> TypeScript, Pinia, and Vite ensure a maintainable and high-performance frontend environment.</li>
+</ul>
+<hr>
+<h2>Getting Started</h2>
+<h3>Prerequisites</h3>
+<p>This project requires the following dependencies:</p>
+<ul class="list-disc pl-4 my-0">
+<li class="my-0"><strong>Programming Language:</strong> TypeScript</li>
+<li class="my-0"><strong>Package Manager:</strong> Npm</li>
+</ul>
+<h3>Installation</h3>
+<p>Build fabriCatraca_frontEnd from the source and install dependencies:</p>
+<ol>
+<li class="my-0">
+<p><strong>Clone the repository:</strong></p>
+<pre><code class="language-sh">❯ git clone https://github.com/fabricadesoftware-ifc/fabriCatraca_frontEnd
+</code></pre>
+</li>
+<li class="my-0">
+<p><strong>Navigate to the project directory:</strong></p>
+<pre><code class="language-sh">❯ cd fabriCatraca_frontEnd
+</code></pre>
+</li>
+<li class="my-0">
+<p><strong>Install the dependencies:</strong></p>
+</li>
+</ol>
+<p><strong>Using <a href="https://www.npmjs.com/">npm</a>:</strong></p>
+<pre><code class="language-sh">❯ npm install
+</code></pre>
+<h3>Usage</h3>
+<p>Run the project with:</p>
+<p><strong>Using <a href="https://www.npmjs.com/">npm</a>:</strong></p>
+<pre><code class="language-sh">npm start
+</code></pre>
+<h3>Testing</h3>
+<p>Fabricatraca_frontend uses the {<strong>test_framework</strong>} test framework. Run the test suite with:</p>
+<p><strong>Using <a href="https://www.npmjs.com/">npm</a>:</strong></p>
+<pre><code class="language-sh">npm test
+</code></pre>
+<hr>
+<div align="left" class=""><a href="#top">⬆ Return</a></div>
+<hr></div>
