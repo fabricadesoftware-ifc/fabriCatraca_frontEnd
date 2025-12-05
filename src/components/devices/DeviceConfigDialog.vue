@@ -24,7 +24,15 @@
   }>()
 
   const configStore = useControlIdConfigStore()
-  const { systemConfig, hardwareConfig, securityConfig, uiConfig, catraConfig, pushServerConfig, monitorConfig } = storeToRefs(configStore)
+  const {
+    systemConfig,
+    hardwareConfig,
+    securityConfig,
+    uiConfig,
+    catraConfig,
+    pushServerConfig,
+    monitorConfig,
+  } = storeToRefs(configStore)
 
   const tab = ref('system')
 
@@ -42,11 +50,14 @@
     activateMonitor,
   } = useDeviceConfig(props.device)
 
-  watch(() => props.modelValue, async isOpen => {
-    if (isOpen && props.device) {
-      await loadConfigs()
-    }
-  })
+  watch(
+    () => props.modelValue,
+    async isOpen => {
+      if (isOpen && props.device) {
+        await loadConfigs()
+      }
+    },
+  )
 
   async function handleSaveSystem (data: any) {
     await saveSystemConfig(data)
@@ -83,14 +94,8 @@
     emit('saved')
   }
 
-  async function handleActivateMonitor () {
-    const monitorData = {
-      hostname: monitorConfig.value?.hostname || '',
-      port: monitorConfig.value?.port || '8000',
-      path: monitorConfig.value?.path || '',
-      request_timeout: monitorConfig.value?.request_timeout || 5000,
-    }
-    await activateMonitor(monitorData)
+  async function handleActivateMonitor (formData: any) {
+    await activateMonitor(formData)
   }
 
   function close () {
@@ -108,16 +113,10 @@
     <v-card>
       <v-card-title class="d-flex align-center justify-space-between">
         <span class="text-h5">
-          <v-icon class="mr-2">
-            mdi-cog
-          </v-icon>
+          <v-icon class="mr-2"> mdi-cog </v-icon>
           Configurações da Catraca
         </span>
-        <v-btn
-          icon="mdi-close"
-          variant="text"
-          @click="close"
-        />
+        <v-btn icon="mdi-close" variant="text" @click="close" />
       </v-card-title>
 
       <v-card-subtitle v-if="device">
@@ -126,48 +125,34 @@
 
       <v-divider />
 
-      <v-card-text style="max-height: 70vh; overflow-y: auto;">
+      <v-card-text style="max-height: 70vh; overflow-y: auto">
         <v-tabs v-model="tab" color="primary">
           <v-tab value="system">
-            <v-icon class="mr-2">
-              mdi-application-cog
-            </v-icon>
+            <v-icon class="mr-2"> mdi-application-cog </v-icon>
             Sistema
           </v-tab>
           <v-tab value="hardware">
-            <v-icon class="mr-2">
-              mdi-chip
-            </v-icon>
+            <v-icon class="mr-2"> mdi-chip </v-icon>
             Hardware
           </v-tab>
           <v-tab value="security">
-            <v-icon class="mr-2">
-              mdi-shield-lock
-            </v-icon>
+            <v-icon class="mr-2"> mdi-shield-lock </v-icon>
             Segurança
           </v-tab>
           <v-tab value="ui">
-            <v-icon class="mr-2">
-              mdi-monitor
-            </v-icon>
+            <v-icon class="mr-2"> mdi-monitor </v-icon>
             Interface
           </v-tab>
           <v-tab value="catra">
-            <v-icon class="mr-2">
-              mdi-turnstile
-            </v-icon>
+            <v-icon class="mr-2"> mdi-turnstile </v-icon>
             Catraca
           </v-tab>
           <v-tab value="push">
-            <v-icon class="mr-2">
-              mdi-server-network
-            </v-icon>
+            <v-icon class="mr-2"> mdi-server-network </v-icon>
             Push Server
           </v-tab>
           <v-tab value="monitor">
-            <v-icon class="mr-2">
-              mdi-monitor-eye
-            </v-icon>
+            <v-icon class="mr-2"> mdi-monitor-eye </v-icon>
             Monitor
           </v-tab>
         </v-tabs>

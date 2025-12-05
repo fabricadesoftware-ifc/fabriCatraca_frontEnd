@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AccessLogsComponent: typeof import('./components/logs/AccessLogsComponent.vue')['default']
     AccessRuleDialog: typeof import('./components/access-rules/AccessRuleDialog.vue')['default']
     AccessRulesComponent: typeof import('./components/access-rules/AccessRulesComponent.vue')['default']
     AppFooter: typeof import('./components/AppFooter.vue')['default']

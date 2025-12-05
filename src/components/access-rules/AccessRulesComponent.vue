@@ -19,13 +19,15 @@
   function onSelectionChanged (items: (AccessRule | number)[]) {
     // Se o item for um número, converte para objeto AccessRule
     const selectedRules = Array.isArray(items)
-      ? items.map(item => {
-        if (typeof item === 'number') {
-          const rule = rules.value.find(r => r.id === item)
-          return rule
-        }
-        return item
-      }).filter((rule): rule is AccessRule => rule !== undefined)
+      ? items
+        .map(item => {
+          if (typeof item === 'number') {
+            const rule = rules.value.find(r => r.id === item)
+            return rule
+          }
+          return item
+        })
+        .filter((rule): rule is AccessRule => rule !== undefined)
       : []
 
     selection.value.selected = selectedRules
@@ -41,7 +43,14 @@
   ]
 
   function novo () {
-    selected.value = { id: 0, name: '', type: 1, priority: 1, time_zones: [], areas: [] } as unknown as AccessRule
+    selected.value = {
+      id: 0,
+      name: '',
+      type: 1,
+      priority: 1,
+      time_zones: [],
+      areas: [],
+    } as unknown as AccessRule
     dialog.value = true
   }
 
@@ -80,7 +89,9 @@
       // Validação: verificar se savedRule foi retornado corretamente
       if (!savedRule || !savedRule.id) {
         console.error('❌ savedRule está undefined ou sem id:', savedRule)
-        console.warn('⚠️ Pulando gerenciamento de portals porque savedRule.id não está disponível')
+        console.warn(
+          '⚠️ Pulando gerenciamento de portals porque savedRule.id não está disponível',
+        )
         await store.loadAccessRules()
         return
       }
@@ -88,13 +99,19 @@
       // Gerenciar portals associados
       if (rule.portals && savedRule.id) {
         const portalIds = Array.isArray(rule.portals)
-          ? rule.portals.map(p => typeof p === 'number' ? p : p.id)
+          ? rule.portals.map(p => (typeof p === 'number' ? p : p.id))
           : []
 
         // Buscar relações atuais
-        const currentRelations = await portalAccessRulesService.getPortalAccessRules({ access_rule_id: savedRule.id })
+        const currentRelations
+          = await portalAccessRulesService.getPortalAccessRules({
+            access_rule_id: savedRule.id,
+          })
         const currentPortalIds = (currentRelations.results || [])
-          .filter((rel: any) => ((rel?.access_rule?.id ?? rel?.access_rule) === savedRule.id))
+          .filter(
+            (rel: any) =>
+              (rel?.access_rule?.id ?? rel?.access_rule) === savedRule.id,
+          )
           .map((rel: any) => ({
             id: rel.id,
             portalId: rel?.portal?.id ?? rel?.portal,
@@ -102,7 +119,8 @@
 
         // Adicionar novos portals
         const portalsToAdd = portalIds.filter(
-          portalId => !currentPortalIds.some((rel: any) => rel.portalId === portalId),
+          portalId =>
+            !currentPortalIds.some((rel: any) => rel.portalId === portalId),
         )
         for (const portalId of portalsToAdd) {
           await portalAccessRulesService.createPortalAccessRule({
@@ -146,7 +164,8 @@
       }
 
       // Se for um objeto, verifica se tem ID válido
-      const isValid = rule && typeof rule.id === 'number' && !Number.isNaN(rule.id)
+      const isValid
+        = rule && typeof rule.id === 'number' && !Number.isNaN(rule.id)
       if (!isValid) {
         console.warn('Regra inválida encontrada:', rule)
       }
@@ -193,7 +212,11 @@
       >
         Remover Selecionadas
       </v-btn>
-      <v-btn color="primary" prepend-icon="mdi-plus" @click="novo">Adicionar Regra</v-btn>
+      <v-btn
+        color="primary"
+        prepend-icon="mdi-plus"
+        @click="novo"
+      >Adicionar Regra</v-btn>
     </div>
   </div>
 
@@ -213,7 +236,7 @@
         color="primary"
         size="small"
         variant="text"
-        @click="abrirHorario(item)"
+        @click.stop="abrirHorario(item)"
       >
         Horários por Turma
       </v-btn>
@@ -221,5 +244,9 @@
   </v-data-table>
 
   <AccessRuleDialog v-model="dialog" :rule="selected" @save="salvar" />
-  <GroupScheduleDialog v-model="scheduleDialog" :access-rule="selected" @saved="store.loadAccessRules()" />
+  <GroupScheduleDialog
+    v-model="scheduleDialog"
+    :access-rule="selected"
+    @saved="store.loadAccessRules()"
+  />
 </template>

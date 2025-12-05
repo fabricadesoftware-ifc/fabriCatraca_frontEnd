@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import type { MonitorConfig } from '@/types'
-  import { computed } from 'vue'
+  import { reactive, watch } from 'vue'
 
   const props = defineProps<{
     config: MonitorConfig | null
@@ -10,25 +10,36 @@
 
   const emit = defineEmits<{
     (e: 'save', config: Partial<MonitorConfig>): void
-    (e: 'activate'): void
+    (e: 'activate', config: Partial<MonitorConfig>): void
   }>()
 
-  const form = computed({
-    get: () => ({
-      hostname: props.config?.hostname ?? '',
-      port: props.config?.port ?? '8000',
-      path: props.config?.path ?? 'api/control_id_monitor/notifications/dao',
-      request_timeout: props.config?.request_timeout ?? 5000,
-    }),
-    set: () => {},
+  const form = reactive({
+    hostname: '',
+    port: '8000',
+    path: 'api/control_id_monitor/notifications/dao',
+    request_timeout: 5000,
   })
 
+  // Sincroniza form quando config mudar (ex: ao carregar dados da API)
+  watch(
+    () => props.config,
+    newConfig => {
+      if (newConfig) {
+        form.hostname = newConfig.hostname ?? ''
+        form.port = newConfig.port ?? '8000'
+        form.path = newConfig.path ?? 'api/control_id_monitor/notifications/dao'
+        form.request_timeout = newConfig.request_timeout ?? 5000
+      }
+    },
+    { immediate: true },
+  )
+
   function handleSave () {
-    emit('save', form.value)
+    emit('save', { ...form })
   }
 
   function handleActivate () {
-    emit('activate')
+    emit('activate', { ...form })
   }
 </script>
 
@@ -83,12 +94,7 @@
 
     <v-row>
       <v-col cols="12" md="6">
-        <v-btn
-          block
-          color="primary"
-          :loading="saving"
-          @click="handleSave"
-        >
+        <v-btn block color="primary" :loading="saving" @click="handleSave">
           Salvar Configurações
         </v-btn>
       </v-col>

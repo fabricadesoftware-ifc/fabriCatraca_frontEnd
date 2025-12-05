@@ -38,6 +38,11 @@
       to: '/devices',
     },
     {
+      title: 'Logs de Acesso',
+      icon: 'mdi-clipboard-text-clock',
+      to: '/logs',
+    },
+    {
       title: 'Dados',
       icon: 'mdi-database',
       subitems: [
@@ -61,11 +66,7 @@
 </script>
 <template>
   <v-app>
-    <v-navigation-drawer
-      border="none"
-      class="mx-h-1"
-      width="210"
-    >
+    <v-navigation-drawer border="none" class="mx-h-1" width="210">
       <v-list-item class="pt-6 pb-0 d-flex align-center mb-5">
         <template #prepend>
           <v-img
@@ -75,17 +76,13 @@
             width="40"
           />
         </template>
-        <v-list-item-title class="text-h6">
-          FabriCatraca
-        </v-list-item-title>
+        <v-list-item-title class="text-h6"> FabriCatraca </v-list-item-title>
       </v-list-item>
       <v-list density="compact" nav>
         <template v-for="item in items" :key="item.title">
           <template v-if="!item?.subitems">
             <!-- Item pai sem subitens -->
-            <v-list-item
-              :to="item.to"
-            >
+            <v-list-item :to="item.to">
               <v-icon :icon="item.icon" />
               {{ item.title }}</v-list-item>
           </template>
@@ -94,11 +91,10 @@
             <!-- Item com subitens -->
             <v-list-group>
               <template #activator="{ props }">
-                <v-list-item
-                  v-bind="props"
-                >
+                <v-list-item v-bind="props">
                   <v-icon :icon="item.icon" />
-                  {{ item.title }}    </v-list-item></template>
+                  {{ item.title }}
+                </v-list-item></template>
               <v-list-item
                 v-for="(subitem, index) in item?.subitems || []"
                 :key="index"
@@ -106,11 +102,11 @@
                 :to="subitem.to"
               >
                 <v-icon :icon="subitem.icon" />
-                {{ subitem.title }}   </v-list-item></v-list-group>
+                {{ subitem.title }}
+              </v-list-item></v-list-group>
           </template>
         </template>
       </v-list>
-
     </v-navigation-drawer>
 
     <v-main class="bg-surface rounded-lg">
@@ -131,29 +127,29 @@
           menu-icon=""
           prepend-inner-icon="mdi-magnify"
           rounded="sm"
-          style="max-width: 350px;"
+          style="max-width: 350px"
           theme="dark"
           variant="solo-filled"
         />
         <v-spacer />
         <v-sheet class="d-flex align-center pr-5" elevation="0">
-
-          <v-card
-            class="d-flex align-center px-3"
-            elevation="0"
-            rounded="lg"
-          >
-
+          <v-card class="d-flex align-center px-3" elevation="0" rounded="lg">
             <div class="ml-2">
-              <div class="text-subtitle-2 font-weight-medium cursor-pointer" @click="authStore.logout()">
-                {{ authStore.user?.name || 'Usuário' }}
+              <div
+                class="text-subtitle-2 font-weight-medium cursor-pointer"
+                @click="authStore.logout()"
+              >
+                {{ authStore.user?.name || "Usuário" }}
               </div>
             </div>
           </v-card>
         </v-sheet>
       </v-app-bar>
 
-      <v-sheet class="mr-8 rounded-lg" style="background-color: #EFF5F9; color: #000;">
+      <v-sheet
+        class="mr-8 rounded-lg"
+        style="background-color: #eff5f9; color: #000"
+      >
         <router-view />
       </v-sheet>
     </v-main>
