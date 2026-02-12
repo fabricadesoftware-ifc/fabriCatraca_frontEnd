@@ -40,6 +40,7 @@
       name: '',
       ip: '',
       username: '',
+      password: '',
       is_active: true,
       is_default: false,
     } as Device
@@ -52,6 +53,7 @@
         name: device.name,
         ip: device.ip,
         username: device.username,
+        ...(device.id === 0 || device.password ? { password: device.password } : {}),
         is_active: device.is_active,
         is_default: device.is_default,
       }

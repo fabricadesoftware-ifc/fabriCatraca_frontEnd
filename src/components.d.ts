@@ -37,6 +37,7 @@ declare module 'vue' {
     SecurityConfigTab: typeof import('./components/devices/config-tabs/SecurityConfigTab.vue')['default']
     SystemConfigTab: typeof import('./components/devices/config-tabs/SystemConfigTab.vue')['default']
     UIConfigTab: typeof import('./components/devices/config-tabs/UIConfigTab.vue')['default']
+    UserAccessLogsPanel: typeof import('./components/users/UserAccessLogsPanel.vue')['default']
     UserBioPanel: typeof import('./components/users/UserBioPanel.vue')['default']
     UserComponent: typeof import('./components/users/UserComponent.vue')['default']
     UserDialog: typeof import('./components/users/UserDialog.vue')['default']

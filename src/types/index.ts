@@ -90,6 +90,7 @@ export interface Device {
   name: string
   ip: string
   username: string
+  password?: string
   is_active: boolean
   is_default: boolean
   status?: string
