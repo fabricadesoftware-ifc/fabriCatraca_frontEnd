@@ -48,7 +48,7 @@
     savePushServerConfig,
     saveMonitorConfig,
     activateMonitor,
-  } = useDeviceConfig(props.device)
+  } = useDeviceConfig(() => props.device)
 
   watch(
     () => props.modelValue,

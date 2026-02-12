@@ -42,12 +42,16 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
         ])
 
       systemConfig.value = system.status === 'fulfilled' ? system.value : null
-      hardwareConfig.value = hardware.status === 'fulfilled' ? hardware.value : null
-      securityConfig.value = security.status === 'fulfilled' ? security.value : null
+      hardwareConfig.value
+        = hardware.status === 'fulfilled' ? hardware.value : null
+      securityConfig.value
+        = security.status === 'fulfilled' ? security.value : null
       uiConfig.value = ui.status === 'fulfilled' ? ui.value : null
       catraConfig.value = catra.status === 'fulfilled' ? catra.value : null
-      pushServerConfig.value = pushServer.status === 'fulfilled' ? pushServer.value : null
-      monitorConfig.value = monitor.status === 'fulfilled' ? monitor.value : null
+      pushServerConfig.value
+        = pushServer.status === 'fulfilled' ? pushServer.value : null
+      monitorConfig.value
+        = monitor.status === 'fulfilled' ? monitor.value : null
     } catch (error) {
       console.error(error)
       throw error
@@ -57,12 +61,21 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
   }
 
   // System Config
-  const saveSystemConfig = async (deviceId: number, data: Partial<SystemConfig>) => {
+  const saveSystemConfig = async (
+    deviceId: number,
+    data: Partial<SystemConfig>,
+  ) => {
     saving.value = true
     try {
       systemConfig.value = systemConfig.value?.id
-        ? await ControlIdConfigService.updateSystemConfig(systemConfig.value.id, data)
-        : await ControlIdConfigService.createSystemConfig({ ...data, device: deviceId })
+        ? await ControlIdConfigService.updateSystemConfig(
+            systemConfig.value.id,
+            data,
+          )
+        : await ControlIdConfigService.createSystemConfig({
+            ...data,
+            device: deviceId,
+          })
     } catch (error) {
       console.error(error)
       throw error
@@ -72,12 +85,21 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
   }
 
   // Hardware Config
-  const saveHardwareConfig = async (deviceId: number, data: Partial<HardwareConfig>) => {
+  const saveHardwareConfig = async (
+    deviceId: number,
+    data: Partial<HardwareConfig>,
+  ) => {
     saving.value = true
     try {
       hardwareConfig.value = hardwareConfig.value?.id
-        ? await ControlIdConfigService.updateHardwareConfig(hardwareConfig.value.id, data)
-        : await ControlIdConfigService.createHardwareConfig({ ...data, device: deviceId })
+        ? await ControlIdConfigService.updateHardwareConfig(
+            hardwareConfig.value.id,
+            data,
+          )
+        : await ControlIdConfigService.createHardwareConfig({
+            ...data,
+            device: deviceId,
+          })
     } catch (error) {
       console.error(error)
       throw error
@@ -87,12 +109,21 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
   }
 
   // Security Config
-  const saveSecurityConfig = async (deviceId: number, data: Partial<SecurityConfig>) => {
+  const saveSecurityConfig = async (
+    deviceId: number,
+    data: Partial<SecurityConfig>,
+  ) => {
     saving.value = true
     try {
       securityConfig.value = securityConfig.value?.id
-        ? await ControlIdConfigService.updateSecurityConfig(securityConfig.value.id, data)
-        : await ControlIdConfigService.createSecurityConfig({ ...data, device: deviceId })
+        ? await ControlIdConfigService.updateSecurityConfig(
+            securityConfig.value.id,
+            data,
+          )
+        : await ControlIdConfigService.createSecurityConfig({
+            ...data,
+            device: deviceId,
+          })
     } catch (error) {
       console.error(error)
       throw error
@@ -107,7 +138,10 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
     try {
       uiConfig.value = uiConfig.value?.id
         ? await ControlIdConfigService.updateUIConfig(uiConfig.value.id, data)
-        : await ControlIdConfigService.createUIConfig({ ...data, device: deviceId })
+        : await ControlIdConfigService.createUIConfig({
+            ...data,
+            device: deviceId,
+          })
     } catch (error) {
       console.error(error)
       throw error
@@ -117,12 +151,21 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
   }
 
   // Catra Config
-  const saveCatraConfig = async (deviceId: number, data: Partial<CatraConfig>) => {
+  const saveCatraConfig = async (
+    deviceId: number,
+    data: Partial<CatraConfig>,
+  ) => {
     saving.value = true
     try {
       catraConfig.value = catraConfig.value?.id
-        ? await ControlIdConfigService.updateCatraConfig(catraConfig.value.id, data)
-        : await ControlIdConfigService.createCatraConfig({ ...data, device: deviceId })
+        ? await ControlIdConfigService.updateCatraConfig(
+            catraConfig.value.id,
+            data,
+          )
+        : await ControlIdConfigService.createCatraConfig({
+            ...data,
+            device: deviceId,
+          })
     } catch (error) {
       console.error(error)
       throw error
@@ -132,12 +175,21 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
   }
 
   // Push Server Config
-  const savePushServerConfig = async (deviceId: number, data: Partial<PushServerConfig>) => {
+  const savePushServerConfig = async (
+    deviceId: number,
+    data: Partial<PushServerConfig>,
+  ) => {
     saving.value = true
     try {
       pushServerConfig.value = pushServerConfig.value?.id
-        ? await ControlIdConfigService.updatePushServerConfig(pushServerConfig.value.id, data)
-        : await ControlIdConfigService.createPushServerConfig({ ...data, device: deviceId })
+        ? await ControlIdConfigService.updatePushServerConfig(
+            pushServerConfig.value.id,
+            data,
+          )
+        : await ControlIdConfigService.createPushServerConfig({
+            ...data,
+            device: deviceId,
+          })
     } catch (error) {
       console.error(error)
       throw error
@@ -147,7 +199,10 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
   }
 
   // Monitor Config
-  const saveMonitorConfig = async (deviceId: number, data: Partial<MonitorConfig>) => {
+  const saveMonitorConfig = async (
+    deviceId: number,
+    data: Partial<MonitorConfig>,
+  ) => {
     saving.value = true
     try {
       monitorConfig.value = monitorConfig.value?.id
@@ -171,7 +226,9 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
   // Agora aceita um payload opcional com dados do monitor (hostname, port, path, request_timeout)
   const activateMonitor = async (data?: Partial<MonitorConfig>) => {
     if (!monitorConfig.value?.id) {
-      return
+      throw new Error(
+        'Configuração do monitor não encontrada. Salve a configuração antes de ativar.',
+      )
     }
     saving.value = true
     try {
@@ -189,7 +246,7 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
 
   const deactivateMonitor = async () => {
     if (!monitorConfig.value?.id) {
-      return
+      throw new Error('Configuração do monitor não encontrada.')
     }
     saving.value = true
     try {
@@ -221,7 +278,10 @@ export const useControlIdConfigStore = defineStore('controlIdConfig', () => {
     }
     syncing.value = true
     try {
-      systemConfig.value = await ControlIdConfigService.syncSystemConfigFromCatraca(systemConfig.value.id)
+      systemConfig.value
+        = await ControlIdConfigService.syncSystemConfigFromCatraca(
+          systemConfig.value.id,
+        )
     } catch (error) {
       console.error(error)
       throw error

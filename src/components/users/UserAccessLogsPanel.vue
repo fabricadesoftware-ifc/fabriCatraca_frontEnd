@@ -45,17 +45,37 @@
       }
     }
 
-    if (log.portal) {
-      // Se o portal tem area_to, o usuário está "entrando" em area_to
-      if (log.portal.area_to) {
+    if (log.portal && typeof log.portal === 'object') {
+      const portal = log.portal as unknown as Record<string, unknown>
+      if (portal.area_to) {
         return { label: 'Entrada', color: 'success', icon: 'mdi-login' }
       }
-      if (log.portal.area_from) {
+      if (portal.area_from) {
         return { label: 'Saída', color: 'info', icon: 'mdi-logout' }
       }
     }
 
     return { label: 'Acesso', color: 'success', icon: 'mdi-door-open' }
+  }
+
+  function getDeviceName (log: AccessLogs): string {
+    const raw = log as unknown as Record<string, unknown>
+    if (raw.device_name) return String(raw.device_name)
+    if (log.device && typeof log.device === 'object') {
+      const d = log.device as unknown as Record<string, unknown>
+      return String(d.name || d.ip || '')
+    }
+    return ''
+  }
+
+  function getPortalName (log: AccessLogs): string {
+    const raw = log as unknown as Record<string, unknown>
+    if (raw.portal_name) return String(raw.portal_name)
+    if (log.portal && typeof log.portal === 'object') {
+      const p = log.portal as unknown as Record<string, unknown>
+      return String(p.name || '')
+    }
+    return ''
   }
 
   async function loadUserLogs () {
@@ -142,16 +162,16 @@
 
       <!-- Coluna Portal -->
       <template #item.portal="{ item }">
-        <span v-if="item.portal" class="text-body-2">
-          {{ item.portal.name }}
+        <span v-if="getPortalName(item)" class="text-body-2">
+          {{ getPortalName(item) }}
         </span>
         <span v-else class="text-grey text-body-2">—</span>
       </template>
 
       <!-- Coluna Dispositivo -->
       <template #item.device="{ item }">
-        <span v-if="item.device" class="text-body-2">
-          {{ item.device.name }}
+        <span v-if="getDeviceName(item)" class="text-body-2">
+          {{ getDeviceName(item) }}
         </span>
         <span v-else class="text-grey text-body-2">—</span>
       </template>

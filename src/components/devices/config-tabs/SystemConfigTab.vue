@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import type { SystemConfig } from '@/types'
-  import { computed } from 'vue'
+  import { reactive, watch } from 'vue'
 
   const props = defineProps<{
     config: SystemConfig | null
@@ -11,17 +11,29 @@
     (e: 'save', config: Partial<SystemConfig>): void
   }>()
 
-  const form = computed({
-    get: () => ({
-      online: props.config?.online ?? true,
-      auto_reboot: props.config?.auto_reboot ?? true,
-      catra_timeout: props.config?.catra_timeout ?? 30,
-      local_identification: props.config?.local_identification ?? true,
-      exception_mode: props.config?.exception_mode ?? 'none',
-      language: props.config?.language ?? 'pt_BR',
-    }),
-    set: () => {}, // Formulário controlado pelo parent via v-model dos campos
+  const form = reactive({
+    online: true,
+    auto_reboot: true,
+    catra_timeout: 30,
+    local_identification: true,
+    exception_mode: 'none' as 'none' | 'free' | 'blocked',
+    language: 'pt_BR' as 'pt_BR' | 'en_US' | 'es_ES',
   })
+
+  watch(
+    () => props.config,
+    newConfig => {
+      if (newConfig) {
+        form.online = newConfig.online ?? true
+        form.auto_reboot = newConfig.auto_reboot ?? true
+        form.catra_timeout = newConfig.catra_timeout ?? 30
+        form.local_identification = newConfig.local_identification ?? true
+        form.exception_mode = newConfig.exception_mode ?? 'none'
+        form.language = newConfig.language ?? 'pt_BR'
+      }
+    },
+    { immediate: true },
+  )
 
   const exceptionModeOptions = [
     { title: 'Normal', value: 'none' },
@@ -36,7 +48,7 @@
   ]
 
   function handleSave () {
-    emit('save', form.value)
+    emit('save', { ...form })
   }
 </script>
 
@@ -94,12 +106,7 @@
 
     <v-divider class="my-4" />
 
-    <v-btn
-      block
-      color="primary"
-      :loading="saving"
-      @click="handleSave"
-    >
+    <v-btn block color="primary" :loading="saving" @click="handleSave">
       Salvar Configurações
     </v-btn>
   </v-container>

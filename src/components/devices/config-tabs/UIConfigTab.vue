@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import type { UIConfig } from '@/types'
-  import { computed } from 'vue'
+  import { reactive, watch } from 'vue'
 
   const props = defineProps<{
     config: UIConfig | null
@@ -11,19 +11,31 @@
     (e: 'save', config: Partial<UIConfig>): void
   }>()
 
-  const form = computed({
-    get: () => ({
-      display_brightness: props.config?.display_brightness ?? 100,
-      display_timeout: props.config?.display_timeout ?? 30,
-      keyboard_backlight: props.config?.keyboard_backlight ?? true,
-      welcome_message: props.config?.welcome_message ?? 'Bem-vindo!',
-      access_denied_message: props.config?.access_denied_message ?? 'Acesso Negado',
-    }),
-    set: () => {},
+  const form = reactive({
+    display_brightness: 100,
+    display_timeout: 30,
+    keyboard_backlight: true,
+    welcome_message: 'Bem-vindo!',
+    access_denied_message: 'Acesso Negado',
   })
 
+  watch(
+    () => props.config,
+    newConfig => {
+      if (newConfig) {
+        form.display_brightness = newConfig.display_brightness ?? 100
+        form.display_timeout = newConfig.display_timeout ?? 30
+        form.keyboard_backlight = newConfig.keyboard_backlight ?? true
+        form.welcome_message = newConfig.welcome_message ?? 'Bem-vindo!'
+        form.access_denied_message
+          = newConfig.access_denied_message ?? 'Acesso Negado'
+      }
+    },
+    { immediate: true },
+  )
+
   function handleSave () {
-    emit('save', form.value)
+    emit('save', { ...form })
   }
 </script>
 
@@ -31,9 +43,7 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h3 class="text-h6 mb-2">
-          Display
-        </h3>
+        <h3 class="text-h6 mb-2">Display</h3>
       </v-col>
       <v-col cols="12" md="4">
         <v-text-field
@@ -68,9 +78,7 @@
 
     <v-row>
       <v-col cols="12">
-        <h3 class="text-h6 mb-2">
-          Mensagens
-        </h3>
+        <h3 class="text-h6 mb-2">Mensagens</h3>
       </v-col>
       <v-col cols="12" md="6">
         <v-text-field
@@ -90,12 +98,7 @@
 
     <v-divider class="my-4" />
 
-    <v-btn
-      block
-      color="primary"
-      :loading="saving"
-      @click="handleSave"
-    >
+    <v-btn block color="primary" :loading="saving" @click="handleSave">
       Salvar Configurações de Interface
     </v-btn>
   </v-container>

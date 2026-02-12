@@ -1,10 +1,10 @@
 export function useUserType () {
-  const getUserTypeColor = (isVisitor: number) => {
-    return isVisitor ? 'warning' : 'primary'
+  const getUserTypeColor = (userTypeId: number | null) => {
+    return userTypeId === 1 ? 'warning' : 'primary'
   }
 
-  const getUserTypeLabel = (isVisitor: number) => {
-    return isVisitor ? 'Visitante' : 'Usuário'
+  const getUserTypeLabel = (userTypeId: number | null) => {
+    return userTypeId === 1 ? 'Visitante' : 'Usuário'
   }
 
   return {

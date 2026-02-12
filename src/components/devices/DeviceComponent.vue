@@ -14,7 +14,10 @@
   }>()
 
   const emit = defineEmits<{
-    (e: 'page-changed' | 'item-per-page' | 'test-connection', value: number): void
+    (
+      e: 'page-changed' | 'item-per-page' | 'test-connection',
+      value: number,
+    ): void
   }>()
 
   const dialog = ref(false)
@@ -53,7 +56,9 @@
         name: device.name,
         ip: device.ip,
         username: device.username,
-        ...(device.id === 0 || device.password ? { password: device.password } : {}),
+        ...(device.id === 0 || device.password
+          ? { password: device.password }
+          : {}),
         is_active: device.is_active,
         is_default: device.is_default,
       }
@@ -78,13 +83,28 @@
 
   async function testConnection (deviceId: number) {
     emit('test-connection', deviceId)
-  // Corrigido: router.go() requer um argumento delta numérico
+  }
+
+  async function toggleActive (device: Device) {
+    try {
+      await deviceStore.updateDevice(device.id, { is_active: !device.is_active })
+      await deviceStore.loadDevices()
+      toast.success(
+        `Dispositivo ${device.is_active ? 'desativado' : 'ativado'} com sucesso!`,
+      )
+    } catch {
+      toast.error('Erro ao alterar status do dispositivo')
+    }
   }
 </script>
 
 <template>
   <div class="d-flex justify-end mb-4">
-    <v-btn color="primary" prepend-icon="mdi-plus" @click="novoDispositivo">Adicionar Dispositivo</v-btn>
+    <v-btn
+      color="primary"
+      prepend-icon="mdi-plus"
+      @click="novoDispositivo"
+    >Adicionar Dispositivo</v-btn>
   </div>
   <v-data-table-server
     class="rounded-lg"
@@ -93,7 +113,7 @@
       { title: 'Nome', key: 'name', align: 'start' },
       { title: 'IP', key: 'ip', align: 'start' },
       { title: 'Status', key: 'status', align: 'start' },
-      { title: 'Ações', key: 'actions', align: 'end' }
+      { title: 'Ações', key: 'actions', align: 'end' },
     ]"
     :items="devices"
     :items-length="totalItems ?? 0"
@@ -110,10 +130,14 @@
         <td>{{ item.name }}</td>
         <td>{{ item.ip }}</td>
         <td>
-          <v-chip
-            :color="item.is_active ? 'success' : 'error'"
-            size="small"
-            :text="item.is_active ? 'Ativo' : 'Inativo'"
+          <v-switch
+            color="success"
+            density="compact"
+            hide-details
+            :label="item.is_active ? 'Ativo' : 'Inativo'"
+            :model-value="item.is_active"
+            @click.stop
+            @update:model-value="toggleActive(item)"
           />
         </td>
         <td class="text-end">
@@ -125,9 +149,7 @@
             @click.stop="showDeviceConfig(item)"
           >
             <v-icon>mdi-cog</v-icon>
-            <v-tooltip activator="parent">
-              Configurações
-            </v-tooltip>
+            <v-tooltip activator="parent"> Configurações </v-tooltip>
           </v-btn>
           <v-btn
             class="mr-2"
@@ -138,9 +160,7 @@
             @click.stop="testConnection(item.id)"
           >
             <v-icon>mdi-lan-connect</v-icon>
-            <v-tooltip activator="parent">
-              Testar Conexão
-            </v-tooltip>
+            <v-tooltip activator="parent"> Testar Conexão </v-tooltip>
           </v-btn>
         </td>
       </tr>

@@ -26,7 +26,7 @@
 
   const groupStore = useGroupStore()
   const tab = ref('dados')
-  const isAdmin = ref(false)
+  const isVisitor = ref(false)
   const name = ref('')
   const registration = ref('')
   const loading = ref(false)
@@ -38,6 +38,7 @@
       if (newUser) {
         name.value = newUser.name
         registration.value = newUser.registration || ''
+        isVisitor.value = newUser.user_type_id === 1
         userGroups.value
           = newUser.user_groups?.map(g => (typeof g === 'number' ? g : g.id))
             || []
@@ -56,6 +57,7 @@
         ...props.user,
         name: name.value,
         registration: registration.value,
+        user_type_id: isVisitor.value ? 1 : (null as unknown as number),
         user_groups: userGroups.value,
       })
       closeDialog()
@@ -108,7 +110,11 @@
                   />
                   <v-text-field v-model="registration" label="Matrícula" />
 
-                  <v-switch v-model="isAdmin" label="Administrador" />
+                  <v-switch
+                    v-model="isVisitor"
+                    color="warning"
+                    label="Visitante"
+                  />
                 </v-col>
 
                 <!-- Coluna direita -->

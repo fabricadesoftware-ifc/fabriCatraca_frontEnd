@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import type { PushServerConfig } from '@/types'
-  import { computed } from 'vue'
+  import { reactive, watch } from 'vue'
 
   const props = defineProps<{
     config: PushServerConfig | null
@@ -11,17 +11,26 @@
     (e: 'save', config: Partial<PushServerConfig>): void
   }>()
 
-  const form = computed({
-    get: () => ({
-      push_request_timeout: props.config?.push_request_timeout ?? 30,
-      push_request_period: props.config?.push_request_period ?? 60,
-      push_remote_address: props.config?.push_remote_address ?? '',
-    }),
-    set: () => {},
+  const form = reactive({
+    push_request_timeout: 30,
+    push_request_period: 60,
+    push_remote_address: '',
   })
 
+  watch(
+    () => props.config,
+    newConfig => {
+      if (newConfig) {
+        form.push_request_timeout = newConfig.push_request_timeout ?? 30
+        form.push_request_period = newConfig.push_request_period ?? 60
+        form.push_remote_address = newConfig.push_remote_address ?? ''
+      }
+    },
+    { immediate: true },
+  )
+
   function handleSave () {
-    emit('save', form.value)
+    emit('save', { ...form })
   }
 </script>
 
@@ -29,9 +38,7 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h3 class="text-h6 mb-2">
-          Conexão
-        </h3>
+        <h3 class="text-h6 mb-2">Conexão</h3>
       </v-col>
       <v-col cols="12">
         <v-text-field
@@ -47,9 +54,7 @@
 
     <v-row>
       <v-col cols="12">
-        <h3 class="text-h6 mb-2">
-          Temporização
-        </h3>
+        <h3 class="text-h6 mb-2">Temporização</h3>
       </v-col>
       <v-col cols="12" md="6">
         <v-text-field
@@ -82,12 +87,7 @@
       Configure o endereço do servidor push para enviar eventos em tempo real.
     </v-alert>
 
-    <v-btn
-      block
-      color="primary"
-      :loading="saving"
-      @click="handleSave"
-    >
+    <v-btn block color="primary" :loading="saving" @click="handleSave">
       Salvar Configurações do Push Server
     </v-btn>
   </v-container>

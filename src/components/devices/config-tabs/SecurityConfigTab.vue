@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import type { SecurityConfig } from '@/types'
-  import { computed } from 'vue'
+  import { reactive, watch } from 'vue'
 
   const props = defineProps<{
     config: SecurityConfig | null
@@ -11,14 +11,24 @@
     (e: 'save', config: Partial<SecurityConfig>): void
   }>()
 
-  const form = computed({
-    get: () => ({
-      verbose_logging: props.config?.verbose_logging ?? true,
-      log_type: props.config?.log_type ?? 1,
-      multi_factor_authentication: props.config?.multi_factor_authentication ?? false,
-    }),
-    set: () => {},
+  const form = reactive({
+    verbose_logging: true,
+    log_type: 1 as 0 | 1 | 2,
+    multi_factor_authentication: false,
   })
+
+  watch(
+    () => props.config,
+    newConfig => {
+      if (newConfig) {
+        form.verbose_logging = newConfig.verbose_logging ?? true
+        form.log_type = newConfig.log_type ?? 1
+        form.multi_factor_authentication
+          = newConfig.multi_factor_authentication ?? false
+      }
+    },
+    { immediate: true },
+  )
 
   const logTypeOptions = [
     { title: 'Desabilitado', value: 0 },
@@ -27,7 +37,7 @@
   ]
 
   function handleSave () {
-    emit('save', form.value)
+    emit('save', { ...form })
   }
 </script>
 
@@ -35,9 +45,7 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h3 class="text-h6 mb-2">
-          Logs
-        </h3>
+        <h3 class="text-h6 mb-2">Logs</h3>
       </v-col>
       <v-col cols="12" md="6">
         <v-switch
@@ -61,9 +69,7 @@
 
     <v-row>
       <v-col cols="12">
-        <h3 class="text-h6 mb-2">
-          Autenticação
-        </h3>
+        <h3 class="text-h6 mb-2">Autenticação</h3>
       </v-col>
       <v-col cols="12">
         <v-switch
@@ -77,12 +83,7 @@
 
     <v-divider class="my-4" />
 
-    <v-btn
-      block
-      color="primary"
-      :loading="saving"
-      @click="handleSave"
-    >
+    <v-btn block color="primary" :loading="saving" @click="handleSave">
       Salvar Configurações de Segurança
     </v-btn>
   </v-container>

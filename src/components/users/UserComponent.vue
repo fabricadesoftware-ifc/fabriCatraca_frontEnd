@@ -18,7 +18,10 @@
   }>()
 
   const emit = defineEmits<{
-    (e: 'page-changed' | 'item-per-page' | 'search-changed', value: number | string): void
+    (
+      e: 'page-changed' | 'item-per-page' | 'search-changed',
+      value: number | string,
+    ): void
   }>()
 
   const userStore = useUserStore()
@@ -63,7 +66,9 @@
         })
 
         // Para usuário novo, adicionar todos os grupos selecionados
-        const userGroupIds = (user.user_groups || []).map(g => typeof g === 'number' ? g : g.id)
+        const userGroupIds = (user.user_groups || []).map(g =>
+          typeof g === 'number' ? g : g.id,
+        )
         for (const groupId of userGroupIds) {
           await userStore.addUserToGroup(savedUser.id, groupId)
         }
@@ -77,21 +82,32 @@
         const basicDataChanged
           = currentUser.name !== user.name
             || currentUser.registration !== user.registration
+            || currentUser.user_type_id !== user.user_type_id
 
         // Atualizar dados básicos apenas se mudaram
         savedUser = basicDataChanged
           ? await userStore.updateUser(user.id, {
             name: user.name,
             registration: user.registration,
+            user_type_id: user.user_type_id,
           })
           : currentUser
 
         // Gerenciar grupos do usuário
-        const userGroupIds = (user.user_groups || []).map(g => typeof g === 'number' ? g : g.id)
-        const currentGroups = currentUser.user_groups?.map(g => typeof g === 'number' ? g : g.id) || []
+        const userGroupIds = (user.user_groups || []).map(g =>
+          typeof g === 'number' ? g : g.id,
+        )
+        const currentGroups
+          = currentUser.user_groups?.map(g =>
+            typeof g === 'number' ? g : g.id,
+          ) || []
 
-        const groupsToAdd = userGroupIds.filter((groupId: number) => !currentGroups.includes(groupId))
-        const groupsToRemove = currentGroups.filter((groupId: number) => !userGroupIds.includes(groupId))
+        const groupsToAdd = userGroupIds.filter(
+          (groupId: number) => !currentGroups.includes(groupId),
+        )
+        const groupsToRemove = currentGroups.filter(
+          (groupId: number) => !userGroupIds.includes(groupId),
+        )
 
         // Adiciona novos grupos
         for (const groupId of groupsToAdd) {
@@ -130,13 +146,17 @@
     if (confirm(`Remover ${selectedItems.length} usuário(s)?`)) {
       try {
         // Filtrar apenas usuários com ID válido
-        const validUsers = selectedItems.filter(user => typeof user.id === 'number' && !Number.isNaN(user.id))
+        const validUsers = selectedItems.filter(
+          user => typeof user.id === 'number' && !Number.isNaN(user.id),
+        )
         if (validUsers.length === 0) {
           throw new Error('Nenhum usuário válido para remover')
         }
 
         // Deletar cada usuário selecionado
-        await Promise.all(validUsers.map(user => userStore.deleteUser(user.id)))
+        await Promise.all(
+          validUsers.map(user => userStore.deleteUser(user.id)),
+        )
         // Recarregar a lista após deletar
         await userStore.loadUsers({
           page: userStore.current_page,
@@ -179,14 +199,14 @@
     // Garantir que temos um array
     const selectedItems = Array.isArray(items) ? items : [items].filter(Boolean)
     // Atualizar seleção apenas se tivermos itens válidos
-    selection.value.selected = selectedItems.length > 0
-      ? selectedItems.map(item => ({
-        ...item,
-        id: Number(item.id), // Garantir que o ID é um número
-      }))
-      : []
+    selection.value.selected
+      = selectedItems.length > 0
+        ? selectedItems.map(item => ({
+          ...item,
+          id: Number(item.id), // Garantir que o ID é um número
+        }))
+        : []
   }
-
 </script>
 
 <template>
@@ -207,11 +227,7 @@
         Remover Selecionados
       </v-btn>
 
-      <v-btn
-        color="primary"
-        prepend-icon="mdi-plus"
-        @click="novoUsuario"
-      >
+      <v-btn color="primary" prepend-icon="mdi-plus" @click="novoUsuario">
         Adicionar Usuário
       </v-btn>
     </div>
@@ -251,15 +267,17 @@
   >
     <!-- Template para user_groups -->
     <template #item.user_groups="{ item }">
-      {{ item.user_groups?.length ? (typeof item.user_groups[0] === 'object' ? item.user_groups[0].name : 'Grupo ' + item.user_groups[0]) : 'Não há grupo' }}
+      {{
+        item.user_groups?.length
+          ? typeof item.user_groups[0] === "object"
+            ? item.user_groups[0].name
+            : "Grupo " + item.user_groups[0]
+          : "Não há grupo"
+      }}
     </template>
   </v-data-table-server>
 
-  <UserDialog
-    v-model="dialog"
-    :user="selectedUser"
-    @save="salvarUsuario"
-  />
+  <UserDialog v-model="dialog" :user="selectedUser" @save="salvarUsuario" />
 </template>
 
 <style scoped>

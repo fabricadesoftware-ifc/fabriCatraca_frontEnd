@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import type { CatraConfig } from '@/types'
-  import { computed } from 'vue'
+  import { reactive, watch } from 'vue'
 
   const props = defineProps<{
     config: CatraConfig | null
@@ -11,15 +11,29 @@
     (e: 'save', config: Partial<CatraConfig>): void
   }>()
 
-  const form = computed({
-    get: () => ({
-      anti_passback: props.config?.anti_passback ?? false,
-      daily_reset: props.config?.daily_reset ?? false,
-      gateway: props.config?.gateway ?? 'clockwise',
-      operation_mode: props.config?.operation_mode ?? 'blocked',
-    }),
-    set: () => {},
+  const form = reactive({
+    anti_passback: false,
+    daily_reset: false,
+    gateway: 'clockwise' as 'clockwise' | 'anticlockwise',
+    operation_mode: 'blocked' as
+    | 'blocked'
+    | 'entrance_open'
+    | 'exit_open'
+    | 'both_open',
   })
+
+  watch(
+    () => props.config,
+    newConfig => {
+      if (newConfig) {
+        form.anti_passback = newConfig.anti_passback ?? false
+        form.daily_reset = newConfig.daily_reset ?? false
+        form.gateway = newConfig.gateway ?? 'clockwise'
+        form.operation_mode = newConfig.operation_mode ?? 'blocked'
+      }
+    },
+    { immediate: true },
+  )
 
   const gatewayOptions = [
     { title: 'Sentido Horário', value: 'clockwise' },
@@ -34,7 +48,7 @@
   ]
 
   function handleSave () {
-    emit('save', form.value)
+    emit('save', { ...form })
   }
 </script>
 
@@ -42,9 +56,7 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h3 class="text-h6 mb-2">
-          Modo de Operação
-        </h3>
+        <h3 class="text-h6 mb-2">Modo de Operação</h3>
       </v-col>
       <v-col cols="12">
         <v-select
@@ -60,9 +72,7 @@
 
     <v-row>
       <v-col cols="12">
-        <h3 class="text-h6 mb-2">
-          Controle de Acesso
-        </h3>
+        <h3 class="text-h6 mb-2">Controle de Acesso</h3>
       </v-col>
       <v-col cols="12" md="4">
         <v-switch
@@ -92,12 +102,7 @@
 
     <v-divider class="my-4" />
 
-    <v-btn
-      block
-      color="primary"
-      :loading="saving"
-      @click="handleSave"
-    >
+    <v-btn block color="primary" :loading="saving" @click="handleSave">
       Salvar Configurações da Catraca
     </v-btn>
   </v-container>

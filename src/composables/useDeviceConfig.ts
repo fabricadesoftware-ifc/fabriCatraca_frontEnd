@@ -1,3 +1,4 @@
+import type { MaybeRefOrGetter } from 'vue'
 import type {
   CatraConfig,
   Device,
@@ -8,16 +9,17 @@ import type {
   SystemConfig,
   UIConfig,
 } from '@/types'
-import { ref } from 'vue'
+import { ref, toValue } from 'vue'
 import { toast } from 'vue3-toastify'
 import { useControlIdConfigStore } from '@/stores'
 
-export function useDeviceConfig (device: Device | null) {
+export function useDeviceConfig (deviceRef: MaybeRefOrGetter<Device | null>) {
   const configStore = useControlIdConfigStore()
   const saving = ref(false)
   const activating = ref(false)
 
   async function loadConfigs () {
+    const device = toValue(deviceRef)
     if (!device?.id) {
       return
     }
@@ -25,6 +27,7 @@ export function useDeviceConfig (device: Device | null) {
   }
 
   async function saveSystemConfig (data: Partial<SystemConfig>) {
+    const device = toValue(deviceRef)
     if (!device?.id) {
       return
     }
@@ -42,6 +45,7 @@ export function useDeviceConfig (device: Device | null) {
   }
 
   async function saveHardwareConfig (data: Partial<HardwareConfig>) {
+    const device = toValue(deviceRef)
     if (!device?.id) {
       return
     }
@@ -59,6 +63,7 @@ export function useDeviceConfig (device: Device | null) {
   }
 
   async function saveSecurityConfig (data: Partial<SecurityConfig>) {
+    const device = toValue(deviceRef)
     if (!device?.id) {
       return
     }
@@ -76,6 +81,7 @@ export function useDeviceConfig (device: Device | null) {
   }
 
   async function saveUIConfig (data: Partial<UIConfig>) {
+    const device = toValue(deviceRef)
     if (!device?.id) {
       return
     }
@@ -93,6 +99,7 @@ export function useDeviceConfig (device: Device | null) {
   }
 
   async function saveCatraConfig (data: Partial<CatraConfig>) {
+    const device = toValue(deviceRef)
     if (!device?.id) {
       return
     }
@@ -110,6 +117,7 @@ export function useDeviceConfig (device: Device | null) {
   }
 
   async function savePushServerConfig (data: Partial<PushServerConfig>) {
+    const device = toValue(deviceRef)
     if (!device?.id) {
       return
     }
@@ -127,6 +135,7 @@ export function useDeviceConfig (device: Device | null) {
   }
 
   async function saveMonitorConfig (data: Partial<MonitorConfig>) {
+    const device = toValue(deviceRef)
     if (!device?.id) {
       return
     }
@@ -144,7 +153,13 @@ export function useDeviceConfig (device: Device | null) {
   }
 
   async function activateMonitor (monitorData: Partial<MonitorConfig>) {
-    const hostname = (monitorData.hostname || configStore.monitorConfig?.hostname || '').toString().trim()
+    const hostname = (
+      monitorData.hostname
+      || configStore.monitorConfig?.hostname
+      || ''
+    )
+      .toString()
+      .trim()
 
     if (!hostname) {
       toast.error('Hostname/IP é obrigatório para ativar o monitor')
@@ -155,10 +170,12 @@ export function useDeviceConfig (device: Device | null) {
     try {
       // Salva antes de ativar se necessário
       const current = configStore.monitorConfig
-      const needsSave = !current?.id
-        || current.hostname !== monitorData.hostname
-        || current.port !== monitorData.port
-        || current.path !== monitorData.path
+      const device = toValue(deviceRef)
+      const needsSave
+        = !current?.id
+          || current.hostname !== monitorData.hostname
+          || current.port !== monitorData.port
+          || current.path !== monitorData.path
 
       if (needsSave && device?.id) {
         await configStore.saveMonitorConfig(device.id, monitorData)
@@ -168,7 +185,10 @@ export function useDeviceConfig (device: Device | null) {
       toast.success('Monitor ativado com sucesso!')
     } catch (error: any) {
       console.error(error)
-      const msg = error?.response?.data?.error || error?.message || 'Erro ao ativar monitor'
+      const msg
+        = error?.response?.data?.error
+          || error?.message
+          || 'Erro ao ativar monitor'
       toast.error(msg)
       throw error
     } finally {
