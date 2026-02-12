@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import type { Portal } from '@/types'
-  import { computed, ref, watch } from 'vue'
+  import { computed, ref } from 'vue'
   import { toast } from 'vue3-toastify'
   import { usePortalStore } from '@/stores/portal'
   import PortalDialog from './PortalDialog.vue'
@@ -31,23 +31,17 @@
     { title: 'Área de Destino', key: 'area_to', align: 'start' as const },
   ]
 
-  watch(() => selection.value.selected, newSelection => {
-    console.log('Seleção atualizada:', {
-      selecionados: newSelection,
-      quantidade: newSelection.length,
-      ids: newSelection.map(item => item.id),
-    })
-  }, { deep: true })
-
   function onSelectionChanged (items: (Portal | number)[]) {
     const selectedPortals = Array.isArray(items)
-      ? items.map(item => {
-        if (typeof item === 'number') {
-          const portal = rules.value.find(r => r.id === item)
-          return portal
-        }
-        return item
-      }).filter((portal): portal is Portal => portal !== undefined)
+      ? items
+        .map(item => {
+          if (typeof item === 'number') {
+            const portal = rules.value.find(r => r.id === item)
+            return portal
+          }
+          return item
+        })
+        .filter((portal): portal is Portal => portal !== undefined)
       : []
 
     selection.value.selected = selectedPortals
@@ -72,8 +66,12 @@
     try {
       const portalData = {
         name: portal.name,
-        area_from: typeof portal.area_from === 'number' ? portal.area_from : portal.area_from.id,
-        area_to: typeof portal.area_to === 'number' ? portal.area_to : portal.area_to.id,
+        area_from:
+          typeof portal.area_from === 'number'
+            ? portal.area_from
+            : portal.area_from.id,
+        area_to:
+          typeof portal.area_to === 'number' ? portal.area_to : portal.area_to.id,
       } as unknown as Partial<Portal>
 
       portal.id === 0
@@ -94,12 +92,16 @@
 
     if (confirm(`Remover ${selectedItems.length} entrada(s)/saída(s)?`)) {
       try {
-        const validPortals = selectedItems.filter(portal => typeof portal.id === 'number' && !Number.isNaN(portal.id))
+        const validPortals = selectedItems.filter(
+          portal => typeof portal.id === 'number' && !Number.isNaN(portal.id),
+        )
         if (validPortals.length === 0) {
           throw new Error('Nenhuma entrada/saída válida para remover')
         }
 
-        await Promise.all(validPortals.map(portal => portalStore.deletePortal(portal.id)))
+        await Promise.all(
+          validPortals.map(portal => portalStore.deletePortal(portal.id)),
+        )
         await portalStore.loadPortals()
         selection.value.selected = []
         toast.success('Entrada(s)/Saída(s) removida(s) com sucesso!')
@@ -128,11 +130,7 @@
         Remover Selecionados
       </v-btn>
 
-      <v-btn
-        color="primary"
-        prepend-icon="mdi-plus"
-        @click="novo"
-      >
+      <v-btn color="primary" prepend-icon="mdi-plus" @click="novo">
         Adicionar Entrada/Saída
       </v-btn>
     </div>
@@ -150,11 +148,11 @@
     @update:model-value="onSelectionChanged"
   >
     <template #item.area_from="{ item }">
-      {{ typeof item.area_from === 'object' ? item.area_from.name : 'N/A' }}
+      {{ typeof item.area_from === "object" ? item.area_from.name : "N/A" }}
     </template>
 
     <template #item.area_to="{ item }">
-      {{ typeof item.area_to === 'object' ? item.area_to.name : 'N/A' }}
+      {{ typeof item.area_to === "object" ? item.area_to.name : "N/A" }}
     </template>
   </v-data-table>
 

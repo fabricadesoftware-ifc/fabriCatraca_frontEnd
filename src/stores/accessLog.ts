@@ -22,10 +22,8 @@ export const useAccessLogStore = defineStore('accessLog', {
       this.loading = true
       try {
         const response = await AccessLogsService.getAccessLogs(params)
-        console.log(response)
         if (response && Array.isArray(response?.results)) {
           this.logs = response?.results || []
-          console.log(this.logs)
           this.totalLogs = response?.count || 0
           this.updateStats()
         }
@@ -53,8 +51,12 @@ export const useAccessLogStore = defineStore('accessLog', {
     updateStats () {
       const total = this.totalLogs
       const granted = this.logs.filter(log => log.event_type === 7).length
-      const denied = this.logs.filter(log => [1, 2, 6, 9].includes(log.event_type)).length
-      const pending = this.logs.filter(log => [4, 8].includes(log.event_type)).length
+      const denied = this.logs.filter(log =>
+        [1, 2, 6, 9].includes(log.event_type),
+      ).length
+      const pending = this.logs.filter(log =>
+        [4, 8].includes(log.event_type),
+      ).length
 
       this.stats = { total, granted, denied, pending }
     },
@@ -108,7 +110,6 @@ export const useAccessLogStore = defineStore('accessLog', {
     async returnedTypedLogs (type: number, page_size?: number) {
       const params = { event_type: type, page_size: page_size || 10 }
       const response = await AccessLogsService.getAccessLogs(params)
-      console.log(response)
       return response
     },
 
@@ -118,7 +119,6 @@ export const useAccessLogStore = defineStore('accessLog', {
         params.event_type = logs_type
       }
       const response = await AccessLogsService.getAccessLogByLastDays(params)
-      console.log(response)
       return response
     },
   },

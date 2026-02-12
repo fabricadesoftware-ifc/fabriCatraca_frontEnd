@@ -63,8 +63,8 @@
           <v-text-field v-model="username" label="Usuário" />
           <v-text-field
             v-model="password"
-            :rules="[v => (props.device?.id ? true : !!v) || 'Obrigatório']"
             label="Senha"
+            :rules="[v => (props.device?.id ? true : !!v) || 'Obrigatório']"
             type="password"
           />
           <div class="d-flex ga-4 mt-2">

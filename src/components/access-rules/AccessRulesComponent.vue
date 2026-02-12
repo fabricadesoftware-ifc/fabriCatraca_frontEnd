@@ -31,7 +31,6 @@
       : []
 
     selection.value.selected = selectedRules
-    console.log(selection.value.selected)
   }
 
   const headers = [
@@ -76,15 +75,11 @@
       let savedRule: AccessRule | undefined
       if (rule.id === 0) {
         const response = await store.createAccessRule(ruleData)
-        console.log(response)
         savedRule = response
       } else {
         const response = await store.updateAccessRule(rule.id, ruleData)
-        console.log(response)
         savedRule = response
       }
-
-      console.log('💾 savedRule após salvar:', savedRule)
 
       // Validação: verificar se savedRule foi retornado corretamente
       if (!savedRule || !savedRule.id) {

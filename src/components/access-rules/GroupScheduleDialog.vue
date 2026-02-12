@@ -8,8 +8,14 @@
   import timeZonesService from '@/services/time_zones'
   import { useGroupStore } from '@/stores'
 
-  const props = defineProps<{ modelValue: boolean, accessRule: AccessRule | null }>()
-  const emit = defineEmits<{ (e: 'update:modelValue', v: boolean): void, (e: 'saved'): void }>()
+  const props = defineProps<{
+    modelValue: boolean
+    accessRule: AccessRule | null
+  }>()
+  const emit = defineEmits<{
+    (e: 'update:modelValue', v: boolean): void
+    (e: 'saved'): void
+  }>()
 
   const groupStore = useGroupStore()
   const selectedGroupId = ref<number | null>(null)
@@ -17,10 +23,18 @@
 
   type DayKey = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'
   const dayLabels: Record<DayKey, string> = {
-    sun: 'Domingo', mon: 'Segunda', tue: 'Terça', wed: 'Quarta', thu: 'Quinta', fri: 'Sexta', sat: 'Sábado',
+    sun: 'Domingo',
+    mon: 'Segunda',
+    tue: 'Terça',
+    wed: 'Quarta',
+    thu: 'Quinta',
+    fri: 'Sexta',
+    sat: 'Sábado',
   }
 
-  const schedule = reactive<Record<DayKey, { enabled: boolean, start: string, end: string }>>({
+  const schedule = reactive<
+    Record<DayKey, { enabled: boolean, start: string, end: string }>
+  >({
     sun: { enabled: false, start: '07:00', end: '17:00' },
     mon: { enabled: false, start: '07:00', end: '17:00' },
     tue: { enabled: false, start: '07:00', end: '17:00' },
@@ -56,7 +70,7 @@
     }
 
     // reset schedule
-    for (const d of (Object.keys(schedule) as DayKey[])) {
+    for (const d of Object.keys(schedule) as DayKey[]) {
       schedule[d].enabled = false
     }
 
@@ -84,7 +98,9 @@
         }
 
         // carrega timespans do tz
-        const spansResp = await timeSpansService.getTimeSpans({ time_zone: tzId })
+        const spansResp = await timeSpansService.getTimeSpans({
+          time_zone: tzId,
+        })
 
         const spans = spansResp.results || []
         for (const ts of spans) {
@@ -114,13 +130,22 @@
   }
 
   async function ensureGroupAccessRule (groupId: number, accessRuleId: number) {
-    const existing = await groupAccessRulesService.getGroupAccessRules({ group_id: groupId, access_rule_id: accessRuleId })
+    const existing = await groupAccessRulesService.getGroupAccessRules({
+      group_id: groupId,
+      access_rule_id: accessRuleId,
+    })
     if ((existing.results || []).length === 0) {
-      await groupAccessRulesService.createGroupAccessRule({ group_id: groupId, access_rule_id: accessRuleId })
+      await groupAccessRulesService.createGroupAccessRule({
+        group_id: groupId,
+        access_rule_id: accessRuleId,
+      })
     }
   }
 
-  async function deleteExistingSchedulesForGroup (groupId: number, ruleId: number) {
+  async function deleteExistingSchedulesForGroup (
+    groupId: number,
+    ruleId: number,
+  ) {
     try {
       // 1. Busca relações grupo-regra-timezone
       const relations = await accessRuleTimeZonesService.getAccessRuleTimeZones({
@@ -141,7 +166,7 @@
               await accessRuleTimeZonesService.deleteAccessRuleTimeZone(relId)
             } catch (error: any) {
               if (error?.response?.status === 404) {
-                console.log('  ⚠️ Relação já foi deletada:', relId)
+              // Relação já foi deletada
               } else {
                 console.warn('  ⚠️ Erro ao deletar relação:', error?.message)
               }
@@ -149,7 +174,9 @@
           }
 
           // SEGUNDO: Deleta timespans do timezone
-          const spansResp = await timeSpansService.getTimeSpans({ time_zone: tzId })
+          const spansResp = await timeSpansService.getTimeSpans({
+            time_zone: tzId,
+          })
 
           for (const span of spansResp.results || []) {
             const spanId = (span as any)?.id
@@ -158,7 +185,7 @@
                 await timeSpansService.deleteTimeSpan(spanId)
               } catch (error: any) {
                 if (error?.response?.status === 404) {
-                  console.log('  ⚠️ TimeSpan já foi deletado:', spanId)
+                // TimeSpan já foi deletado
                 } else {
                   console.warn('  ⚠️ Erro ao deletar TimeSpan:', error?.message)
                 }
@@ -171,7 +198,7 @@
             await timeZonesService.deleteTimeZone(tzId)
           } catch (error: any) {
             if (error?.response?.status === 404) {
-              console.log('  ⚠️ TimeZone já foi deletado:', tzId)
+            // TimeZone já foi deletado
             } else {
               console.warn('  ⚠️ Erro ao deletar TimeZone:', error?.message)
             }
@@ -183,7 +210,7 @@
       }
     } catch (error) {
       console.error(error)
-      // Não propaga o erro - permite que o salvamento continue mesmo com falha na limpeza
+    // Não propaga o erro - permite que o salvamento continue mesmo com falha na limpeza
     }
   }
 
@@ -206,7 +233,9 @@
 
       // Validação: início deve ser menor que fim
       if (!(start < end)) {
-        toast.error(`Horário inválido para ${dayLabels[day]}: início (${cfg.start}) deve ser antes do fim (${cfg.end})`)
+        toast.error(
+          `Horário inválido para ${dayLabels[day]}: início (${cfg.start}) deve ser antes do fim (${cfg.end})`,
+        )
         return
       }
 
@@ -253,7 +282,8 @@
 
         // Cria timezone
         const tz = await timeZonesService.createTimeZone({ name: tzName })
-        const tzId = (tz as any)?.data?.id ?? (tz as any)?.data ?? (tz as any)?.id
+        const tzId
+          = (tz as any)?.data?.id ?? (tz as any)?.data ?? (tz as any)?.id
 
         if (!tzId) {
           throw new Error('Falha ao criar TimeZone - ID não retornado')
@@ -298,7 +328,9 @@
         })
       }
 
-      toast.success(`Horários salvos com sucesso! (${validSchedules.length} dia(s) configurado(s))`)
+      toast.success(
+        `Horários salvos com sucesso! (${validSchedules.length} dia(s) configurado(s))`,
+      )
       emit('saved')
       close()
     } catch (error) {
@@ -316,24 +348,29 @@
   })
 
   // Quando abrir o diálogo, carregar grupos e horários existentes
-  watch(() => props.modelValue, async v => {
-    if (v) {
-      // Carrega os grupos se necessário
-      if (groupStore.groups.length === 0) {
-        await groupStore.loadGroups()
-      }
+  watch(
+    () => props.modelValue,
+    async v => {
+      if (v) {
+        // Carrega os grupos se necessário
+        if (groupStore.groups.length === 0) {
+          await groupStore.loadGroups()
+        }
 
-      // Busca grupo-regra existente
-      if (props.accessRule) {
-        const relations = await groupAccessRulesService.getGroupAccessRules({ access_rule_id: props.accessRule.id })
-        const existingGroup = relations.results?.[0]?.group
-        if (existingGroup) {
-          selectedGroupId.value = existingGroup.id
-          await loadExistingForGroup(existingGroup.id)
+        // Busca grupo-regra existente
+        if (props.accessRule) {
+          const relations = await groupAccessRulesService.getGroupAccessRules({
+            access_rule_id: props.accessRule.id,
+          })
+          const existingGroup = relations.results?.[0]?.group
+          if (existingGroup) {
+            selectedGroupId.value = existingGroup.id
+            await loadExistingForGroup(existingGroup.id)
+          }
         }
       }
-    }
-  })
+    },
+  )
 
   // Quando mudar o grupo selecionado, carregar horários
   watch(selectedGroupId, async v => {
@@ -344,7 +381,11 @@
 </script>
 
 <template>
-  <v-dialog max-width="800" :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
+  <v-dialog
+    max-width="800"
+    :model-value="modelValue"
+    @update:model-value="emit('update:modelValue', $event)"
+  >
     <v-card>
       <v-card-title class="text-h6">Definir horários por turma</v-card-title>
       <v-card-text>
@@ -359,8 +400,14 @@
           variant="outlined"
         />
 
-        <v-alert class="mt-3 mb-5" density="comfortable" type="info" variant="tonal">
-          Ative os dias desejados e defina o intervalo de acesso. Cada dia criará uma faixa horária independente.
+        <v-alert
+          class="mt-3 mb-5"
+          density="comfortable"
+          type="info"
+          variant="tonal"
+        >
+          Ative os dias desejados e defina o intervalo de acesso. Cada dia
+          criará uma faixa horária independente.
         </v-alert>
 
         <v-row>
@@ -372,9 +419,16 @@
             sm="6"
           >
             <v-card class="day-card" variant="tonal">
-              <v-card-title class="d-flex align-center justify-space-between py-2">
+              <v-card-title
+                class="d-flex align-center justify-space-between py-2"
+              >
                 <span class="text-subtitle-2">{{ label }}</span>
-                <v-switch v-model="schedule[key as DayKey].enabled" color="primary" density="compact" hide-details />
+                <v-switch
+                  v-model="schedule[key as DayKey].enabled"
+                  color="primary"
+                  density="compact"
+                  hide-details
+                />
               </v-card-title>
               <v-card-text class="pt-0">
                 <div class="time-fields">
@@ -405,7 +459,12 @@
       <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="close">Cancelar</v-btn>
-        <v-btn color="primary" :disabled="!selectedGroupId" :loading="saving" @click="saveSchedule">Salvar</v-btn>
+        <v-btn
+          color="primary"
+          :disabled="!selectedGroupId"
+          :loading="saving"
+          @click="saveSchedule"
+        >Salvar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

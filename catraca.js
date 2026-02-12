@@ -187,11 +187,10 @@ async function checkGroupPermissions () {
     const dayOfWeek = nowLocal.getDay() // 0=dom, 1=seg, ..., 6=sab
 
     // Carregar feriados
-    const { isHol1, isHol2, isHol3, holidayDetails } = await getHolidayTypes(
-      nowUnix,
-    )
+    const { isHol1, isHol2, isHol3, holidayDetails }
+      = await getHolidayTypes(nowUnix)
     if (holidayDetails.length > 0) {
-      console.log(`Hoje é feriado: ${holidayDetails.join('; ')}`)
+      // Hoje é feriado
     }
 
     // Carregar todos os groups
@@ -320,16 +319,6 @@ async function checkGroupPermissions () {
           reason: reasons.join('; ') || 'Sem permissão ativa agora',
         })
       }
-    }
-
-    console.log('Grupos com permissão agora:')
-    for (const g of permitted) {
-      console.log(`- ${g.name}: ${g.reason}`)
-    }
-
-    console.log('Grupos sem permissão agora:')
-    for (const g of notPermitted) {
-      console.log(`- ${g.name}: ${g.reason}`)
     }
   } catch (error) {
     console.error('Erro ao verificar permissões:', error)
