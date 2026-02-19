@@ -176,6 +176,7 @@ export interface User {
   name: string
   registration: string
   user_type_id: number
+  pin?: string
   devices: Device[]
   email?: string
   user_groups?: Group[]

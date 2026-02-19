@@ -183,6 +183,7 @@
       user_type_id: 1,
       devices: [],
       email: '',
+      pin: '',
     }
     dialog.value = true
   }

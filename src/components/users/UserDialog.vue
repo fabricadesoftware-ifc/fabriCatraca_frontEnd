@@ -29,6 +29,8 @@
   const isVisitor = ref(false)
   const name = ref('')
   const registration = ref('')
+  const pin = ref('')
+  const showPin = ref(false)
   const loading = ref(false)
 
   // Atualiza os campos locais quando o props.user mudar
@@ -38,6 +40,8 @@
       if (newUser) {
         name.value = newUser.name
         registration.value = newUser.registration || ''
+        pin.value = newUser.pin || ''
+        showPin.value = false
         isVisitor.value = newUser.user_type_id === 1
         userGroups.value
           = newUser.user_groups?.map(g => (typeof g === 'number' ? g : g.id))
@@ -200,7 +204,66 @@
           </v-window-item>
           <v-window-item value="cartoes"><p>Gerenciar cartões...</p></v-window-item>
           <v-window-item value="horarios"><p>Configurar horários...</p></v-window-item>
-          <v-window-item value="pin"><p>Definir PIN...</p></v-window-item>
+          <v-window-item value="pin">
+            <v-container>
+              <v-row justify="center">
+                <v-col cols="12" md="6">
+                  <v-card elevation="2" rounded="lg">
+                    <v-card-text class="text-center pa-6">
+                      <v-icon
+                        class="mb-4"
+                        color="primary"
+                        icon="mdi-lock"
+                        size="48"
+                      />
+                      <div class="text-subtitle-1 mb-4">PIN do Usuário</div>
+
+                      <div v-if="pin" class="d-flex flex-column align-center">
+                        <div class="d-flex align-center ga-2 mb-4">
+                          <v-text-field
+                            class="pin-field"
+                            density="comfortable"
+                            hide-details
+                            :model-value="pin"
+                            readonly
+                            :type="showPin ? 'text' : 'password'"
+                            variant="outlined"
+                          >
+                            <template #append-inner>
+                              <v-btn
+                                density="comfortable"
+                                :icon="showPin ? 'mdi-eye-off' : 'mdi-eye'"
+                                variant="text"
+                                @click="showPin = !showPin"
+                              />
+                            </template>
+                          </v-text-field>
+                        </div>
+
+                        <v-chip
+                          color="success"
+                          prepend-icon="mdi-check-circle"
+                          variant="tonal"
+                        >
+                          PIN cadastrado
+                        </v-chip>
+                      </div>
+
+                      <div v-else class="d-flex flex-column align-center">
+                        <v-chip
+                          color="warning"
+                          prepend-icon="mdi-alert-circle"
+                          variant="tonal"
+                        >
+                          Nenhum PIN cadastrado
+                        </v-chip>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-window-item>
           <v-window-item value="biometria">
             <UserBioPanel :user-id="props.user.id" />
           </v-window-item>
