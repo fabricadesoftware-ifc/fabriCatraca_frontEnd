@@ -1,316 +1,394 @@
 export interface BaseResponse<T> {
-  refresh: string
-  access: string
-  data: T
-  message?: string
-  status?: number
+  refresh: string;
+  access: string;
+  data: T;
+  message?: string;
+  status?: number;
 }
 
 export interface PaginatedResponse<T> {
-  count: number
-  next: string | null
-  previous: string | null
-  results: T[]
-  page_size: number
-  current_page: number
-  total_pages: number
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+  page_size: number;
+  current_page: number;
+  total_pages: number;
 }
 
 export interface QueryParams {
-  [key: string]: unknown | undefined
-  page?: number
-  page_size?: number
-  search?: string
-  name?: string
-  ordering?: string
-  user?: number
+  [key: string]: unknown | undefined;
+  page?: number;
+  page_size?: number;
+  search?: string;
+  name?: string;
+  ordering?: string;
+  user?: number;
 }
 
 export interface AccessRule {
-  data: any
-  id: number
-  name: string
-  type: number
-  priority: number
-  time_zones: TimeZone[] | []
-  areas: Area[] | []
-  portals?: Portal[] | number[] | []
+  data: any;
+  id: number;
+  name: string;
+  type: number;
+  priority: number;
+  time_zones: TimeZone[] | [];
+  areas: Area[] | [];
+  portals?: Portal[] | number[] | [];
 }
 
 export interface AccessRuleTimeZone {
-  id: number
-  access_rule: AccessRule
-  time_zone: TimeZone
+  id: number;
+  access_rule: AccessRule;
+  time_zone: TimeZone;
 }
 
 export interface AccessRuleTimeZoneCreate {
-  access_rule_id: number
-  time_zone_id: number
+  access_rule_id: number;
+  time_zone_id: number;
 }
 
 export interface Area {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 
 export interface AreaCreate {
-  name: string
+  name: string;
 }
 
 export interface AreaAccessRule {
-  id: number
-  area: Area
-  access_rule: AccessRule
+  id: number;
+  area: Area;
+  access_rule: AccessRule;
 }
 
 export interface Bio {
-  id: number
-  user: number
-  template: string
-  finger_type: number
-  finger_position: number
-  devices: Device[]
+  id: number;
+  user: number;
+  template: string;
+  finger_type: number;
+  finger_position: number;
+  devices: Device[];
 }
 
 export interface BioCreate {
-  user_id: number
-  enrollment_device_id: number
+  user_id: number;
+  enrollment_device_id: number;
 }
 
 export interface Card {
-  id: number
-  number: string
-  value: number
-  user: User
-  devices: Device[]
+  id: number;
+  number: string;
+  value: number;
+  user: User;
+  devices: Device[];
 }
 
 export interface Device {
-  id: number
-  name: string
-  ip: string
-  username: string
-  password?: string
-  is_active: boolean
-  is_default: boolean
-  status?: string
-  updating?: boolean
+  id: number;
+  name: string;
+  ip: string;
+  username: string;
+  password?: string;
+  is_active: boolean;
+  is_default: boolean;
+  status?: string;
+  updating?: boolean;
 }
 
 export interface Group {
-  id: number
-  name: string
-  users?: User[]
-  access_rules?: AccessRule[]
+  id: number;
+  name: string;
+  users?: User[];
+  access_rules?: AccessRule[];
 }
 
 export interface GroupCreate {
-  name: string
+  name: string;
 }
 
 export interface GroupAccessRule {
-  id: number
-  group: Group
-  access_rule: AccessRule
+  id: number;
+  group: Group;
+  access_rule: AccessRule;
 }
 
 export interface GroupAccessRuleCreate {
-  group_id: number
-  access_rule_id: number
+  group_id: number;
+  access_rule_id: number;
 }
 
 export interface Portal {
-  id: number
-  name: string
-  area_from: Area
-  area_to: Area
+  id: number;
+  name: string;
+  area_from: Area;
+  area_to: Area;
 }
 
 export interface PortalAccessRule {
-  id: number
-  portal: Portal
-  access_rule: AccessRule
+  id: number;
+  portal: Portal;
+  access_rule: AccessRule;
 }
 
 export interface PortalAccessRuleCreate {
-  portal_id: number
-  access_rule_id: number
+  portal_id: number;
+  access_rule_id: number;
 }
 
 export interface TimeSpan {
-  id: number
-  time_zone: TimeZone
-  start: number
-  end: number
-  sun: boolean
-  mon: boolean
-  tue: boolean
-  wed: boolean
-  thu: boolean
-  fri: boolean
-  sat: boolean
-  hol1: boolean
-  hol2: boolean
-  hol3: boolean
+  id: number;
+  time_zone: TimeZone;
+  start: number;
+  end: number;
+  sun: boolean;
+  mon: boolean;
+  tue: boolean;
+  wed: boolean;
+  thu: boolean;
+  fri: boolean;
+  sat: boolean;
+  hol1: boolean;
+  hol2: boolean;
+  hol3: boolean;
 }
 
 export interface TimeZone {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 
 export interface UserGroup {
-  id: number
-  user: User
-  group: Group
+  id: number;
+  user: User;
+  group: Group;
 }
 
 export interface UserGroupCreate {
-  id: number
-  user: number
-  group: number
+  id: number;
+  user: number;
+  group: number;
 }
 
 export interface User {
-  id: number
-  name: string
-  registration: string
-  user_type_id: number
-  pin?: string
-  devices: Device[]
-  email?: string
-  user_groups?: Group[]
+  id: number;
+  name: string;
+  registration: string;
+  user_type_id: number;
+  pin?: string;
+  devices: Device[];
+  email?: string;
+  user_groups?: Group[];
 }
 
 export interface UserAccessRule {
-  id: number
-  user: User
-  access_rule: AccessRule
+  id: number;
+  user: User;
+  access_rule: AccessRule;
 }
 
 export interface UserAccessRuleCreate {
-  user: number
-  access_rule: number
+  user: number;
+  access_rule: number;
 }
 
 export interface AccessLogs {
-  id: number
-  time: string
-  event_type: number
-  device: Device
-  identifier_id: string
-  user: User
-  portal: Portal
-  access_rule: AccessRule
-  qr_code: string
-  uhf_value: string
-  pin_value: string
-  card_value: string
-  confidence: number
-  mask: string
+  id: number;
+  time: string;
+  event_type: number;
+  device: Device;
+  identifier_id: string;
+  user: User;
+  portal: Portal;
+  access_rule: AccessRule;
+  qr_code: string;
+  uhf_value: string;
+  pin_value: string;
+  card_value: string;
+  confidence: number;
+  mask: string;
 }
 
 export interface getToken {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface AuthState {
-  access: string | null
-  refresh: string | null
-  loading: boolean
-  error: Error | null
+  access: string | null;
+  refresh: string | null;
+  loading: boolean;
+  error: Error | null;
 }
 
 export interface SystemConfig {
-  id?: number
-  device: number
-  device_name?: string
-  online?: boolean
-  auto_reboot?: boolean
-  catra_timeout?: number
-  local_identification?: boolean
-  exception_mode?: 'none' | 'free' | 'blocked'
-  language?: 'pt_BR' | 'en_US' | 'es_ES'
-  daylight_savings_time_start?: string
-  daylight_savings_time_end?: string
-  created_at?: string
-  updated_at?: string
+  id?: number;
+  device: number;
+  device_name?: string;
+  online?: boolean;
+  auto_reboot?: boolean;
+  catra_timeout?: number;
+  local_identification?: boolean;
+  exception_mode?: "none" | "free" | "blocked";
+  language?: "pt_BR" | "en_US" | "es_ES";
+  daylight_savings_time_start?: string;
+  daylight_savings_time_end?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface HardwareConfig {
-  id?: number
-  device: number
-  device_name?: string
-  beep_enabled?: boolean
-  bell_enabled?: boolean
-  bell_relay?: number
-  exception_mode?: boolean
-  siren_enabled?: boolean
-  siren_relay?: number
-  created_at?: string
-  updated_at?: string
+  id?: number;
+  device: number;
+  device_name?: string;
+  beep_enabled?: boolean;
+  bell_enabled?: boolean;
+  bell_relay?: number;
+  exception_mode?: boolean;
+  siren_enabled?: boolean;
+  siren_relay?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface SecurityConfig {
-  id?: number
-  device: number
-  device_name?: string
-  verbose_logging?: boolean
-  log_type?: 0 | 1 | 2
-  multi_factor_authentication?: boolean
-  created_at?: string
-  updated_at?: string
+  id?: number;
+  device: number;
+  device_name?: string;
+  verbose_logging?: boolean;
+  log_type?: 0 | 1 | 2;
+  multi_factor_authentication?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface UIConfig {
-  id?: number
-  device: number
-  device_name?: string
-  display_brightness?: number
-  display_timeout?: number
-  keyboard_backlight?: boolean
-  welcome_message?: string
-  access_denied_message?: string
-  created_at?: string
-  updated_at?: string
+  id?: number;
+  device: number;
+  device_name?: string;
+  display_brightness?: number;
+  display_timeout?: number;
+  keyboard_backlight?: boolean;
+  welcome_message?: string;
+  access_denied_message?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CatraConfig {
-  id?: number
-  device: number
-  device_name?: string
-  anti_passback?: boolean
-  daily_reset?: boolean
-  gateway?: 'clockwise' | 'anticlockwise'
-  operation_mode?: 'blocked' | 'entrance_open' | 'exit_open' | 'both_open'
-  created_at?: string
-  updated_at?: string
+  id?: number;
+  device: number;
+  device_name?: string;
+  anti_passback?: boolean;
+  daily_reset?: boolean;
+  gateway?: "clockwise" | "anticlockwise";
+  operation_mode?: "blocked" | "entrance_open" | "exit_open" | "both_open";
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PushServerConfig {
-  id?: number
-  device: number
-  device_name?: string
-  push_request_timeout?: number
-  push_request_period?: number
-  push_remote_address?: string
-  created_at?: string
-  updated_at?: string
+  id?: number;
+  device: number;
+  device_name?: string;
+  push_request_timeout?: number;
+  push_request_period?: number;
+  push_remote_address?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface MonitorConfig {
-  id?: number
-  device: number
-  device_name?: string
-  hostname: string
-  port: string
-  path?: string
-  request_timeout?: number
-  is_configured?: boolean
-  full_url?: string
-  notification_url?: string
-  status?: string
-  created_at?: string
-  updated_at?: string
+  id?: number;
+  device: number;
+  device_name?: string;
+  hostname: string;
+  port: string;
+  path?: string;
+  request_timeout?: number;
+  is_configured?: boolean;
+  full_url?: string;
+  notification_url?: string;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Easy Setup
+export interface EasySetupDevice {
+  id: number;
+  name: string;
+  ip: string;
+  is_default: boolean;
+  user_count: number;
+  monitor_configured: boolean;
+  monitor_url: string;
+  selected: boolean;
+}
+
+export interface EasySetupListResponse {
+  devices: EasySetupDevice[];
+  total: number;
+  hint: string;
+}
+
+export interface EasySetupStepResult {
+  ok: boolean;
+  status?: number;
+  count?: number;
+  skipped?: boolean;
+  datetime?: string;
+  full_url?: string;
+  [key: string]: unknown;
+}
+
+export interface EasySetupCleanResult {
+  access_logs: EasySetupStepResult;
+  users: EasySetupStepResult;
+  groups: EasySetupStepResult;
+  [key: string]: EasySetupStepResult;
+}
+
+export interface EasySetupPushResult {
+  users: EasySetupStepResult;
+  pins: EasySetupStepResult;
+  groups: EasySetupStepResult;
+  time_zones: EasySetupStepResult;
+  time_spans: EasySetupStepResult;
+  access_rules: EasySetupStepResult;
+  areas: EasySetupStepResult;
+  portals: EasySetupStepResult;
+  user_groups: EasySetupStepResult;
+  cards: EasySetupStepResult;
+  templates: EasySetupStepResult;
+  [key: string]: EasySetupStepResult;
+}
+
+export interface EasySetupDeviceResult {
+  device: string;
+  steps: {
+    login: EasySetupStepResult;
+    clean: EasySetupCleanResult;
+    datetime: EasySetupStepResult;
+    monitor: EasySetupStepResult;
+    push: EasySetupPushResult;
+  };
+  elapsed_s: number;
+  summary: {
+    records_pushed: number;
+    tables_with_errors: number;
+  };
+}
+
+export interface EasySetupResponse {
+  success: boolean;
+  message: string;
+  devices_ok: number;
+  devices_total: number;
+  results: EasySetupDeviceResult[];
+}
+
+export interface EasySetupErrorResponse {
+  error: string;
 }
