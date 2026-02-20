@@ -16,7 +16,7 @@ class EasySetupService {
     try {
       const data = deviceIds ? { device_ids: deviceIds } : {};
       const response = await api.post("/easy-setup/", data, {
-        timeout: 300_000, // 5 minutos — operação pode demorar
+        timeout: 700_000, // 5 minutos — operação pode demorar
       });
       return response.data as EasySetupResponse;
     } catch (error) {
