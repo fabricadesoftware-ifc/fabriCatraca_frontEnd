@@ -121,7 +121,6 @@
       <v-card-text>
         <v-tabs v-model="tab" bg-color="transparent" color="primary">
           <v-tab value="dados">Dados Gerais</v-tab>
-          <v-tab value="areas">Áreas</v-tab>
           <v-tab value="portals">Entradas/Saídas</v-tab>
         </v-tabs>
 
@@ -154,53 +153,6 @@
                     label="Prioridade"
                     type="number"
                   />
-                </v-col>
-              </v-row>
-            </v-container>
-          </v-window-item>
-
-          <!-- Aba Áreas -->
-          <v-window-item value="areas">
-            <v-container>
-              <v-row>
-                <v-col cols="12">
-                  <v-card>
-                    <v-card-text class="pa-4">
-                      <v-progress-linear
-                        v-if="loading"
-                        color="primary"
-                        indeterminate
-                      />
-
-                      <template v-else>
-                        <div class="text-subtitle-1 mb-4">
-                          Selecione as áreas para esta regra de acesso:
-                        </div>
-
-                        <v-list lines="two">
-                          <v-list-item
-                            v-for="area in areaStore.areas"
-                            :key="area.id"
-                            :title="area.name"
-                          >
-                            <template #append>
-                              <v-switch
-                                color="primary"
-                                hide-details
-                                :model-value="ruleAreas.includes(area.id)"
-                                @update:model-value="(value) => toggleArea(area.id, !!value)"
-                              />
-                            </template>
-                          </v-list-item>
-                        </v-list>
-
-                        <div v-if="areaStore.areas.length === 0" class="text-center pa-4">
-                          <v-icon class="mb-2" color="grey" icon="mdi-map-marker" size="48" />
-                          <div class="text-body-1 text-grey">Nenhuma área disponível</div>
-                        </div>
-                      </template>
-                    </v-card-text>
-                  </v-card>
                 </v-col>
               </v-row>
             </v-container>
