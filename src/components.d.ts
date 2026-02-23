@@ -19,6 +19,7 @@ declare module 'vue' {
     DeviceComponent: typeof import('./components/devices/DeviceComponent.vue')['default']
     DeviceConfigDialog: typeof import('./components/devices/DeviceConfigDialog.vue')['default']
     DeviceDialog: typeof import('./components/devices/DeviceDialog.vue')['default']
+    EasySetupComponent: typeof import('./components/devices/EasySetupComponent.vue')['default']
     ExportUsersDialog: typeof import('./components/export/ExportUsersDialog.vue')['default']
     GroupComponent: typeof import('./components/groups/GroupComponent.vue')['default']
     GroupDialog: typeof import('./components/groups/GroupDialog.vue')['default']

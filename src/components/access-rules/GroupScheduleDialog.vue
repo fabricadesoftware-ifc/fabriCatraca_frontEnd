@@ -18,6 +18,7 @@
   }>()
 
   const groupStore = useGroupStore()
+  const groupIsLocked = ref(false)
   const selectedGroupId = ref<number | null>(null)
   const saving = ref(false)
 
@@ -357,6 +358,10 @@
           await groupStore.loadGroups()
         }
 
+        groupIsLocked.value = false
+        selectedGroupId.value = null
+
+
         // Busca grupo-regra existente
         if (props.accessRule) {
           const relations = await groupAccessRulesService.getGroupAccessRules({
@@ -365,6 +370,7 @@
           const existingGroup = relations.results?.[0]?.group
           if (existingGroup) {
             selectedGroupId.value = existingGroup.id
+            groupIsLocked.value = true
             await loadExistingForGroup(existingGroup.id)
           }
         }
@@ -389,17 +395,6 @@
     <v-card>
       <v-card-title class="text-h6">Definir horários por turma</v-card-title>
       <v-card-text>
-        <v-select
-          v-model="selectedGroupId"
-          density="comfortable"
-          item-title="name"
-          item-value="id"
-          :items="groupStore.groups"
-          label="Turma (Grupo)"
-          prepend-inner-icon="mdi-account-group"
-          variant="outlined"
-        />
-
         <v-alert
           class="mt-3 mb-5"
           density="comfortable"
