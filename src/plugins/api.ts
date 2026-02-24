@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/stores";
 import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import axios from "axios";
 import router from "@/router";
@@ -44,10 +45,11 @@ export function createApi(basePrefix = "", options: CreateApiOptions = {}): Axio
   // Interceptor de response → trata erros globais
   api.interceptors.response.use(
     (response: AxiosResponse) => response,
-    (error) => {
+    async (error) => {
       if (error.response && error.response.status === 401) {
-        localStorage.removeItem("access_token");
-        router.push("/login");
+        // @ts-ignore
+        const authStore = useAuthStore();
+        await authStore.refreshAccessToken()
       }
       return Promise.reject(error);
     },

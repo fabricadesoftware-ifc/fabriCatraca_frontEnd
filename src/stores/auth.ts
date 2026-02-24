@@ -1,78 +1,127 @@
-import type { getToken, User } from '@/types'
-import { defineStore } from 'pinia'
-import router from '@/router'
-import { AuthService } from '@/services'
-import { showMessage } from '@/utils/showmsg'
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
+import type { getToken, User } from "@/types";
+import { AuthService } from "@/services";
+import router from "@/router";
+import { showMessage } from "@/utils/showmsg";
 
-export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    me: null as User | null,
-    access: '' as string,
-    refresh: '' as string,
-    loading: false as boolean,
-    error: null as string | null,
-  }),
+export const useAuthStore = defineStore(
+  "auth",
+  () => {
+    // State
+    const me = ref<User | null>(null);
+    const access = ref<string>("");
+    const refresh = ref<string>("");
+    const loading = ref<boolean>(false);
+    const error = ref<string | null>(null);
 
-  getters: {
-    user: state => state.me,
-    isAuthenticated: state => !!state.access,
-    getAccessToken: state => state.access,
-    getRefreshToken: state => state.refresh,
-    isLoading: state => state.loading,
-    getError: state => state.error,
-  },
+    // Getters (computed)
+    const user = computed(() => me.value);
+    const isAuthenticated = computed(() => !!access.value);
+    const getAccessToken = computed(() => access.value);
+    const getRefreshToken = computed(() => refresh.value);
+    const isLoading = computed(() => loading.value);
+    const getError = computed(() => error.value);
 
-  actions: {
-    async GetToken (user: getToken) {
-      this.loading = true
+    // Actions
+
+    async function getToken(credentials: getToken) {
+      loading.value = true;
+      error.value = null;
+
       try {
-        const response = await AuthService.getToken(user)
-        this.access = response.access
-        this.refresh = response.refresh
-        localStorage.setItem('access_token', this.access)
-        localStorage.setItem('refresh_token', this.refresh)
-      } catch (error) {
-        console.error(error)
-        showMessage('Erro ao se logar, verifique suas credenciais!', 'error', 1500, 'top-right')
-        this.error = error instanceof Error ? error.message : String(error)
-        throw error
+        const response = await AuthService.getToken(credentials);
+
+        access.value = response.access;
+        refresh.value = response.refresh;
+
+        showMessage("Logado com sucesso", "success", 1500, "top-right");
+        await getMe();
+        router.push("/");
+
+        return true;
+      } catch (err: any) {
+        error.value =
+          err?.response?.data?.detail || "Erro ao se logar, verifique suas credenciais!";
+
+        showMessage(error.value, "error", 1500, "top-right");
+        return false;
       } finally {
-        if (!this.error) {
-          showMessage('logado com sucesso', 'success', 1500, 'top-right')
-          router.push('/')
-        }
-        this.loading = false
-        this.error = null
+        loading.value = false;
       }
-    },
-    async getMe () {
-      this.loading = true
+    }
+
+    async function getMe() {
+      loading.value = true;
       try {
-        const response = await AuthService.getMe()
-        this.me = response
-      } catch (error) {
-        console.error(error)
-        throw error
+        const response = await AuthService.getMe();
+        me.value = response;
+      } catch (err) {
+        console.error(err);
+        logout();
       } finally {
-        this.loading = false
+        loading.value = false;
       }
-    },
-    async takeDatas (user: Array<{ value: getToken }>) {
-      const values = user.map((u: { value: any }) => u.value)
-      const User: getToken = {
+    }
+
+    async function takeDatas(user: Array<{ value: string }>) {
+      const values = user.map((u) => u.value);
+
+      const credentials: getToken = {
         email: values[0],
         password: values[1],
+      };
+
+      return await getToken(credentials);
+    }
+
+    function logout() {
+      me.value = null;
+      access.value = "";
+      refresh.value = "";
+
+      router.push("/login");
+      showMessage("Deslogado com sucesso", "success", 1500, "top-right");
+    }
+
+    async function refreshAccessToken() {
+      try {
+        const response = await AuthService.refreshToken();
+        access.value = response;
+        return response;
+      } catch (err) {
+        logout();
+        throw err;
       }
-      await this.GetToken(User)
-    },
-    logout () {
-      this.me = null
-      this.access = ''
-      this.refresh = ''
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
-      router.push('/login')
-      showMessage('Deslogado com sucesso', 'success', 1500, 'top-right')
-    },
+    }
+
+    function clearError() {
+      error.value = null;
+    }
+
+    return {
+      // state
+      me,
+      access,
+      refresh,
+      loading,
+      error,
+
+      // getters
+      user,
+      isAuthenticated,
+      getAccessToken,
+      getRefreshToken,
+      isLoading,
+      getError,
+
+      // actions
+      getToken,
+      getMe,
+      takeDatas,
+      logout,
+      refreshAccessToken,
+      clearError,
+    };
   },
-})
+);

@@ -1,83 +1,81 @@
 <script lang="ts" setup>
-  import type { User as BaseUser } from '@/types'
-  import { onMounted, ref, toValue, watch } from 'vue'
-  import { useGroupStore } from '@/stores'
-  import UserAccessLogsPanel from './UserAccessLogsPanel.vue'
-  import UserBioPanel from './UserBioPanel.vue'
+import type { User as BaseUser } from "@/types";
+import { onMounted, ref, toValue, watch } from "vue";
+import { useGroupStore } from "@/stores";
+import UserAccessLogsPanel from "./UserAccessLogsPanel.vue";
+import UserBioPanel from "./UserBioPanel.vue";
 
-  interface User extends Omit<BaseUser, 'user_groups'> {
-    user_groups?: (number | { id: number, name: string })[]
-  }
+interface User extends Omit<BaseUser, "user_groups"> {
+  user_groups?: (number | { id: number; name: string })[];
+}
 
-  const props = defineProps<{
-    modelValue: boolean
-    user: User | null
-  }>()
+const props = defineProps<{
+  modelValue: boolean;
+  user: User | null;
+}>();
 
-  const userGroups = ref<number[]>([])
-  function setUserGroups (newGroups: number[]) {
-    userGroups.value = newGroups
-  }
+const userGroups = ref<number[]>([]);
+function setUserGroups(newGroups: number[]) {
+  userGroups.value = newGroups;
+}
 
-  const emit = defineEmits<{
-    (e: 'update:modelValue', value: boolean): void
-    (e: 'save', value: User): void
-  }>()
+const emit = defineEmits<{
+  (e: "update:modelValue", value: boolean): void;
+  (e: "save", value: User): void;
+}>();
 
-  const groupStore = useGroupStore()
-  const tab = ref('dados')
-  const isVisitor = ref(false)
-  const name = ref('')
-  const registration = ref('')
-  const pin = ref('')
-  const showPin = ref(false)
-  const loading = ref(false)
+const groupStore = useGroupStore();
+const tab = ref("dados");
+const isVisitor = ref(false);
+const name = ref("");
+const registration = ref("");
+const pin = ref("");
+const showPin = ref(false);
+const loading = ref(false);
 
-  // Atualiza os campos locais quando o props.user mudar
-  watch(
-    () => props.user,
-    newUser => {
-      if (newUser) {
-        name.value = newUser.name
-        registration.value = newUser.registration || ''
-        pin.value = newUser.pin || ''
-        showPin.value = false
-        isVisitor.value = newUser.user_type_id === 1
-        userGroups.value
-          = newUser.user_groups?.map(g => (typeof g === 'number' ? g : g.id))
-            || []
-      }
-    },
-    { immediate: true },
-  )
-
-  function closeDialog () {
-    emit('update:modelValue', false)
-  }
-
-  async function salvarUsuario () {
-    if (props.user) {
-      emit('save', {
-        ...props.user,
-        name: name.value,
-        registration: registration.value,
-        user_type_id: isVisitor.value ? 1 : (null as unknown as number),
-        user_groups: userGroups.value,
-      })
-      closeDialog()
+// Atualiza os campos locais quando o props.user mudar
+watch(
+  () => props.user,
+  (newUser) => {
+    if (newUser) {
+      name.value = newUser.name;
+      registration.value = newUser.registration || "";
+      pin.value = newUser.pin || "";
+      showPin.value = false;
+      isVisitor.value = newUser.user_type_id === 1;
+      userGroups.value = newUser.user_groups?.map((g) => (typeof g === "number" ? g : g.id)) || [];
     }
-  }
+  },
+  { immediate: true },
+);
 
-  onMounted(async () => {
-    loading.value = true
-    try {
-      await groupStore.loadGroups()
-    } catch (error) {
-      console.error(error)
-    } finally {
-      loading.value = false
-    }
-  })
+function closeDialog() {
+  emit("update:modelValue", false);
+}
+
+async function salvarUsuario() {
+  if (props.user) {
+    emit("save", {
+      ...props.user,
+      name: name.value,
+      registration: registration.value,
+      user_type_id: isVisitor.value ? 1 : (null as unknown as number),
+      user_groups: userGroups.value,
+    });
+    closeDialog();
+  }
+}
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    await groupStore.loadGroups();
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
+});
 </script>
 <template>
   <v-dialog
@@ -91,12 +89,12 @@
       <v-card-text>
         <v-tabs v-model="tab" bg-color="transparent" color="primary">
           <v-tab value="dados">Dados Gerais</v-tab>
-          <v-tab value="departamentos">Grupos</v-tab>
-          <v-tab value="cartoes">Cartões</v-tab>
-          <v-tab value="horarios">Horários</v-tab>
-          <v-tab value="pin">PIN</v-tab>
-          <v-tab value="biometria">Biometria</v-tab>
-          <v-tab value="acessos">Acessos</v-tab>
+          <v-tab value="departamentos" v-if="props.user.name">Grupos</v-tab>
+          <v-tab value="cartoes" v-if="props.user.name">Cartões</v-tab>
+          <v-tab value="horarios" v-if="props.user.name">Horários</v-tab>
+          <v-tab value="pin" v-if="props.user.name">PIN</v-tab>
+          <v-tab value="biometria" v-if="props.user.name">Biometria</v-tab>
+          <v-tab value="acessos" v-if="props.user.name">Acessos</v-tab>
         </v-tabs>
 
         <v-window v-model="tab">
@@ -114,15 +112,11 @@
                   />
                   <v-text-field v-model="registration" label="Matrícula" />
 
-                  <v-switch
-                    v-model="isVisitor"
-                    color="warning"
-                    label="Visitante"
-                  />
+                  <v-switch v-model="isVisitor" color="warning" label="Visitante" />
                 </v-col>
 
                 <!-- Coluna direita -->
-                <v-col class="d-flex flex-column align-center" cols="4">
+                <!-- <v-col class="d-flex flex-column align-center" cols="4">
                   <v-avatar class="mb-4" size="150">
                     <v-img
                       src="https://cdn.vuetifyjs.com/images/profiles/avatar.jpg"
@@ -131,7 +125,7 @@
                   <v-btn class="mb-2" color="primary">Arquivo</v-btn>
                   <v-btn class="mb-2" color="primary">Câmera</v-btn>
                   <v-btn class="mb-2" color="error">Remover</v-btn>
-                </v-col>
+                </v-col> -->
               </v-row>
             </v-container>
           </v-window-item>
@@ -143,11 +137,7 @@
                 <v-col cols="12">
                   <v-card>
                     <v-card-text class="pa-4">
-                      <v-progress-linear
-                        v-if="loading"
-                        color="primary"
-                        indeterminate
-                      />
+                      <v-progress-linear v-if="loading" color="primary" indeterminate />
 
                       <template v-else>
                         <div class="text-subtitle-1 mb-4">
@@ -170,9 +160,7 @@
                                     const groups = toValue(userGroups);
                                     const newGroups = value
                                       ? [...groups, group.id]
-                                      : groups.filter(
-                                        (gid: number) => gid !== group.id,
-                                      );
+                                      : groups.filter((gid: number) => gid !== group.id);
                                     setUserGroups(newGroups);
                                   }
                                 "
@@ -181,19 +169,9 @@
                           </v-list-item>
                         </v-list>
 
-                        <div
-                          v-if="groupStore.groups.length === 0"
-                          class="text-center pa-4"
-                        >
-                          <v-icon
-                            class="mb-2"
-                            color="grey"
-                            icon="mdi-account-group"
-                            size="48"
-                          />
-                          <div class="text-body-1 text-grey">
-                            Nenhum grupo disponível
-                          </div>
+                        <div v-if="groupStore.groups.length === 0" class="text-center pa-4">
+                          <v-icon class="mb-2" color="grey" icon="mdi-account-group" size="48" />
+                          <div class="text-body-1 text-grey">Nenhum grupo disponível</div>
                         </div>
                       </template>
                     </v-card-text>
@@ -210,24 +188,20 @@
                 <v-col cols="12" md="6">
                   <v-card elevation="2" rounded="lg">
                     <v-card-text class="text-center pa-6">
-                      <v-icon
-                        class="mb-4"
-                        color="primary"
-                        icon="mdi-lock"
-                        size="48"
-                      />
+                      <v-icon class="mb-4" color="primary" icon="mdi-lock" size="48" />
                       <div class="text-subtitle-1 mb-4">PIN do Usuário</div>
 
                       <div v-if="pin" class="d-flex flex-column align-center">
                         <div class="d-flex align-center ga-2 mb-4">
                           <v-text-field
-                            class="pin-field"
+                            class="px-4 pin-input"
                             density="comfortable"
                             hide-details
                             :model-value="pin"
                             readonly
                             :type="showPin ? 'text' : 'password'"
                             variant="outlined"
+                            style="min-width: 220px; max-width: 100%; font-size: 1.5rem; letter-spacing: 0.3em;"
                           >
                             <template #append-inner>
                               <v-btn
@@ -240,21 +214,13 @@
                           </v-text-field>
                         </div>
 
-                        <v-chip
-                          color="success"
-                          prepend-icon="mdi-check-circle"
-                          variant="tonal"
-                        >
+                        <v-chip color="success" prepend-icon="mdi-check-circle" variant="tonal">
                           PIN cadastrado
                         </v-chip>
                       </div>
 
                       <div v-else class="d-flex flex-column align-center">
-                        <v-chip
-                          color="warning"
-                          prepend-icon="mdi-alert-circle"
-                          variant="tonal"
-                        >
+                        <v-chip color="warning" prepend-icon="mdi-alert-circle" variant="tonal">
                           Nenhum PIN cadastrado
                         </v-chip>
                       </div>
@@ -275,16 +241,8 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="error"
-          variant="text"
-          @click="closeDialog"
-        >Cancelar</v-btn>
-        <v-btn
-          color="primary"
-          variant="flat"
-          @click="salvarUsuario"
-        >Salvar</v-btn>
+        <v-btn color="error" variant="text" @click="closeDialog">Cancelar</v-btn>
+        <v-btn color="primary" variant="flat" @click="salvarUsuario">Salvar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

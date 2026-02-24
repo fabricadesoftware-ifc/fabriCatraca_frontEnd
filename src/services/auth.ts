@@ -26,6 +26,22 @@ class AuthService {
       throw error
     }
   }
+
+  async refreshToken () {
+    try {
+      const refreshToken = localStorage.getItem('refresh_token')
+      if (!refreshToken) {
+        throw new Error('No refresh token available')
+      }
+      const response = await api.post('refresh/', { refresh: refreshToken })
+      const { access } = response.data
+      localStorage.setItem('access_token', access)
+      return access
+    } catch (error) {
+      console.error('Error refreshing token:', error)
+      throw error
+    }
+  }
 }
 
 export default new AuthService()
