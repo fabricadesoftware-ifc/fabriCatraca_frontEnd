@@ -44,7 +44,7 @@ export const useAuthStore = defineStore(
         error.value =
           err?.response?.data?.detail || "Erro ao se logar, verifique suas credenciais!";
 
-        showMessage(error.value, "error", 1500, "top-right");
+        showMessage(error.value ?? "Erro desconhecido", "error", 1500, "top-right");
         return false;
       } finally {
         loading.value = false;
