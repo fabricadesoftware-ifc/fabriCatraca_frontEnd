@@ -47,9 +47,11 @@ export function createApi(basePrefix = "", options: CreateApiOptions = {}): Axio
     (response: AxiosResponse) => response,
     async (error) => {
       if (error.response && error.response.status === 401) {
-        // @ts-ignore
-        const authStore = useAuthStore();
-        await authStore.refreshAccessToken()
+        // // @ts-ignore
+        // const authStore = useAuthStore();
+        // const responde = await authStore.refreshAccessToken()
+        // if (!responde) {   router.push("/login");
+        // }
       }
       return Promise.reject(error);
     },

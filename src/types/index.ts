@@ -392,3 +392,45 @@ export interface EasySetupResponse {
 export interface EasySetupErrorResponse {
   error: string;
 }
+
+// Easy Setup Assíncrono
+export interface EasySetupAsyncResponse {
+  task_id: string;
+  message: string;
+  device_ids: number[];
+  status_url: string;
+}
+
+export interface EasySetupStatusDevice {
+  device_name: string;
+  status: "pending" | "running" | "success" | "partial" | "failed";
+  report?: EasySetupDeviceResult;
+}
+
+export interface EasySetupStatusResponse {
+  task_id: string;
+  overall_status: "pending" | "running" | "success" | "partial" | "failed";
+  completed: number;
+  total: number;
+  devices: EasySetupStatusDevice[];
+}
+
+export interface EasySetupHistoryEntry {
+  task_id: string;
+  status: "pending" | "running" | "success" | "partial" | "failed";
+  device_count: number;
+  started_at: string;
+  finished_at: string | null;
+}
+
+export interface EasySetupHistoryResponse {
+  results: EasySetupHistoryEntry[];
+}
+
+// Cards com base em biometria
+export interface CardFromBioPayload {
+  user_id: number;
+  card_number: string;
+  card_value: number;
+  device_ids?: number[];
+}

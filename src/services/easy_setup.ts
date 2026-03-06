@@ -1,4 +1,9 @@
-import type { EasySetupListResponse, EasySetupResponse } from "@/types";
+import type {
+  EasySetupAsyncResponse,
+  EasySetupHistoryResponse,
+  EasySetupListResponse,
+  EasySetupStatusResponse,
+} from "@/types";
 import { controlIdConfigApi as api } from "@/plugins/api";
 
 class EasySetupService {
@@ -12,13 +17,31 @@ class EasySetupService {
     }
   }
 
-  async executeSetup(deviceIds?: number[]): Promise<EasySetupResponse> {
+  async executeSetup(deviceIds?: number[]): Promise<EasySetupAsyncResponse> {
     try {
       const data = deviceIds ? { device_ids: deviceIds } : {};
-      const response = await api.post("/easy-setup/", data, {
-        timeout: 700_000, // 5 minutos — operação pode demorar
-      });
-      return response.data as EasySetupResponse;
+      const response = await api.post("/easy-setup/", data);
+      return response.data as EasySetupAsyncResponse;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async getStatus(taskId: string): Promise<EasySetupStatusResponse> {
+    try {
+      const response = await api.get(`/easy-setup/status/${taskId}/`);
+      return response.data as EasySetupStatusResponse;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async getHistory(limit = 10): Promise<EasySetupHistoryResponse> {
+    try {
+      const response = await api.get("/easy-setup/history/", { params: { limit } });
+      return response.data as EasySetupHistoryResponse;
     } catch (error) {
       console.error(error);
       throw error;

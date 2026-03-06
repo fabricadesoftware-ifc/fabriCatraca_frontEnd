@@ -40,6 +40,7 @@ declare module 'vue' {
     UIConfigTab: typeof import('./components/devices/config-tabs/UIConfigTab.vue')['default']
     UserAccessLogsPanel: typeof import('./components/users/UserAccessLogsPanel.vue')['default']
     UserBioPanel: typeof import('./components/users/UserBioPanel.vue')['default']
+    UserCardsPanel: typeof import('./components/users/UserCardsPanel.vue')['default']
     UserComponent: typeof import('./components/users/UserComponent.vue')['default']
     UserDialog: typeof import('./components/users/UserDialog.vue')['default']
   }

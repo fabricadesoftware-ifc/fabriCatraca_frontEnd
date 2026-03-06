@@ -4,6 +4,7 @@ import { onMounted, ref, toValue, watch } from "vue";
 import { useGroupStore } from "@/stores";
 import UserAccessLogsPanel from "./UserAccessLogsPanel.vue";
 import UserBioPanel from "./UserBioPanel.vue";
+import UserCardsPanel from "./UserCardsPanel.vue";
 
 interface User extends Omit<BaseUser, "user_groups"> {
   user_groups?: (number | { id: number; name: string })[];
@@ -180,7 +181,9 @@ onMounted(async () => {
               </v-row>
             </v-container>
           </v-window-item>
-          <v-window-item value="cartoes"><p>Gerenciar cartões...</p></v-window-item>
+          <v-window-item value="cartoes">
+            <UserCardsPanel :user-id="props.user.id" />
+          </v-window-item>
           <v-window-item value="horarios"><p>Configurar horários...</p></v-window-item>
           <v-window-item value="pin">
             <v-container>
@@ -201,7 +204,12 @@ onMounted(async () => {
                             readonly
                             :type="showPin ? 'text' : 'password'"
                             variant="outlined"
-                            style="min-width: 220px; max-width: 100%; font-size: 1.5rem; letter-spacing: 0.3em;"
+                            style="
+                              min-width: 220px;
+                              max-width: 100%;
+                              font-size: 1.5rem;
+                              letter-spacing: 0.3em;
+                            "
                           >
                             <template #append-inner>
                               <v-btn
