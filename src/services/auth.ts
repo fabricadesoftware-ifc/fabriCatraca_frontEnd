@@ -1,47 +1,51 @@
-import type { BaseResponse, getToken, User } from '@/types'
-import { api, usersApi } from '@/plugins/api'
+import type { getToken, User } from "@/types";
+import { authApi, usersApi } from "@/plugins/api";
+
+interface TokenResponse {
+  access: string;
+  refresh: string;
+}
 
 class AuthService {
-  async getToken (user: getToken): Promise<BaseResponse<getToken>> {
+  async getToken(user: getToken): Promise<TokenResponse> {
     try {
-      const response = await api.post('token/', user)
-      return response.data as BaseResponse<getToken>
+      const response = await authApi.post("token/", user);
+      return response.data as TokenResponse;
     } catch (error) {
-      console.error(error)
-      throw error
+      console.error(error);
+      throw error;
     }
   }
 
-  async getMe (): Promise<User> {
+  async getMe(): Promise<User> {
     try {
-      const accessToken = localStorage.getItem('access_token')
-      const response = await usersApi.get('users/me/', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-      return response.data as User
+      const response = await usersApi.get("/users/me/");
+      return response.data as User;
     } catch (error) {
-      console.error(error)
-      throw error
+      console.error(error);
+      throw error;
     }
   }
 
-  async refreshToken () {
+  async refreshToken(): Promise<string> {
     try {
-      const refreshToken = localStorage.getItem('refresh_token')
+      const refreshToken = localStorage.getItem("refresh_token");
+
       if (!refreshToken) {
-        throw new Error('No refresh token available')
+        throw new Error("No refresh token available");
       }
-      const response = await api.post('refresh/', { refresh: refreshToken })
-      const { access } = response.data
-      localStorage.setItem('access_token', access)
-      return access
+
+      const response = await authApi.post("refresh/", { refresh: refreshToken });
+      const { access } = response.data as Pick<TokenResponse, "access">;
+
+      localStorage.setItem("access_token", access);
+
+      return access;
     } catch (error) {
-      console.error('Error refreshing token:', error)
-      throw error
+      console.error("Error refreshing token:", error);
+      throw error;
     }
   }
 }
 
-export default new AuthService()
+export default new AuthService();

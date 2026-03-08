@@ -1,7 +1,5 @@
-import { useAuthStore } from "@/stores";
 import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import axios from "axios";
-import router from "@/router";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -20,18 +18,17 @@ export function createApi(basePrefix = "", options: CreateApiOptions = {}): Axio
     timeout: 30_000,
   });
 
-  // Interceptor de request → injeta token automaticamente
   if (attachAuth) {
     api.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         const token = localStorage.getItem("access_token");
+
         if (token && config.headers) {
-          config.headers["Authorization"] = `Bearer ${token}`;
+          config.headers.Authorization = `Bearer ${token}`;
         } else if (config.headers) {
-          delete config.headers["Authorization"];
+          delete config.headers.Authorization;
         }
 
-        // Se é FormData, remover Content-Type para deixar o navegador definir com boundary
         if (config.data instanceof FormData && config.headers) {
           delete config.headers["Content-Type"];
         }
@@ -42,28 +39,17 @@ export function createApi(basePrefix = "", options: CreateApiOptions = {}): Axio
     );
   }
 
-  // Interceptor de response → trata erros globais
   api.interceptors.response.use(
     (response: AxiosResponse) => response,
-    async (error) => {
-      if (error.response && error.response.status === 401) {
-        // // @ts-ignore
-        // const authStore = useAuthStore();
-        // const responde = await authStore.refreshAccessToken()
-        // if (!responde) {   router.push("/login");
-        // }
-      }
-      return Promise.reject(error);
-    },
+    async (error) => Promise.reject(error),
   );
 
   return api;
 }
 
-// Instâncias exportadas
 export const api = createApi();
+export const authApi = createApi("", { attachAuth: false });
 export const controlIdApi = createApi("/control_id");
 export const controlIdConfigApi = createApi("/control_id_config");
 export const controlIdMonitorApi = createApi("/control_id_monitor");
 export const usersApi = createApi("/users");
-export const getToken = createApi("/token", { attachAuth: false }); // não envia token
