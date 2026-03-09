@@ -177,6 +177,7 @@ export interface User {
   registration: string;
   user_type_id: number;
   pin?: string;
+  device_admin?: boolean;
   devices: Device[];
   email?: string;
   user_groups?: Group[];
@@ -352,6 +353,7 @@ export interface EasySetupCleanResult {
 
 export interface EasySetupPushResult {
   users: EasySetupStepResult;
+  user_roles: EasySetupStepResult;
   pins: EasySetupStepResult;
   groups: EasySetupStepResult;
   time_zones: EasySetupStepResult;
@@ -360,6 +362,10 @@ export interface EasySetupPushResult {
   areas: EasySetupStepResult;
   portals: EasySetupStepResult;
   user_groups: EasySetupStepResult;
+  user_access_rules: EasySetupStepResult;
+  group_access_rules: EasySetupStepResult;
+  access_rule_time_zones: EasySetupStepResult;
+  portal_access_rules: EasySetupStepResult;
   cards: EasySetupStepResult;
   templates: EasySetupStepResult;
   [key: string]: EasySetupStepResult;

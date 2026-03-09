@@ -137,18 +137,29 @@ function getStepColor(step: EasySetupStepResult): string {
 
 function getPushEntries(push: Record<string, EasySetupStepResult>) {
   const items: Array<EasySetupStepResult & { name: string }> = [];
-  const keys = [
+  const preferredKeys = [
     "users",
+    "user_roles",
     "pins",
-    "groups",
     "time_zones",
     "time_spans",
     "access_rules",
+    "groups",
     "areas",
     "portals",
     "user_groups",
+    "user_access_rules",
+    "group_access_rules",
+    "access_rule_time_zones",
+    "portal_access_rules",
     "cards",
     "templates",
+  ];
+  const keys = [
+    ...preferredKeys.filter((key) => key in push),
+    ...Object.keys(push).filter(
+      (key) => !preferredKeys.includes(key) && !key.startsWith("_"),
+    ),
   ];
   for (const key of keys) {
     if (push[key]) {
@@ -160,17 +171,22 @@ function getPushEntries(push: Record<string, EasySetupStepResult>) {
 
 function formatPushName(key: string): string {
   const names: Record<string, string> = {
-    users: "Usuários",
+    users: "Usuarios",
+    user_roles: "Perfis Administrativos",
     pins: "PINs",
     groups: "Grupos",
     time_zones: "Zonas de Tempo",
     time_spans: "Intervalos de Tempo",
     access_rules: "Regras de Acesso",
-    areas: "Áreas",
+    areas: "Areas",
     portals: "Portais",
-    user_groups: "Grupos de Usuários",
-    cards: "Cartões",
-    templates: "Templates Biométricos",
+    user_groups: "Grupos de Usuarios",
+    user_access_rules: "Regras por Usuario",
+    group_access_rules: "Regras por Grupo",
+    access_rule_time_zones: "Horarios das Regras",
+    portal_access_rules: "Regras por Portal",
+    cards: "Cartoes",
+    templates: "Templates Biometricos",
   };
   return names[key] || key;
 }
@@ -629,7 +645,7 @@ onUnmounted(() => {
                   <div class="d-flex align-center justify-space-between">
                     <span class="text-body-2 text-medium-emphasis">
                       <v-icon icon="mdi-account-group" size="16" class="mr-1" />
-                      Usuários vinculados
+                      Usuarios globais
                     </span>
                     <v-chip color="info" size="small" variant="tonal">
                       {{ device.user_count }}
@@ -651,7 +667,7 @@ onUnmounted(() => {
                         size="14"
                         start
                       />
-                      {{ device.monitor_configured ? "Configurado" : "Não configurado" }}
+                      {{ device.monitor_configured ? "Disponivel" : "Nao configurado" }}
                     </v-chip>
                   </div>
                 </div>

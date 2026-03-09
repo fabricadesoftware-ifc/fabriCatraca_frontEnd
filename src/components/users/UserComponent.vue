@@ -36,6 +36,7 @@
   const headers = [
     { title: 'ID', key: 'id', align: 'start' as const },
     { title: 'Nome', key: 'name', align: 'start' as const },
+    { title: 'Admin catraca', key: 'device_admin', align: 'start' as const },
     { title: 'Turma', key: 'user_groups', align: 'start' as const },
     { title: 'Matrícula', key: 'registration', align: 'start' as const },
   ]
@@ -63,6 +64,7 @@
           name: user.name,
           registration: user.registration,
           user_type_id: user.user_type_id,
+          device_admin: user.device_admin,
         })
 
         // Para usuário novo, adicionar todos os grupos selecionados
@@ -83,6 +85,7 @@
           = currentUser.name !== user.name
             || currentUser.registration !== user.registration
             || currentUser.user_type_id !== user.user_type_id
+            || !!currentUser.device_admin !== !!user.device_admin
 
         // Atualizar dados básicos apenas se mudaram
         savedUser = basicDataChanged
@@ -90,6 +93,7 @@
             name: user.name,
             registration: user.registration,
             user_type_id: user.user_type_id,
+            device_admin: user.device_admin,
           })
           : currentUser
 
@@ -181,6 +185,7 @@
       registration: '',
       user_groups: [],
       user_type_id: 1,
+      device_admin: false,
       devices: [],
       email: '',
       pin: '',
@@ -275,6 +280,16 @@
             : "Grupo " + item.user_groups[0]
           : "Não há grupo"
       }}
+    </template>
+
+    <template #item.device_admin="{ item }">
+      <v-chip
+        :color="item.device_admin ? 'primary' : 'grey'"
+        size="small"
+        variant="tonal"
+      >
+        {{ item.device_admin ? "Sim" : "Nao" }}
+      </v-chip>
     </template>
   </v-data-table-server>
 

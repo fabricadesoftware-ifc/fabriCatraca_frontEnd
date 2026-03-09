@@ -28,6 +28,7 @@ const emit = defineEmits<{
 const groupStore = useGroupStore();
 const tab = ref("dados");
 const isVisitor = ref(false);
+const deviceAdmin = ref(false);
 const name = ref("");
 const registration = ref("");
 const pin = ref("");
@@ -44,6 +45,7 @@ watch(
       pin.value = newUser.pin || "";
       showPin.value = false;
       isVisitor.value = newUser.user_type_id === 1;
+      deviceAdmin.value = !!newUser.device_admin;
       userGroups.value = newUser.user_groups?.map((g) => (typeof g === "number" ? g : g.id)) || [];
     }
   },
@@ -61,6 +63,7 @@ async function salvarUsuario() {
       name: name.value,
       registration: registration.value,
       user_type_id: isVisitor.value ? 1 : (null as unknown as number),
+      device_admin: deviceAdmin.value,
       user_groups: userGroups.value,
     });
     closeDialog();
@@ -114,6 +117,11 @@ onMounted(async () => {
                   <v-text-field v-model="registration" label="Matrícula" />
 
                   <v-switch v-model="isVisitor" color="warning" label="Visitante" />
+                  <v-switch
+                    v-model="deviceAdmin"
+                    color="primary"
+                    label="Administrador da catraca"
+                  />
                 </v-col>
 
                 <!-- Coluna direita -->
