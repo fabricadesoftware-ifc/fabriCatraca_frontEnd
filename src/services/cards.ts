@@ -1,6 +1,7 @@
 import type {
   BaseResponse,
   Card,
+  CardCreate,
   CardFromBioPayload,
   PaginatedResponse,
   QueryParams,
@@ -28,7 +29,7 @@ class CardsService {
     }
   }
 
-  async createCard(data: Partial<Card>): Promise<BaseResponse<Card>> {
+  async createCard(data: CardCreate): Promise<BaseResponse<Card>> {
     try {
       const response = await api.post("/cards/", data);
       return response.data;

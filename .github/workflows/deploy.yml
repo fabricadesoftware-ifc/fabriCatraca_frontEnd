@@ -5,17 +5,9 @@ on:
     branches:
     - main
 
-concurrency:
-  group: deploy-catraca-frontend-production
-  cancel-in-progress: false
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-24.04
-    env:
-      DOKKU_HOST: app1.fabricadesoftware.ifc.edu.br
-      DOKKU_PORT: '1022'
-      DOKKU_APP: catraca
     steps:
       - name: Cloning repo
         uses: actions/checkout@v4
@@ -39,27 +31,6 @@ jobs:
 
       - name: Build project
         run: npm run build
-
-      - name: Setup SSH key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Trust Dokku host
-        run: ssh-keyscan -p "$DOKKU_PORT" "$DOKKU_HOST" >> ~/.ssh/known_hosts
-
-      - name: Wait for Dokku app unlock
-        run: |
-          for i in $(seq 1 60); do
-            if ssh -p "$DOKKU_PORT" dokku@"$DOKKU_HOST" apps:locked "$DOKKU_APP" | grep -q "false"; then
-              echo "App desbloqueado; seguindo com o deploy."
-              exit 0
-            fi
-            echo "App ainda bloqueado; aguardando 10s..."
-            sleep 10
-          done
-          echo "Timeout aguardando unlock do app $DOKKU_APP"
-          exit 1
 
       - name: Push to dokku
         uses: dokku/github-action@master

@@ -85,6 +85,11 @@ export interface Card {
   devices: Device[];
 }
 
+export interface CardCreate {
+  user_id: number;
+  enrollment_device_id: number;
+}
+
 export interface Device {
   id: number;
   name: string;
