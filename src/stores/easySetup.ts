@@ -119,11 +119,26 @@ export const useEasySetupStore = defineStore("easySetup", () => {
 
   const loadHistory = async (limit = 10) => {
     loadingHistory.value = true;
+    error.value = null;
     try {
       const data = await EasySetupService.getHistory(limit);
-      history.value = data.results;
+      const rawResults = Array.isArray((data as any).results)
+        ? (data as any).results
+        : Array.isArray((data as any).executions)
+          ? (data as any).executions
+          : [];
+
+      history.value = rawResults.map((entry: any) => ({
+        task_id: entry.task_id,
+        status: entry.status ?? entry.overall_status ?? "pending",
+        device_count: entry.device_count ?? entry.total_devices ?? 0,
+        started_at: entry.started_at,
+        finished_at: entry.finished_at ?? null,
+      }));
     } catch (err: any) {
       console.error("Erro ao carregar histórico:", err);
+      error.value = err?.response?.data?.error || "Erro ao carregar histórico do Easy Setup";
+      history.value = [];
     } finally {
       loadingHistory.value = false;
     }
