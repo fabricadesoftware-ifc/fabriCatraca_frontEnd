@@ -38,6 +38,11 @@ const items = [
     to: "/devices",
   },
   {
+    title: "Acoes em Catracas",
+    icon: "mdi-play-circle-outline",
+    to: "/device-actions",
+  },
+  {
     title: "Easy Setup",
     icon: "mdi-cog-sync",
     to: "/easy-setup",
