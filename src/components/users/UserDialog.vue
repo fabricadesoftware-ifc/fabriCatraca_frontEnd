@@ -5,6 +5,7 @@ import { useGroupStore } from "@/stores";
 import UserAccessLogsPanel from "./UserAccessLogsPanel.vue";
 import UserBioPanel from "./UserBioPanel.vue";
 import UserCardsPanel from "./UserCardsPanel.vue";
+import UserTemporaryReleasePanel from "./UserTemporaryReleasePanel.vue";
 
 interface User extends Omit<BaseUser, "user_groups"> {
   user_groups?: (number | { id: number; name: string })[];
@@ -96,6 +97,7 @@ onMounted(async () => {
           <v-tab value="departamentos" v-if="props.user.name">Grupos</v-tab>
           <v-tab value="cartoes" v-if="props.user.name">Cartões</v-tab>
           <v-tab value="horarios" v-if="props.user.name">Horários</v-tab>
+          <v-tab value="liberacao" v-if="props.user.id">Liberação</v-tab>
           <v-tab value="pin" v-if="props.user.name">PIN</v-tab>
           <v-tab value="biometria" v-if="props.user.name">Biometria</v-tab>
           <v-tab value="acessos" v-if="props.user.name">Acessos</v-tab>
@@ -193,6 +195,9 @@ onMounted(async () => {
             <UserCardsPanel :user-id="props.user.id" />
           </v-window-item>
           <v-window-item value="horarios"><p>Configurar horários...</p></v-window-item>
+          <v-window-item value="liberacao">
+            <UserTemporaryReleasePanel :user-id="props.user.id" />
+          </v-window-item>
           <v-window-item value="pin">
             <v-container>
               <v-row justify="center">

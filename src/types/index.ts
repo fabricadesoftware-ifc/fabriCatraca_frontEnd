@@ -445,3 +445,48 @@ export interface CardFromBioPayload {
   card_value: number;
   device_ids?: number[];
 }
+
+export interface TemporaryReleaseActor {
+  id: number;
+  name: string;
+  registration?: string | null;
+}
+
+export interface TemporaryReleaseRule {
+  id: number;
+  name: string;
+  type: number;
+  priority: number;
+}
+
+export interface TemporaryReleaseLog {
+  id: number;
+  time: string;
+  event_type: number;
+  device_name?: string;
+  portal_name?: string;
+}
+
+export interface TemporaryUserRelease {
+  id: number;
+  user: TemporaryReleaseActor;
+  requested_by: TemporaryReleaseActor;
+  access_rule: TemporaryReleaseRule;
+  status: "pending" | "active" | "consumed" | "expired" | "cancelled" | "failed";
+  valid_from: string;
+  valid_until: string;
+  activated_at: string | null;
+  consumed_at: string | null;
+  closed_at: string | null;
+  consumed_log: TemporaryReleaseLog | null;
+  notes: string;
+  result_message: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TemporaryUserReleaseCreatePayload {
+  user_id: number;
+  duration_minutes: number;
+  notes?: string;
+}
