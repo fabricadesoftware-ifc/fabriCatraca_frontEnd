@@ -14,8 +14,8 @@
   const form = reactive({
     beep_enabled: true,
     bell_enabled: false,
-    bell_relay: 1,
-    exception_mode: false,
+    bell_relay: 2,
+    exception_mode: 'none' as 'none' | 'emergency' | 'lock_down',
   })
 
   watch(
@@ -24,12 +24,18 @@
       if (newConfig) {
         form.beep_enabled = newConfig.beep_enabled ?? true
         form.bell_enabled = newConfig.bell_enabled ?? false
-        form.bell_relay = newConfig.bell_relay ?? 1
-        form.exception_mode = newConfig.exception_mode ?? false
+        form.bell_relay = newConfig.bell_relay ?? 2
+        form.exception_mode = newConfig.exception_mode ?? 'none'
       }
     },
     { immediate: true },
   )
+
+  const exceptionModeOptions = [
+    { title: 'Normal', value: 'none' },
+    { title: 'Emergencia', value: 'emergency' },
+    { title: 'Lockdown', value: 'lock_down' },
+  ]
 
   function handleSave () {
     emit('save', { ...form })
@@ -84,11 +90,11 @@
         <h3 class="text-h6 mb-2">Outros</h3>
       </v-col>
       <v-col cols="12">
-        <v-switch
+        <v-select
           v-model="form.exception_mode"
-          color="warning"
+          :items="exceptionModeOptions"
           hide-details
-          label="Modo de Exceção"
+          label="Modo de Exce??o"
         />
       </v-col>
     </v-row>

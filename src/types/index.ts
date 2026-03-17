@@ -237,7 +237,7 @@ export interface SystemConfig {
   auto_reboot_minute?: number;
   catra_timeout?: number;
   local_identification?: boolean;
-  language?: string;
+  language?: "pt_BR" | "en_US" | "spa_SPA" | string;
   daylight_savings_time_start?: string;
   daylight_savings_time_end?: string;
   created_at?: string;
@@ -251,7 +251,7 @@ export interface HardwareConfig {
   beep_enabled?: boolean;
   bell_enabled?: boolean;
   bell_relay?: number;
-  exception_mode?: boolean;
+  exception_mode?: "none" | "emergency" | "lock_down";
   siren_enabled?: boolean;
   siren_relay?: number;
   created_at?: string;
@@ -270,7 +270,7 @@ export interface SecurityConfig {
   send_code_when_not_identified?: boolean;
   send_code_when_not_authorized?: boolean;
   verbose_logging?: boolean;
-  log_type?: 0 | 1 | 2;
+  log_type?: boolean;
   multi_factor_authentication?: boolean;
   created_at?: string;
   updated_at?: string;

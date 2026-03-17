@@ -13,7 +13,7 @@
 
   const form = reactive({
     verbose_logging: true,
-    log_type: 1 as 0 | 1 | 2,
+    log_type: false,
     multi_factor_authentication: false,
   })
 
@@ -22,7 +22,7 @@
     newConfig => {
       if (newConfig) {
         form.verbose_logging = newConfig.verbose_logging ?? true
-        form.log_type = newConfig.log_type ?? 1
+        form.log_type = newConfig.log_type ?? false
         form.multi_factor_authentication
           = newConfig.multi_factor_authentication ?? false
       }
@@ -30,11 +30,7 @@
     { immediate: true },
   )
 
-  const logTypeOptions = [
-    { title: 'Desabilitado', value: 0 },
-    { title: 'Básico', value: 1 },
-    { title: 'Completo', value: 2 },
-  ]
+
 
   function handleSave () {
     emit('save', { ...form })
@@ -56,11 +52,11 @@
         />
       </v-col>
       <v-col cols="12" md="6">
-        <v-select
+        <v-switch
           v-model="form.log_type"
+          color="primary"
           hide-details
-          :items="logTypeOptions"
-          label="Tipo de Log"
+          label="Tipos de Batida (iDFlex ponto)"
         />
       </v-col>
     </v-row>

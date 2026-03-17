@@ -13,7 +13,7 @@
 
   const form = reactive({
     online: true,
-    catra_timeout: 30,
+    catra_timeout: 30000,
     local_identification: true,
     language: 'pt_BR' as string,
   })
@@ -23,7 +23,7 @@
     newConfig => {
       if (newConfig) {
         form.online = newConfig.online ?? true
-        form.catra_timeout = newConfig.catra_timeout ?? 30
+        form.catra_timeout = newConfig.catra_timeout ?? 30000
         form.local_identification = newConfig.local_identification ?? true
         form.language = newConfig.language ?? 'pt_BR'
       }
@@ -34,7 +34,7 @@
   const languageOptions = [
     { title: 'Português (BR)', value: 'pt_BR' },
     { title: 'English (US)', value: 'en_US' },
-    { title: 'Español (ES)', value: 'es_ES' },
+    { title: 'Español (ES)', value: 'spa_SPA' },
   ]
 
   function handleSave () {
@@ -56,7 +56,7 @@
       <v-col cols="12" md="6">
         <v-text-field
           v-model.number="form.catra_timeout"
-          hint="Tempo em segundos"
+          hint="Tempo em milissegundos"
           label="Timeout da Catraca"
           persistent-hint
           type="number"
