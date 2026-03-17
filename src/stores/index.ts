@@ -5,6 +5,7 @@ export default createPinia();
 
 export { useAccessLogStore } from "./accessLog";
 export { useAccessRuleStore } from "./accessRule";
+export { useAlertsStore } from "./alerts";
 export { useAppStore } from "./app";
 export { useAreaStore } from "./area";
 export { useAuthStore } from "./auth";

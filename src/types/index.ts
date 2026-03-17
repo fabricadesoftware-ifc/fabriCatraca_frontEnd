@@ -316,12 +316,44 @@ export interface MonitorConfig {
   port: string;
   path?: string;
   request_timeout?: number;
+  heartbeat_timeout_seconds?: number;
+  last_seen_at?: string | null;
+  last_payload_at?: string | null;
+  last_signal_source?: string;
+  offline_since?: string | null;
+  is_offline?: boolean;
   is_configured?: boolean;
   full_url?: string;
   notification_url?: string;
   status?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface MonitorAlert {
+  id: number;
+  type: string;
+  severity: "info" | "warning" | "error" | string;
+  title: string;
+  message: string;
+  device?: number | null;
+  device_name?: string;
+  user?: number | null;
+  user_name?: string;
+  dedupe_key?: string;
+  metadata?: Record<string, unknown>;
+  started_at: string;
+  resolved_at?: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  is_read: boolean;
+}
+
+export interface MonitorAlertSummary {
+  unread_count: number;
+  active_count: number;
+  total_count: number;
 }
 
 // Easy Setup

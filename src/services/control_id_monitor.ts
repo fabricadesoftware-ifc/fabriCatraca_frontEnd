@@ -1,4 +1,6 @@
 import type {
+  MonitorAlert,
+  MonitorAlertSummary,
   MonitorConfig,
   PaginatedResponse,
   QueryParams,
@@ -73,6 +75,46 @@ class ControlIdMonitorService {
   async probeMonitor (id: number): Promise<any> {
     try {
       const response = await api.get(`/monitor-configs/${id}/probe/`)
+      return response.data
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  }
+
+  async getAlerts (params?: QueryParams): Promise<PaginatedResponse<MonitorAlert>> {
+    try {
+      const response = await api.get('/alerts/', { params })
+      return response.data as PaginatedResponse<MonitorAlert>
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  }
+
+  async getAlertSummary (): Promise<MonitorAlertSummary> {
+    try {
+      const response = await api.get('/alerts/summary/')
+      return response.data as MonitorAlertSummary
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  }
+
+  async markAlertAsRead (id: number): Promise<any> {
+    try {
+      const response = await api.post(`/alerts/${id}/mark-read/`)
+      return response.data
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  }
+
+  async markAllAlertsAsRead (): Promise<any> {
+    try {
+      const response = await api.post('/alerts/mark-all-read/')
       return response.data
     } catch (error) {
       console.error(error)
