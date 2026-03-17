@@ -60,7 +60,7 @@
         <v-text-field
           v-model.number="form.push_request_timeout"
           hide-details
-          label="Timeout (segundos)"
+          label="Timeout (milissegundos)"
           min="1"
           type="number"
         />
@@ -84,7 +84,7 @@
       type="info"
       variant="tonal"
     >
-      Configure o endereço do servidor push para enviar eventos em tempo real.
+      Configure o endereco do servidor push no formato host:porta para enviar eventos em tempo real.
     </v-alert>
 
     <v-btn block color="primary" :loading="saving" @click="handleSave">

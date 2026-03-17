@@ -13,11 +13,9 @@
 
   const form = reactive({
     online: true,
-    auto_reboot: true,
     catra_timeout: 30,
     local_identification: true,
-    exception_mode: 'none' as 'none' | 'free' | 'blocked',
-    language: 'pt_BR' as 'pt_BR' | 'en_US' | 'es_ES',
+    language: 'pt_BR' as string,
   })
 
   watch(
@@ -25,21 +23,13 @@
     newConfig => {
       if (newConfig) {
         form.online = newConfig.online ?? true
-        form.auto_reboot = newConfig.auto_reboot ?? true
         form.catra_timeout = newConfig.catra_timeout ?? 30
         form.local_identification = newConfig.local_identification ?? true
-        form.exception_mode = newConfig.exception_mode ?? 'none'
         form.language = newConfig.language ?? 'pt_BR'
       }
     },
     { immediate: true },
   )
-
-  const exceptionModeOptions = [
-    { title: 'Normal', value: 'none' },
-    { title: 'Liberado (⚠️ Cuidado!)', value: 'free' },
-    { title: 'Bloqueado (⚠️ Cuidado!)', value: 'blocked' },
-  ]
 
   const languageOptions = [
     { title: 'Português (BR)', value: 'pt_BR' },
@@ -64,14 +54,6 @@
         />
       </v-col>
       <v-col cols="12" md="6">
-        <v-switch
-          v-model="form.auto_reboot"
-          color="primary"
-          hide-details
-          label="Reinicialização Automática"
-        />
-      </v-col>
-      <v-col cols="12" md="6">
         <v-text-field
           v-model.number="form.catra_timeout"
           hint="Tempo em segundos"
@@ -86,13 +68,6 @@
           color="primary"
           hide-details
           label="Identificação Local"
-        />
-      </v-col>
-      <v-col cols="12" md="6">
-        <v-select
-          v-model="form.exception_mode"
-          :items="exceptionModeOptions"
-          label="Modo de Exceção"
         />
       </v-col>
       <v-col cols="12" md="6">

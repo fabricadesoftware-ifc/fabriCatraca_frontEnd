@@ -12,23 +12,14 @@
   }>()
 
   const form = reactive({
-    display_brightness: 100,
-    display_timeout: 30,
-    keyboard_backlight: true,
-    welcome_message: 'Bem-vindo!',
-    access_denied_message: 'Acesso Negado',
+    screen_always_on: false,
   })
 
   watch(
     () => props.config,
     newConfig => {
       if (newConfig) {
-        form.display_brightness = newConfig.display_brightness ?? 100
-        form.display_timeout = newConfig.display_timeout ?? 30
-        form.keyboard_backlight = newConfig.keyboard_backlight ?? true
-        form.welcome_message = newConfig.welcome_message ?? 'Bem-vindo!'
-        form.access_denied_message
-          = newConfig.access_denied_message ?? 'Acesso Negado'
+        form.screen_always_on = newConfig.screen_always_on ?? false
       }
     },
     { immediate: true },
@@ -43,60 +34,20 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h3 class="text-h6 mb-2">Display</h3>
-      </v-col>
-      <v-col cols="12" md="4">
-        <v-text-field
-          v-model.number="form.display_brightness"
-          hide-details
-          label="Brilho do Display (%)"
-          max="100"
-          min="0"
-          type="number"
-        />
-      </v-col>
-      <v-col cols="12" md="4">
-        <v-text-field
-          v-model.number="form.display_timeout"
-          hide-details
-          label="Timeout do Display (segundos)"
-          min="0"
-          type="number"
-        />
-      </v-col>
-      <v-col cols="12" md="4">
         <v-switch
-          v-model="form.keyboard_backlight"
+          v-model="form.screen_always_on"
           color="primary"
           hide-details
-          label="Iluminação do Teclado"
+          label="Tela Sempre Ligada"
         />
       </v-col>
     </v-row>
 
     <v-divider class="my-4" />
 
-    <v-row>
-      <v-col cols="12">
-        <h3 class="text-h6 mb-2">Mensagens</h3>
-      </v-col>
-      <v-col cols="12" md="6">
-        <v-text-field
-          v-model="form.welcome_message"
-          hide-details
-          label="Mensagem de Boas-Vindas"
-        />
-      </v-col>
-      <v-col cols="12" md="6">
-        <v-text-field
-          v-model="form.access_denied_message"
-          hide-details
-          label="Mensagem de Acesso Negado"
-        />
-      </v-col>
-    </v-row>
-
-    <v-divider class="my-4" />
+    <v-alert class="mb-4" type="info" variant="tonal">
+      Esta aba agora envia apenas configuracoes que o backend consegue mapear diretamente para a catraca.
+    </v-alert>
 
     <v-btn block color="primary" :loading="saving" @click="handleSave">
       Salvar Configurações de Interface

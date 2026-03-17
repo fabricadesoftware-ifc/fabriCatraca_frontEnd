@@ -233,11 +233,11 @@ export interface SystemConfig {
   device: number;
   device_name?: string;
   online?: boolean;
-  auto_reboot?: boolean;
+  auto_reboot_hour?: number;
+  auto_reboot_minute?: number;
   catra_timeout?: number;
   local_identification?: boolean;
-  exception_mode?: "none" | "free" | "blocked";
-  language?: "pt_BR" | "en_US" | "es_ES";
+  language?: string;
   daylight_savings_time_start?: string;
   daylight_savings_time_end?: string;
   created_at?: string;
@@ -262,6 +262,13 @@ export interface SecurityConfig {
   id?: number;
   device: number;
   device_name?: string;
+  password_only?: boolean;
+  hide_password_only?: boolean;
+  password_only_tip?: string;
+  hide_name_on_identification?: boolean;
+  denied_transaction_code?: string;
+  send_code_when_not_identified?: boolean;
+  send_code_when_not_authorized?: boolean;
   verbose_logging?: boolean;
   log_type?: 0 | 1 | 2;
   multi_factor_authentication?: boolean;
@@ -273,11 +280,7 @@ export interface UIConfig {
   id?: number;
   device: number;
   device_name?: string;
-  display_brightness?: number;
-  display_timeout?: number;
-  keyboard_backlight?: boolean;
-  welcome_message?: string;
-  access_denied_message?: string;
+  screen_always_on?: boolean;
   created_at?: string;
   updated_at?: string;
 }

@@ -16,8 +16,6 @@
     bell_enabled: false,
     bell_relay: 1,
     exception_mode: false,
-    siren_enabled: false,
-    siren_relay: 2,
   })
 
   watch(
@@ -28,8 +26,6 @@
         form.bell_enabled = newConfig.bell_enabled ?? false
         form.bell_relay = newConfig.bell_relay ?? 1
         form.exception_mode = newConfig.exception_mode ?? false
-        form.siren_enabled = newConfig.siren_enabled ?? false
-        form.siren_relay = newConfig.siren_relay ?? 2
       }
     },
     { immediate: true },
@@ -52,6 +48,31 @@
           color="primary"
           hide-details
           label="Beep Ativado"
+        />
+      </v-col>
+    </v-row>
+
+    <v-divider class="my-4" />
+
+    <v-row>
+      <v-col cols="12">
+        <h3 class="text-h6 mb-2">Campainha</h3>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-switch
+          v-model="form.bell_enabled"
+          color="primary"
+          hide-details
+          label="Campainha Ativada"
+        />
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-text-field
+          v-model.number="form.bell_relay"
+          hide-details
+          label="Relé da Campainha"
+          min="1"
+          type="number"
         />
       </v-col>
     </v-row>
