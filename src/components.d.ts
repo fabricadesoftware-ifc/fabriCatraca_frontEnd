@@ -16,6 +16,7 @@ declare module 'vue' {
     AreaDialog: typeof import('./components/areas/AreaDialog.vue')['default']
     CardsComponent: typeof import('./components/cards/CardsComponent.vue')['default']
     CatraConfigTab: typeof import('./components/devices/config-tabs/CatraConfigTab.vue')['default']
+    DeviceActionsComponent: typeof import('./components/devices/DeviceActionsComponent.vue')['default']
     DeviceComponent: typeof import('./components/devices/DeviceComponent.vue')['default']
     DeviceConfigDialog: typeof import('./components/devices/DeviceConfigDialog.vue')['default']
     DeviceDialog: typeof import('./components/devices/DeviceDialog.vue')['default']
@@ -43,5 +44,6 @@ declare module 'vue' {
     UserCardsPanel: typeof import('./components/users/UserCardsPanel.vue')['default']
     UserComponent: typeof import('./components/users/UserComponent.vue')['default']
     UserDialog: typeof import('./components/users/UserDialog.vue')['default']
+    UserTemporaryReleasePanel: typeof import('./components/users/UserTemporaryReleasePanel.vue')['default']
   }
 }
