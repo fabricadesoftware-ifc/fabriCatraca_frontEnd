@@ -6,6 +6,7 @@
   import { useControlIdConfigStore } from '@/stores'
 
   import CatraConfigTab from './config-tabs/CatraConfigTab.vue'
+  import DeviceLogoTab from './config-tabs/DeviceLogoTab.vue'
   import HardwareConfigTab from './config-tabs/HardwareConfigTab.vue'
   import MonitorConfigTab from './config-tabs/MonitorConfigTab.vue'
   import PushServerConfigTab from './config-tabs/PushServerConfigTab.vue'
@@ -143,6 +144,10 @@
             <v-icon class="mr-2"> mdi-monitor </v-icon>
             Interface
           </v-tab>
+          <v-tab value="logos">
+            <v-icon class="mr-2"> mdi-image-multiple </v-icon>
+            Logos
+          </v-tab>
           <v-tab value="catra">
             <v-icon class="mr-2"> mdi-turnstile </v-icon>
             Catraca
@@ -188,6 +193,10 @@
               :saving="saving"
               @save="handleSaveUI"
             />
+          </v-window-item>
+
+          <v-window-item value="logos">
+            <DeviceLogoTab :active="modelValue && tab === 'logos'" :device="device" />
           </v-window-item>
 
           <v-window-item value="catra">

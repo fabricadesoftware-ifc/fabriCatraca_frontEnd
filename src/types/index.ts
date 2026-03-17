@@ -102,6 +102,41 @@ export interface Device {
   updating?: boolean;
 }
 
+export interface DeviceRegistryItem {
+  id: number;
+  name: string;
+  ip: string;
+}
+
+export interface DeviceRegistryRow {
+  id: number;
+  status: "ok" | "divergente" | "faltando" | "extra" | string;
+  expected?: DeviceRegistryItem | null;
+  remote?: DeviceRegistryItem | null;
+}
+
+export interface DeviceRegistryReport {
+  device_id: number;
+  device_name: string;
+  expected_count: number;
+  remote_count: number;
+  rows: DeviceRegistryRow[];
+}
+
+export interface DeviceLogoSlot {
+  slot_id: number;
+  has_logo: boolean;
+  is_active: boolean;
+  content_type?: string | null;
+}
+
+export interface DeviceLogoSummary {
+  device_id: number;
+  device_name: string;
+  active_slot: number;
+  slots: DeviceLogoSlot[];
+}
+
 export interface Group {
   id: number;
   name: string;

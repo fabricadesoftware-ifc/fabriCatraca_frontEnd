@@ -5,6 +5,7 @@
   import { useDeviceStore } from '@/stores'
   import DeviceConfigDialog from './DeviceConfigDialog.vue'
   import DeviceDialog from './DeviceDialog.vue'
+  import DeviceRegistryDialog from './DeviceRegistryDialog.vue'
   defineProps<{
     devices: Device[]
     currentPage: number
@@ -22,6 +23,7 @@
 
   const dialog = ref(false)
   const configDialog = ref(false)
+  const registryDialog = ref(false)
   const selectedDevice = ref<Device | null>(null)
   const creating = ref(false)
   const deviceStore = useDeviceStore()
@@ -48,6 +50,11 @@
       is_default: false,
     } as Device
     dialog.value = true
+  }
+
+  function showDeviceRegistry (device: Device) {
+    selectedDevice.value = device
+    registryDialog.value = true
   }
 
   async function salvarDispositivo (device: Device) {
@@ -153,6 +160,16 @@
           </v-btn>
           <v-btn
             class="mr-2"
+            color="secondary"
+            icon
+            size="small"
+            @click.stop="showDeviceRegistry(item)"
+          >
+            <v-icon>mdi-database-search</v-icon>
+            <v-tooltip activator="parent"> Conferir Registry </v-tooltip>
+          </v-btn>
+          <v-btn
+            class="mr-2"
             color="primary"
             icon
             :loading="item.updating"
@@ -177,6 +194,11 @@
     v-model="configDialog"
     :device="selectedDevice"
     @saved="deviceStore.loadDevices()"
+  />
+
+  <DeviceRegistryDialog
+    v-model="registryDialog"
+    :device="selectedDevice"
   />
 </template>
 
