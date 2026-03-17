@@ -15,6 +15,9 @@
     beep_enabled: true,
     bell_enabled: false,
     bell_relay: 2,
+    network_interlock_enabled: false,
+    network_interlock_api_bypass_enabled: false,
+    network_interlock_rex_bypass_enabled: false,
     exception_mode: 'none' as 'none' | 'emergency' | 'lock_down',
   })
 
@@ -25,6 +28,9 @@
         form.beep_enabled = newConfig.beep_enabled ?? true
         form.bell_enabled = newConfig.bell_enabled ?? false
         form.bell_relay = newConfig.bell_relay ?? 2
+        form.network_interlock_enabled = newConfig.network_interlock_enabled ?? false
+        form.network_interlock_api_bypass_enabled = newConfig.network_interlock_api_bypass_enabled ?? false
+        form.network_interlock_rex_bypass_enabled = newConfig.network_interlock_rex_bypass_enabled ?? false
         form.exception_mode = newConfig.exception_mode ?? 'none'
       }
     },
@@ -79,6 +85,38 @@
           label="Relé da Campainha"
           min="1"
           type="number"
+        />
+      </v-col>
+    </v-row>
+
+    <v-divider class="my-4" />
+
+    <v-row>
+      <v-col cols="12">
+        <h3 class="text-h6 mb-2">Intertravamento via Rede</h3>
+      </v-col>
+      <v-col cols="12">
+        <v-switch
+          v-model="form.network_interlock_enabled"
+          color="primary"
+          hide-details
+          label="Intertravamento via Rede"
+        />
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-switch
+          v-model="form.network_interlock_api_bypass_enabled"
+          color="primary"
+          hide-details
+          label="Ignorar ao abrir via API"
+        />
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-switch
+          v-model="form.network_interlock_rex_bypass_enabled"
+          color="primary"
+          hide-details
+          label="Ignorar ao abrir via botoeira"
         />
       </v-col>
     </v-row>

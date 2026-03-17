@@ -251,6 +251,9 @@ export interface HardwareConfig {
   beep_enabled?: boolean;
   bell_enabled?: boolean;
   bell_relay?: number;
+  network_interlock_enabled?: boolean;
+  network_interlock_api_bypass_enabled?: boolean;
+  network_interlock_rex_bypass_enabled?: boolean;
   exception_mode?: "none" | "emergency" | "lock_down";
   siren_enabled?: boolean;
   siren_relay?: number;
