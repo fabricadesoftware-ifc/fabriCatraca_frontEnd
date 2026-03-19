@@ -36,6 +36,7 @@
   const headers = [
     { title: 'ID', key: 'id', align: 'start' as const },
     { title: 'Nome', key: 'name', align: 'start' as const },
+    { title: 'Perfil', key: 'app_role', align: 'start' as const },
     { title: 'Admin catraca', key: 'device_admin', align: 'start' as const },
     { title: 'Turma', key: 'user_groups', align: 'start' as const },
     { title: 'Matrícula', key: 'registration', align: 'start' as const },
@@ -62,6 +63,10 @@
         // Criar novo usuário
         savedUser = await userStore.createUser({
           name: user.name,
+          email: user.email,
+          password: user.password,
+          app_role: user.app_role,
+          panel_access_only: user.panel_access_only,
           registration: user.registration,
           user_type_id: user.user_type_id,
           device_admin: user.device_admin,
@@ -83,6 +88,9 @@
         }
         const basicDataChanged
           = currentUser.name !== user.name
+            || currentUser.email !== user.email
+            || currentUser.app_role !== user.app_role
+            || !!currentUser.panel_access_only !== !!user.panel_access_only
             || currentUser.registration !== user.registration
             || currentUser.user_type_id !== user.user_type_id
             || !!currentUser.device_admin !== !!user.device_admin
@@ -91,6 +99,10 @@
         savedUser = basicDataChanged
           ? await userStore.updateUser(user.id, {
             name: user.name,
+            email: user.email,
+            password: user.password,
+            app_role: user.app_role,
+            panel_access_only: user.panel_access_only,
             registration: user.registration,
             user_type_id: user.user_type_id,
             device_admin: user.device_admin,
@@ -184,6 +196,8 @@
       name: '',
       registration: '',
       user_groups: [],
+      app_role: '',
+      panel_access_only: false,
       user_type_id: 1,
       device_admin: false,
       devices: [],
@@ -212,6 +226,13 @@
           id: Number(item.id), // Garantir que o ID é um número
         }))
         : []
+  }
+
+  function appRoleLabel (value?: string) {
+    if (value === 'admin') return 'Administrador'
+    if (value === 'guarita') return 'Guarita'
+    if (value === 'sisae') return 'SISAE'
+    return 'Sem perfil'
   }
 </script>
 
@@ -271,6 +292,10 @@
     @update:page="trocarPagina"
     @update:selected="onSelect"
   >
+    <template #item.app_role="{ item }">
+      {{ appRoleLabel(item.effective_app_role || item.app_role) }}
+    </template>
+
     <!-- Template para user_groups -->
     <template #item.user_groups="{ item }">
       {{

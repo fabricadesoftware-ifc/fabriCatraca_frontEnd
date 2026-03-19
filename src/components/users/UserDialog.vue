@@ -31,10 +31,20 @@ const tab = ref("dados");
 const isVisitor = ref(false);
 const deviceAdmin = ref(false);
 const name = ref("");
+const email = ref("");
+const password = ref("");
+const appRole = ref<BaseUser["app_role"]>("");
+const panelAccessOnly = ref(false);
 const registration = ref("");
 const pin = ref("");
 const showPin = ref(false);
 const loading = ref(false);
+const roleOptions = [
+  { title: "Sem perfil do painel", value: "" },
+  { title: "Administrador", value: "admin" },
+  { title: "Guarita", value: "guarita" },
+  { title: "SISAE", value: "sisae" },
+];
 
 // Atualiza os campos locais quando o props.user mudar
 watch(
@@ -42,6 +52,10 @@ watch(
   (newUser) => {
     if (newUser) {
       name.value = newUser.name;
+      email.value = newUser.email || "";
+      password.value = "";
+      appRole.value = newUser.app_role || "";
+      panelAccessOnly.value = !!newUser.panel_access_only;
       registration.value = newUser.registration || "";
       pin.value = newUser.pin || "";
       showPin.value = false;
@@ -62,6 +76,10 @@ async function salvarUsuario() {
     emit("save", {
       ...props.user,
       name: name.value,
+      email: email.value,
+      password: password.value,
+      app_role: appRole.value,
+      panel_access_only: panelAccessOnly.value,
       registration: registration.value,
       user_type_id: isVisitor.value ? 1 : (null as unknown as number),
       device_admin: deviceAdmin.value,
@@ -115,6 +133,25 @@ onMounted(async () => {
                     label="Nome"
                     required
                     :rules="[(v) => !!v || 'Nome é obrigatório']"
+                  />
+                  <v-text-field v-model="email" label="E-mail para login" />
+                  <v-select
+                    v-model="appRole"
+                    :items="roleOptions"
+                    item-title="title"
+                    item-value="value"
+                    label="Perfil do painel"
+                  />
+                  <v-switch
+                    v-model="panelAccessOnly"
+                    color="info"
+                    label="Conta somente do painel"
+                  />
+                  <v-text-field
+                    v-model="password"
+                    label="Senha do painel"
+                    placeholder="Preencha para definir ou alterar a senha"
+                    type="password"
                   />
                   <v-text-field v-model="registration" label="Matrícula" />
 

@@ -24,7 +24,15 @@ export interface QueryParams {
   name?: string;
   ordering?: string;
   user?: number;
+  requested_by?: number;
+  target_user?: number;
+  release_type?: string;
+  status?: string;
+  app_role?: string;
+  panel_access_only?: boolean;
 }
+
+export type AppRole = "admin" | "guarita" | "sisae" | "";
 
 export interface AccessRule {
   data: any;
@@ -220,6 +228,10 @@ export interface User {
   device_admin?: boolean;
   devices: Device[];
   email?: string;
+  app_role?: AppRole;
+  effective_app_role?: AppRole;
+  panel_access_only?: boolean;
+  password?: string;
   user_groups?: Group[];
 }
 
@@ -562,4 +574,59 @@ export interface TemporaryUserReleaseCreatePayload {
   user_id: number;
   duration_minutes: number;
   notes?: string;
+  valid_from?: string;
+}
+
+export interface ReleaseAuditActor {
+  id: number | null;
+  name: string;
+  email?: string;
+  registration?: string;
+  role?: string;
+}
+
+export interface ReleaseAudit {
+  id: number;
+  release_type:
+    | "device_event"
+    | "single_turn"
+    | "scheduled_user_release"
+    | "temporary_user_release"
+    | string;
+  status:
+    | "requested"
+    | "sent"
+    | "active"
+    | "consumed"
+    | "expired"
+    | "cancelled"
+    | "failed"
+    | string;
+  requested_by: number | null;
+  requested_by_name: string;
+  requested_by_role: string;
+  requested_by_email: string;
+  requested_by_data: ReleaseAuditActor;
+  target_user: number | null;
+  target_user_name: string;
+  target_user_registration: string;
+  target_user_data: ReleaseAuditActor;
+  device: number | null;
+  device_name?: string;
+  portal: number | null;
+  portal_name?: string;
+  temporary_release: number | null;
+  access_log: number | null;
+  access_log_time?: string | null;
+  notes: string;
+  error_message: string;
+  request_payload: Record<string, unknown>;
+  response_payload: Record<string, unknown>;
+  requested_at: string;
+  scheduled_for?: string | null;
+  executed_at?: string | null;
+  expires_at?: string | null;
+  closed_at?: string | null;
+  created_at: string;
+  updated_at: string;
 }

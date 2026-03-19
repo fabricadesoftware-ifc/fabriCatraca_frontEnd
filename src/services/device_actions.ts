@@ -1,4 +1,4 @@
-﻿import { controlIdApi as api } from '@/plugins/api'
+import { controlIdApi as api } from '@/plugins/api'
 
 export interface MessageToScreenPayload {
   device_ids: number[]
@@ -20,6 +20,8 @@ export interface RemoteUserAuthorizationPayload {
   user_name: string
   user_image: boolean
   portal_id: number
+  notes?: string
+  release_mode?: "device_event" | "single_turn"
   actions: Array<{ action: string; parameters: string }>
 }
 

@@ -15,6 +15,7 @@ export { default as GroupAccessRulesService } from "./group_access_rules";
 export { default as GroupsService } from "./groups";
 export { default as PortalAccessRulesService } from "./portal_access_rules";
 export { default as PortalsService } from "./portals";
+export { default as ReleaseAuditsService } from "./release_audits";
 export { default as TemporaryUserReleasesService } from "./temporary_user_releases";
 export { default as TimeSpansService } from "./time_spans";
 export { default as TimeZonesService } from "./time_zones";

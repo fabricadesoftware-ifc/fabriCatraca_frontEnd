@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import type { getToken, User } from "@/types";
+import type { AppRole, getToken, User } from "@/types";
 import { AuthService } from "@/services";
 import router from "@/router";
 import { showMessage } from "@/utils/showmsg";
@@ -14,6 +14,10 @@ export const useAuthStore = defineStore("auth", () => {
 
   const user = computed(() => me.value);
   const isAuthenticated = computed(() => !!access.value);
+  const role = computed<AppRole>(() => me.value?.effective_app_role || me.value?.app_role || "");
+  const isAdmin = computed(() => role.value === "admin");
+  const isGuarita = computed(() => role.value === "guarita");
+  const isSisae = computed(() => role.value === "sisae");
   const getAccessToken = computed(() => access.value);
   const getRefreshToken = computed(() => refresh.value);
   const isLoading = computed(() => loading.value);
@@ -24,6 +28,31 @@ export const useAuthStore = defineStore("auth", () => {
     refresh.value = tokens.refresh;
     localStorage.setItem("access_token", tokens.access);
     localStorage.setItem("refresh_token", tokens.refresh);
+  }
+
+  function persistCurrentUser(userData: User | null) {
+    if (userData) {
+      localStorage.setItem("current_user", JSON.stringify(userData));
+    } else {
+      localStorage.removeItem("current_user");
+    }
+  }
+
+  function getDefaultRouteByRole(currentRole: AppRole) {
+    if (currentRole === "guarita") {
+      return "/guarita";
+    }
+    if (currentRole === "sisae") {
+      return "/sisae";
+    }
+    return "/";
+  }
+
+  function hasRole(allowedRoles: AppRole[]) {
+    if (!allowedRoles.length) {
+      return true;
+    }
+    return allowedRoles.includes(role.value);
   }
 
   async function getToken(credentials: getToken) {
@@ -37,7 +66,7 @@ export const useAuthStore = defineStore("auth", () => {
 
       await getMe();
       showMessage("Logado com sucesso", "success", 1500, "top-right");
-      await router.push("/");
+      await router.push(getDefaultRouteByRole(role.value));
 
       return true;
     } catch (err: any) {
@@ -55,6 +84,7 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       const response = await AuthService.getMe();
       me.value = response;
+      persistCurrentUser(response);
     } catch (err) {
       console.error(err);
       logout(false);
@@ -80,6 +110,7 @@ export const useAuthStore = defineStore("auth", () => {
     refresh.value = "";
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
+    persistCurrentUser(null);
 
     router.push("/login");
 
@@ -112,6 +143,10 @@ export const useAuthStore = defineStore("auth", () => {
     error,
     user,
     isAuthenticated,
+    role,
+    isAdmin,
+    isGuarita,
+    isSisae,
     getAccessToken,
     getRefreshToken,
     isLoading,
@@ -122,5 +157,7 @@ export const useAuthStore = defineStore("auth", () => {
     logout,
     refreshAccessToken,
     clearError,
+    hasRole,
+    getDefaultRouteByRole,
   };
 });

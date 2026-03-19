@@ -1,63 +1,86 @@
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted } from "vue";
+import { computed, onBeforeUnmount, onMounted } from "vue";
 import { useAlertsStore, useAuthStore } from "@/stores";
 
 const authStore = useAuthStore();
 const alertsStore = useAlertsStore();
-const items = [
+const rawItems = [
   {
     title: "Home",
     icon: "mdi-home",
     to: "/",
+    roles: ["admin", "guarita", "sisae"],
   },
   {
     title: "Usuario",
     icon: "mdi-account",
     to: "/users",
+    roles: ["admin"],
   },
   {
     title: "Grupos",
     icon: "mdi-account-group",
     to: "/groups",
+    roles: ["admin"],
   },
   {
     title: "Regras de Acesso",
     icon: "mdi-lock",
     to: "/access-rules",
+    roles: ["admin"],
   },
   {
     title: "Entradas e Saidas",
     icon: "mdi-login-variant",
     to: "/portal",
+    roles: ["admin"],
   },
   {
     title: "Areas",
     icon: "mdi-map-marker",
     to: "/areas",
+    roles: ["admin"],
   },
   {
     title: "Dispositivos",
     icon: "mdi-turnstile",
     to: "/devices",
+    roles: ["admin"],
   },
   {
     title: "Ações em Catracas",
     icon: "mdi-play-circle-outline",
     to: "/device-actions",
+    roles: ["admin"],
+  },
+  {
+    title: "Guarita",
+    icon: "mdi-shield-account",
+    to: "/guarita",
+    roles: ["admin", "guarita"],
+  },
+  {
+    title: "SISAE",
+    icon: "mdi-account-clock",
+    to: "/sisae",
+    roles: ["admin", "sisae"],
   },
   {
     title: "Reconfigurar Catracas",
     icon: "mdi-cog-sync",
     to: "/easy-setup",
+    roles: ["admin"],
   },
   {
     title: "Logs de Acesso",
     icon: "mdi-clipboard-text-clock",
     to: "/logs",
+    roles: ["admin"],
   },
   {
     title: "Dados",
     icon: "mdi-database",
+    roles: ["admin"],
     subitems: [
       {
         title: "Exportar",
@@ -72,6 +95,15 @@ const items = [
     ],
   },
 ];
+
+const items = computed(() =>
+  rawItems
+    .filter(item => authStore.hasRole((item.roles || []) as any))
+    .map(item => ({
+      ...item,
+      subitems: item.subitems?.filter(subitem => !("roles" in subitem) || authStore.hasRole(((subitem as any).roles || []) as any)),
+    })),
+);
 
 function formatAlertTime(dateTime?: string | null) {
   if (!dateTime) {
