@@ -39,12 +39,6 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   function getDefaultRouteByRole(currentRole: AppRole) {
-    if (currentRole === "guarita") {
-      return "/guarita";
-    }
-    if (currentRole === "sisae") {
-      return "/sisae";
-    }
     return "/";
   }
 

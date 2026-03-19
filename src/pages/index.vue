@@ -1,19 +1,42 @@
 <script setup lang="ts">
   import { computed, onMounted, ref } from 'vue'
-  import { useAccessLogStore, useUserStore } from '@/stores'
+  import { ReleaseAuditsService } from '@/services'
+  import { useAccessLogStore, useAuthStore, useUserStore } from '@/stores'
 
   const accessLogStore = useAccessLogStore()
+  const authStore = useAuthStore()
   const userStore = useUserStore()
   const acces_accept = ref<any>()
   const acces_rejected = ref<any>()
   const count_approved = ref(0)
   const count_rejected = ref(0)
+  const releaseAuditCount = ref(0)
+  const releaseAuditLabel = ref('Liberações')
+  const releaseAuditDescription = ref('Total de liberações registradas')
 
   onMounted(async () => {
     await accessLogStore.loadLogs()
-    await userStore.loadUsers()
     const acceptResponse = await accessLogStore.returnedLogsByLastDays(10, 7)
     const rejectedResponse = await accessLogStore.returnedLogsByLastDays(10, 6)
+
+    if (authStore.isAdmin || authStore.isSisae) {
+      await userStore.loadUsers()
+    }
+
+    if (authStore.user?.id) {
+      const auditResponse = await ReleaseAuditsService.getReleaseAudits({
+        requested_by: authStore.isAdmin ? undefined : authStore.user.id,
+        page_size: 1,
+      })
+      releaseAuditCount.value = auditResponse.count
+      if (authStore.isGuarita) {
+        releaseAuditLabel.value = 'Minhas Liberações'
+        releaseAuditDescription.value = 'Total de comandos executados na guarita'
+      } else if (authStore.isSisae) {
+        releaseAuditLabel.value = 'Liberações do SISAE'
+        releaseAuditDescription.value = 'Total de liberações agendadas e executadas'
+      }
+    }
 
     // Extrair arrays de results ou usar o próprio valor se já for array
     acces_accept.value = Array.isArray(acceptResponse) ? acceptResponse : (acceptResponse as any)?.results || []
@@ -48,13 +71,16 @@
       variant: 'light' as const, // Modo claro
     },
     {
-      title: 'Usuários',
-      description: 'Total de usuários cadastrados no sistema',
-      value: userStore.count,
+      title: authStore.isAdmin || authStore.isSisae ? 'Usuários' : releaseAuditLabel.value,
+      description:
+        authStore.isAdmin || authStore.isSisae
+          ? 'Total de usuários cadastrados no sistema'
+          : releaseAuditDescription.value,
+      value: authStore.isAdmin || authStore.isSisae ? userStore.count : releaseAuditCount.value,
       trend: 'up' as const,
       trendValue: '+3%',
       color: '', // Sem cor específica, deixar o CSS controlar
-      icon: 'mdi-account-group',
+      icon: authStore.isAdmin || authStore.isSisae ? 'mdi-account-group' : 'mdi-history',
       iconColor: 'info', // Ícone azul
       variant: 'light' as const, // Modo claro
     },
