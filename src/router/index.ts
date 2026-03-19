@@ -44,6 +44,7 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   const accessToken = localStorage.getItem("access_token");
+  const defaultRoute = authStore.getDefaultRouteByRole(authStore.role);
   const routes = router.getRoutes();
   const protectedRoutes = routes.filter((route) => route.path !== "/login");
   const routePaths = protectedRoutes.map((route) => route.path);
@@ -56,7 +57,11 @@ router.beforeEach(async (to, from, next) => {
     if (!authStore.me) {
       await authStore.getMe();
     }
-    return next(authStore.getDefaultRouteByRole(authStore.role));
+    const loginRedirect = authStore.getDefaultRouteByRole(authStore.role);
+    if (loginRedirect !== to.path) {
+      return next(loginRedirect);
+    }
+    return next();
   }
 
   if (routePaths.includes(to.path) && !accessToken) {
@@ -73,14 +78,21 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (accessToken && to.path === "/") {
-    return next(authStore.getDefaultRouteByRole(authStore.role));
+    const homeRedirect = authStore.getDefaultRouteByRole(authStore.role);
+    if (homeRedirect !== to.path) {
+      return next(homeRedirect);
+    }
+    return next();
   }
 
   if (accessToken) {
     const allowedPatterns = allowedPathsByRole[authStore.role] || [];
     const isAllowed = allowedPatterns.some(pattern => pattern.test(to.path));
     if (!isAllowed) {
-      return next(authStore.getDefaultRouteByRole(authStore.role));
+      if (defaultRoute !== to.path) {
+        return next(defaultRoute);
+      }
+      return next();
     }
   }
 

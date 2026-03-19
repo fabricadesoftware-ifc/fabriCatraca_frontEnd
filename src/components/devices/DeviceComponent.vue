@@ -60,16 +60,17 @@
   async function salvarDispositivo (device: Device) {
     try {
       const payload = {
+        ...(creating.value ? { id: device.id } : {}),
         name: device.name,
         ip: device.ip,
         username: device.username,
-        ...(device.id === 0 || device.password
+        ...(creating.value || device.password
           ? { password: device.password }
           : {}),
         is_active: device.is_active,
         is_default: device.is_default,
       }
-      device.id === 0
+      creating.value
         ? await deviceStore.createDevice(payload)
         : await deviceStore.updateDevice(device.id, payload)
       await deviceStore.loadDevices()

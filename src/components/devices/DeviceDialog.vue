@@ -13,6 +13,7 @@
   }>()
 
   const name = ref('')
+  const deviceId = ref<number | null>(null)
   const ip = ref('')
   const username = ref('')
   const password = ref('')
@@ -22,6 +23,7 @@
 
   watch(() => props.device, d => {
     if (!d) return
+    deviceId.value = d.id && d.id > 0 ? d.id : null
     name.value = d.name || ''
     ip.value = d.ip || ''
     username.value = d.username || ''
@@ -41,6 +43,7 @@
 
     emit('save', {
       ...props.device,
+      id: deviceId.value || 0,
       name: name.value,
       ip: ip.value,
       username: username.value,
@@ -58,6 +61,14 @@
       <v-card-title class="text-h6">{{ props.device?.id ? 'Editar Dispositivo' : 'Novo Dispositivo' }}</v-card-title>
       <v-card-text>
         <v-form ref="formRef">
+          <v-text-field
+            v-model.number="deviceId"
+            :disabled="!!props.device?.id"
+            label="ID da catraca"
+            required
+            :rules="[v => (!!props.device?.id || !!v) || 'Obrigatório', v => (!v || v > 0) || 'Deve ser maior que zero']"
+            type="number"
+          />
           <v-text-field v-model="name" label="Nome" required :rules="[v => !!v || 'Obrigatório']" />
           <v-text-field v-model="ip" label="IP (host:porta)" required :rules="[v => !!v || 'Obrigatório']" />
           <v-text-field v-model="username" label="Usuário" />
