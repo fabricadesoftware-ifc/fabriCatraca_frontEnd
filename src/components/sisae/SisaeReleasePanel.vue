@@ -122,10 +122,6 @@ onMounted(async () => {
         <v-card>
           <v-card-title>Agendar liberação</v-card-title>
           <v-card-text>
-            <v-alert class="mb-4" type="info" variant="tonal">
-              A liberação do SISAE usa o fluxo de regra temporária, mas com data e hora agendadas e trilha completa de auditoria.
-            </v-alert>
-
             <v-row>
               <v-col cols="12" md="4">
                 <v-text-field

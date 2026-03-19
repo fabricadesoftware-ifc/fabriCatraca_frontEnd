@@ -430,11 +430,6 @@ onMounted(reloadData);
           <v-window v-model="activeTab">
             <v-window-item value="message">
               <v-card-text class="pa-6">
-                <v-alert class="mb-4" color="info" icon="mdi-message-text" variant="tonal">
-                  Envie uma mensagem para a tela das catracas. Use mensagem vazia para limpar a
-                  exibicao atual.
-                </v-alert>
-
                 <v-textarea
                   v-model="messageForm.message"
                   auto-grow
@@ -457,10 +452,6 @@ onMounted(reloadData);
 
             <v-window-item value="buzzer">
               <v-card-text class="pa-6">
-                <v-alert class="mb-4" color="warning" icon="mdi-bullhorn" variant="tonal">
-                  O tempo maximo por requisicao para o buzzer e de 3000 ms.
-                </v-alert>
-
                 <v-row>
                   <v-col cols="12" md="4">
                     <v-text-field
@@ -494,11 +485,6 @@ onMounted(reloadData);
 
             <v-window-item value="authorization">
               <v-card-text class="pa-6">
-                <v-alert class="mb-4" color="success" icon="mdi-turnstile" variant="tonal">
-                  Esta acao monta o payload de catraca com <strong>action=catra</strong> e o
-                  parametro <strong>{{ authorizationActionPreview }}</strong>.
-                </v-alert>
-
                 <v-row>
                   <v-col cols="12" md="6">
                     <v-text-field

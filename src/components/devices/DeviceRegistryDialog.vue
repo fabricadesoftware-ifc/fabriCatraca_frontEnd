@@ -126,10 +126,6 @@
           </v-chip>
         </div>
 
-        <v-alert class="mb-4" type="info" variant="tonal">
-          Esta tela mostra o que deveria existir na tabela `devices` da catraca comparado ao que esta cadastrado nela agora.
-        </v-alert>
-
         <v-data-table
           :headers="[
             { title: 'ID', key: 'id' },

@@ -45,10 +45,6 @@
 
     <v-divider class="my-4" />
 
-    <v-alert class="mb-4" type="info" variant="tonal">
-      Esta aba agora envia apenas configuracoes que o backend consegue mapear diretamente para a catraca.
-    </v-alert>
-
     <v-btn block color="primary" :loading="saving" @click="handleSave">
       Salvar Configurações de Interface
     </v-btn>

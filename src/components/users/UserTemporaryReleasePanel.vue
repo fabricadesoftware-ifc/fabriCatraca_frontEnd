@@ -131,18 +131,6 @@ onMounted(loadReleases);
   <v-container>
     <v-row>
       <v-col cols="12">
-        <v-alert
-          class="mb-4"
-          color="info"
-          icon="mdi-timer-play-outline"
-          variant="tonal"
-        >
-          A liberação temporária aplica uma regra global ao usuário até que ele passe pela
-          catraca uma vez ou até o tempo expirar.
-        </v-alert>
-      </v-col>
-
-      <v-col cols="12">
         <v-card>
           <v-card-title class="text-subtitle-1">Nova Liberação</v-card-title>
           <v-card-text>

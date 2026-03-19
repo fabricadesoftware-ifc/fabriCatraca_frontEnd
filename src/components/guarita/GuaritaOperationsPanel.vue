@@ -145,10 +145,6 @@ onMounted(loadData);
         <v-card>
           <v-card-title>Liberação operacional</v-card-title>
           <v-card-text>
-            <v-alert class="mb-4" type="info" variant="tonal">
-              Toda ação da guarita fica registrada na auditoria com o operador autenticado.
-            </v-alert>
-
             <v-row>
               <v-col cols="12" md="6">
                 <v-select

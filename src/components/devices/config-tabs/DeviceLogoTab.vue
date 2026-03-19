@@ -184,10 +184,6 @@
       @change="handleFileSelected"
     >
 
-    <v-alert class="mb-4" type="info" variant="tonal">
-      A catraca suporta ate 8 logos. O arquivo precisa ser PNG e ter no maximo 1MB.
-    </v-alert>
-
     <div class="d-flex flex-wrap ga-3 mb-4">
       <v-chip color="primary" variant="tonal">
         Slot ativo: {{ summary?.active_slot ?? 0 }}
