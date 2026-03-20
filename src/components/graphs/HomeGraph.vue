@@ -1,126 +1,79 @@
 <script setup lang="ts">
   import * as echarts from 'echarts'
   import { computed, onMounted, ref, watch } from 'vue'
+  import type { AccessLogs } from '@/types'
 
   interface Props {
-    approvedLogs: any[]
-    rejectedLogs: any[]
+    approvedLogs: AccessLogs[]
+    rejectedLogs: AccessLogs[]
   }
 
   const props = defineProps<Props>()
   const chartRef = ref<HTMLElement>()
   let chartInstance: echarts.ECharts | null = null
 
-  // Dados do gráfico
   const chartData = ref({
     dates: [] as string[],
     approved: [] as number[],
     denied: [] as number[],
   })
 
-  // Configuração do gráfico
   const chartOption = computed(() => ({
     backgroundColor: '#ffffff',
     title: {
       text: 'Acessos por Hora',
       subtext: 'Histórico das últimas 24 horas',
       left: 'center',
-      textStyle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333333',
-      },
-      subtextStyle: {
-        fontSize: 12,
-        color: '#666666',
-      },
+      textStyle: { fontSize: 16, fontWeight: 'bold', color: '#333333' },
+      subtextStyle: { fontSize: 12, color: '#666666' },
     },
     tooltip: {
       trigger: 'axis',
-      axisPointer: {
-        type: 'cross',
-        label: {
-          backgroundColor: '#6a7985',
-        },
-      },
+      axisPointer: { type: 'cross', label: { backgroundColor: '#6a7985' } },
       formatter: (params: any) => {
         const data = params[0]
-        const [date, time] = data.name.split(' ')
+        const [date, time] = data.name.split(', ')
         const [day, month] = date.split('/')
         return `${day}/${month} às ${time}<br/>
                 <span style="color: #4CAF50;">● Aprovados: ${data.value}</span><br/>
                 <span style="color: #F44336;">● Negados: ${params[1]?.value || 0}</span>`
       },
     },
-    legend: {
-      data: ['Aprovados', 'Negados'],
-      bottom: 10,
-    },
-    grid: {
-      left: '8%',
-      right: '4%',
-      bottom: '15%',
-      top: '15%',
-      containLabel: true,
-    },
+    legend: { data: ['Aprovados', 'Negados'], bottom: 10 },
+    grid: { left: '8%', right: '4%', bottom: '15%', top: '15%', containLabel: true },
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: chartData.value.dates,
+      data: chartData.value.dates.slice(0, -2),
       axisLabel: {
         rotate: 45,
         fontSize: 10,
         color: '#666666',
         formatter: (value: string) => {
-          const [_date, time] = value.split(' ')
+          const [, time] = value.split(', ')
           return `${time}h`
         },
       },
-      axisLine: {
-        lineStyle: {
-          color: '#e0e0e0',
-        },
-      },
+      axisLine: { lineStyle: { color: '#e0e0e0' } },
     },
     yAxis: {
       type: 'value',
       name: 'Quantidade de Acessos',
-      nameTextStyle: {
-        color: '#666666',
-      },
-      axisLabel: {
-        color: '#666666',
-      },
-      axisLine: {
-        lineStyle: {
-          color: '#e0e0e0',
-        },
-      },
-      splitLine: {
-        lineStyle: {
-          color: '#f0f0f0',
-        },
-      },
+      nameTextStyle: { color: '#666666' },
+      axisLabel: { color: '#666666' },
+      axisLine: { lineStyle: { color: '#e0e0e0' } },
+      splitLine: { lineStyle: { color: '#f0f0f0' } },
     },
     series: [
       {
         name: 'Aprovados',
         type: 'line',
         data: chartData.value.approved,
-        itemStyle: {
-          color: '#4CAF50',
-        },
-        lineStyle: {
-          color: '#4CAF50',
-          width: 3,
-        },
+        itemStyle: { color: '#4CAF50' },
+        lineStyle: { color: '#4CAF50', width: 3 },
         areaStyle: {
           color: {
-            type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
+            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
             colorStops: [
               { offset: 0, color: 'rgba(76, 175, 80, 0.3)' },
               { offset: 1, color: 'rgba(76, 175, 80, 0.1)' },
@@ -133,20 +86,11 @@
         name: 'Negados',
         type: 'line',
         data: chartData.value.denied,
-        itemStyle: {
-          color: '#F44336',
-        },
-        lineStyle: {
-          color: '#F44336',
-          width: 3,
-        },
+        itemStyle: { color: '#F44336' },
+        lineStyle: { color: '#F44336', width: 3 },
         areaStyle: {
           color: {
-            type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
+            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
             colorStops: [
               { offset: 0, color: 'rgba(244, 67, 54, 0.3)' },
               { offset: 1, color: 'rgba(244, 67, 54, 0.1)' },
@@ -158,102 +102,89 @@
     ],
   }))
 
-  // Gerar intervalo de datas para as últimas 24 horas
-  function generateDateRange () {
-    const dates = []
-    const end = new Date()
-    const start = new Date()
-    start.setUTCHours(end.getUTCHours() - 24)
+  function formatUTC(date: Date, withMinutes = false): string {
+    const day = String(date.getUTCDate()).padStart(2, '0')
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+    const hour = String(date.getUTCHours()).padStart(2, '0')
+    const minute = String(date.getUTCMinutes()).padStart(2, '0')
+    return `${day}/${month}, ${hour}:${withMinutes ? minute : '00'}`
+  }
 
-    // Ajusta para o início da hora
+  function generateDateRange(): string[] {
+    const dates: string[] = []
+    const now = new Date()
+
+    const start = new Date(now)
+    start.setUTCHours(now.getUTCHours() - 23)
     start.setUTCMinutes(0)
     start.setUTCSeconds(0)
     start.setUTCMilliseconds(0)
 
-    // Gera um ponto a cada hora
-    for (let d = new Date(start); d <= end; d.setUTCHours(d.getUTCHours() + 1)) {
-      const day = String(d.getUTCDate()).padStart(2, '0')
-      const month = String(d.getUTCMonth() + 1).padStart(2, '0')
-      const hour = String(d.getUTCHours()).padStart(2, '0')
-      const minute = String(d.getUTCMinutes()).padStart(2, '0')
-      const dateStr = `${day}/${month}, ${hour}:${minute}`
-      dates.push(dateStr)
+    const current = new Date(start)
+    while (current.getTime() <= now.getTime()) {
+      dates.push(formatUTC(current, false)) // HH:00
+      current.setUTCHours(current.getUTCHours() + 1)
+    }
+
+    // Substitui o último ponto pelo horário exato atual (ex: 09:28)
+    const nowKey = formatUTC(now, true)
+    if (dates.at(-1) !== nowKey) {
+      dates[dates.length - 1] = nowKey
     }
 
     return dates
   }
 
-  // Processar dados dos logs recebidos via props
-  function processLogData () {
+  function processLogData() {
     try {
-      // Verificar se temos dados válidos
-      if (!Array.isArray(props.approvedLogs) && !Array.isArray(props.rejectedLogs)) {
-        console.warn('⚠️ Nenhum array de logs válido recebido')
-      }
+      const groupedData = new Map<string, { approved: number; denied: number }>()
+      const dateRange = generateDateRange()
 
-      // Inicializar dados com zeros para todas as horas das últimas 24 horas
-      const groupedData = new Map<string, { approved: number, denied: number }>()
-
-      // Preencher com zeros para todas as horas
-      for (const dateTime of generateDateRange()) {
+      for (const dateTime of dateRange) {
         groupedData.set(dateTime, { approved: 0, denied: 0 })
       }
 
-      // Processar logs aprovados
+      const now = new Date()
+      const currentHourKey = formatUTC(now, true) // chave do último ponto
+
+      function getKey(log: AccessLogs): string {
+        const date = new Date(log.time)
+        const logHour = date.getUTCHours()
+        const nowHour = now.getUTCHours()
+        const logDay = date.getUTCDate()
+        const nowDay = now.getUTCDate()
+
+        // Se o log é da hora atual, agrupa no ponto final (HH:mm)
+        if (logHour === nowHour && logDay === nowDay) {
+          return currentHourKey
+        }
+
+        return formatUTC(date, false) // HH:00
+      }
+
       if (props.approvedLogs) {
         for (const log of props.approvedLogs) {
-          const date = new Date(log.time)
-          const day = String(date.getUTCDate()).padStart(2, '0')
-          const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-          const hour = String(date.getUTCHours()).padStart(2, '0')
-          const minute = String(date.getUTCMinutes()).padStart(2, '0')
-          const dateTime = `${day}/${month}, ${hour}:${minute}`
-
-          const data = groupedData.get(dateTime) || { approved: 0, denied: 0 }
+          const key = getKey(log)
+          const data = groupedData.get(key) || { approved: 0, denied: 0 }
           data.approved++
-          groupedData.set(dateTime, data)
+          groupedData.set(key, data)
         }
       }
 
-      // Processar logs negados
       if (props.rejectedLogs) {
         for (const log of props.rejectedLogs) {
-          const date = new Date(log.time)
-          const day = String(date.getUTCDate()).padStart(2, '0')
-          const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-          const hour = String(date.getUTCHours()).padStart(2, '0')
-          const minute = String(date.getUTCMinutes()).padStart(2, '0')
-          const dateTime = `${day}/${month}, ${hour}:${minute}`
-
-          const data = groupedData.get(dateTime) || { approved: 0, denied: 0 }
+          const key = getKey(log)
+          const data = groupedData.get(key) || { approved: 0, denied: 0 }
           data.denied++
-          groupedData.set(dateTime, data)
+          groupedData.set(key, data)
         }
       }
 
-      // Ordenar por data/hora
-      // eslint-disable-next-line unicorn/no-array-sort
-      const sortedDates = Array.from(groupedData.keys()).slice().sort((a: string, b: string) => {
-        // Formato: "dd/MM, HH:mm"
-        const [dateA, timeA] = a.split(', ')
-        const [dateB, timeB] = b.split(', ')
-
-        const [dayA, monthA] = dateA.split('/')
-        const [dayB, monthB] = dateB.split('/')
-
-        // Assumir ano atual
-        const year = new Date().getUTCFullYear()
-        const dateStrA = `${year}-${monthA}-${dayA}T${timeA}:00Z`
-        const dateStrB = `${year}-${monthB}-${dayB}T${timeB}:00Z`
-
-        return new Date(dateStrA).getTime() - new Date(dateStrB).getTime()
-      })
-
-      // Preparar dados para o gráfico
+      // Usa a ordem do dateRange diretamente (já está ordenado)
       chartData.value = {
-        dates: sortedDates,
-        approved: sortedDates.map((date: string) => groupedData.get(date)?.approved || 0),
-        denied: sortedDates.map((date: string) => groupedData.get(date)?.denied || 0),
+        dates: dateRange,
+        approved: dateRange.map(d => groupedData.get(d)?.approved || 0),
+        denied: dateRange.map(d => groupedData.get(d)?.denied || 0),
       }
 
       updateChart()
@@ -262,34 +193,29 @@
     }
   }
 
-  // Atualizar gráfico
-  function updateChart () {
+  function updateChart() {
     if (chartInstance) {
       chartInstance.setOption(chartOption.value)
     }
   }
 
-  // Inicializar gráfico
-  function initChart () {
+  function initChart() {
     if (chartRef.value) {
       chartInstance = echarts.init(chartRef.value, 'light')
-      chartInstance.setOption(chartOption.value)
 
-      // Responsividade
       window.addEventListener('resize', () => {
         chartInstance?.resize()
       })
     }
   }
 
-  // Watch para mudanças nos props
   watch(() => [props.approvedLogs, props.rejectedLogs], () => {
     processLogData()
   }, { deep: true })
 
   onMounted(() => {
-    processLogData()
-    initChart()
+    initChart()      // 1. Cria o gráfico
+    processLogData() // 2. Processa dados e chama updateChart()
   })
 </script>
 
