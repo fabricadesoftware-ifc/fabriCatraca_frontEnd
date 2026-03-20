@@ -44,7 +44,7 @@
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: chartData.value.dates.slice(0, -2),
+      data: chartData.value.dates.slice(0, -3),
       axisLabel: {
         rotate: 45,
         fontSize: 10,
