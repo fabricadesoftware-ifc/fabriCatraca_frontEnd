@@ -128,7 +128,7 @@
 
     // Substitui o último ponto pelo horário exato atual (ex: 09:28)
     const nowKey = formatUTC(now, true)
-    if (dates.at(-1) !== nowKey) {
+    if (dates[dates.length - 1] !== nowKey) {
       dates[dates.length - 1] = nowKey
     }
 
