@@ -110,8 +110,8 @@ export const useAccessLogStore = defineStore("accessLog", {
       return response;
     },
 
-    async returnedLogsByLastDays(days: number, logs_type?: number) {
-      const params: { days: number; event_type?: number } = { days };
+    async returnedLogsByLastDays(days: number, logs_type?: number, page_size?: number) {
+      const params: { days: number; event_type?: number; page_size?: number } = { days, page_size: page_size || 10 };
       if (logs_type) {
         params.event_type = logs_type;
       }

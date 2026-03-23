@@ -16,8 +16,8 @@
 
   onMounted(async () => {
     await accessLogStore.loadLogs()
-    const acceptResponse = await accessLogStore.returnedLogsByLastDays(10, 7)
-    const rejectedResponse = await accessLogStore.returnedLogsByLastDays(10, 6)
+    const acceptResponse = await accessLogStore.returnedLogsByLastDays(10, 7, 350)
+    const rejectedResponse = await accessLogStore.returnedLogsByLastDays(10, 6, 350)
 
     if (authStore.isAdmin || authStore.isSisae) {
       await userStore.loadUsers()
@@ -43,8 +43,8 @@
     acces_rejected.value = Array.isArray(rejectedResponse) ? rejectedResponse : (rejectedResponse as any)?.results || []
 
     // Contar os logs
-    count_approved.value = (await accessLogStore.returnedTypedLogs(7)).count
-    count_rejected.value = (await accessLogStore.returnedTypedLogs(6)).count
+    count_approved.value = (await accessLogStore.returnedTypedLogs(7, 350)).count
+    count_rejected.value = (await accessLogStore.returnedTypedLogs(6, 350)).count
   })
 
   const data = computed(() => [
@@ -53,7 +53,6 @@
       description: 'Total de acessos concedidos com sucesso',
       value: count_approved.value,
       trend: 'up' as const,
-      trendValue: '+12%',
       color: '', // Sem cor específica, deixar o CSS controlar
       icon: 'mdi-check-circle',
       iconColor: 'success', // Ícone verde
@@ -64,7 +63,6 @@
       description: 'Total de tentativas de acesso rejeitadas',
       value: count_rejected.value,
       trend: 'down' as const,
-      trendValue: '-5%',
       color: '', // Sem cor específica, deixar o CSS controlar
       icon: 'mdi-close-circle',
       iconColor: 'error', // Ícone vermelho
