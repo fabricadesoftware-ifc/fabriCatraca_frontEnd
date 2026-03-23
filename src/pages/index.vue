@@ -16,8 +16,8 @@
 
   onMounted(async () => {
     await accessLogStore.loadLogs()
-    const acceptResponse = await accessLogStore.returnedLogsByLastDays(10, 7, 350)
-    const rejectedResponse = await accessLogStore.returnedLogsByLastDays(10, 6, 350)
+    const acceptResponse = await accessLogStore.returnedLogsByLastDays(1, 7, 350)
+    const rejectedResponse = await accessLogStore.returnedLogsByLastDays(1, 6, 350)
 
     if (authStore.isAdmin || authStore.isSisae) {
       await userStore.loadUsers()
