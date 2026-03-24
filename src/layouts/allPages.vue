@@ -216,19 +216,20 @@ onBeforeUnmount(() => {
         />
         <v-spacer />
         <v-sheet class="d-flex align-center pr-5" elevation="0">
-          <v-card class="d-flex align-center px-3" elevation="0" rounded="lg">
+          <v-card class="d-flex align-center px-3 py-3" elevation="0" rounded="lg">
             <v-menu location="bottom end" width="380">
               <template #activator="{ props }">
                 <v-badge
                   color="error"
                   :content="alertsStore.unreadCount > 99 ? '99+' : alertsStore.unreadCount"
                   :model-value="alertsStore.unreadCount > 0"
+                  :offset-x="5"
                 >
                   <v-btn
                     v-bind="props"
                     class="mr-1"
                     icon="mdi-bell-outline"
-                    size="small"
+                    size="medium"
                     variant="text"
                     @click="alertsStore.refresh()"
                   />

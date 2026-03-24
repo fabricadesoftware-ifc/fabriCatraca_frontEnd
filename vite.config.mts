@@ -9,6 +9,8 @@ import VueRouter from 'unplugin-vue-router/vite'
 import { defineConfig } from 'vite'
 import Layouts from 'vite-plugin-vue-layouts-next'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+import vueDevTools from 'vite-plugin-vue-devtools'
+
 
 // Utilities
 
@@ -61,6 +63,7 @@ export default defineConfig({
         ],
       },
     }),
+    vueDevTools(),
   ],
   optimizeDeps: {
     exclude: [

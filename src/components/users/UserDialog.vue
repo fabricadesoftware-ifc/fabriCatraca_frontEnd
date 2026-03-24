@@ -115,7 +115,7 @@ onMounted(async () => {
           <v-tab value="departamentos" v-if="props.user.name">Grupos</v-tab>
           <v-tab value="cartoes" v-if="props.user.name">Cartões</v-tab>
           <v-tab value="horarios" v-if="props.user.name">Horários</v-tab>
-          <v-tab value="liberacao" v-if="props.user.id">Liberação</v-tab>
+          <v-tab value="liberacao" v-if="props.user.id">Liberação temporária</v-tab>
           <v-tab value="pin" v-if="props.user.name">PIN</v-tab>
           <v-tab value="biometria" v-if="props.user.name">Biometria</v-tab>
           <v-tab value="acessos" v-if="props.user.name">Acessos</v-tab>
