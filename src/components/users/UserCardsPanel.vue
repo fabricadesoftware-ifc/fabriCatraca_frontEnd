@@ -20,7 +20,7 @@ const deviceStore = useDeviceStore();
 async function loadCards() {
   loading.value = true;
   try {
-    const response = await CardsService.getCards({ user: props.userId });
+    const response = await CardsService.getCards({ user_id: props.userId });
     cards.value = response.results;
   } catch {
     toast.error("Erro ao carregar cartoes");
