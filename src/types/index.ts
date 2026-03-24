@@ -82,7 +82,9 @@ export interface Bio {
 
 export interface BioCreate {
   user_id: number;
-  enrollment_device_id: number;
+  enrollment_device_id?: number;
+  enrollment_mode?: "remote" | "local";
+  captured_template?: string;
 }
 
 export interface Card {

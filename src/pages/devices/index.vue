@@ -18,12 +18,7 @@
   }
 
   async function handleTestConnection (deviceId: number) {
-    try {
-      await deviceStore.testConnection(deviceId)
-      router.go(0)
-    } catch {
-      router.go(0)
-    }
+    await deviceStore.testConnection(deviceId)
   }
 
   onMounted(async () => {
