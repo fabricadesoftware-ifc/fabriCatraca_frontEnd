@@ -11,45 +11,63 @@
 </script>
 
 <template>
-  <div class="d-flex justify-center align-center" style="height: 100vh;">
-    <div class="bg-white w-50 h-screen d-flex justify-center align-center w-full">
-      <VCard class="w-full w-100 pa-10 d-flex align-center justify-center ga-5" elevation="20" rounded="xl">
-        <div class="d-flex flex-column w-50 align-center ga-5">
-          <img
-            height="70"
-            :src="Logo"
-            style="top: -50px; width: 100px; left: 350px;"
-          >
-          <VCardTitle>FabriCatraca</VCardTitle>
-        </div>
-        <VDivider vertical />
+  <v-container fluid class="pa-0 d-flex align-center justify-center login-page">
+    <v-row class="ma-0 w-100" align="center" justify="center">
+      <v-col cols="12" sm="8" md="6" lg="3" class="pa-4">
+        <VCard class="pa-6 pa-sm-10" elevation="20" rounded="xl">
 
-        <!-- 🔥 Formulário para permitir Enter -->
-        <form class="w-100 d-flex justify-center align-center flex-column ga-5 pa-5" @submit.prevent="handleLogin">
-          <VCardTitle>faça o seu Login</VCardTitle>
-          <VTextField
+
+          <VCardTitle class="text-subtitle-1 text-center pa-0 pb-4">
+            Faça o seu Login
+          </VCardTitle>
+          <!-- Formulário -->
+          <form class="d-flex flex-column ga-6" @submit.prevent="handleLogin">
+
+            <VTextField
             v-for="(infos, i) in infoAuth"
             :key="i"
             v-model="infos.value"
-            class="w-100"
             :label="infos.label"
             :placeholder="infos.placeholder"
             :prepend-icon="infos.prependIcon"
-            rounded="xl"
             :rules="infos.rules"
             :type="infos.type"
+            rounded="xl"
             variant="outlined"
-          />
-          <VCardActions class="w-full d-flex justify-center align-center">
-            <!-- type="submit" faz com que o Enter funcione -->
-            <VBtn
-              class="w-25"
+            hide-details="auto"
+            />
+
+            <VCardActions class="pa-0 mt-2">
+              <VBtn
+              block
               color="primary"
               type="submit"
-            >Login</VBtn>
+              size="large"
+              rounded="xl"
+              >
+              Login
+            </VBtn>
+
           </VCardActions>
         </form>
+        <VDivider class="mb-6" />
+        <!-- Logo + Título -->
+        <div class="d-flex flex-column align-center ga-3 mt-4">
+          <img
+            :src="Logo"
+            style="width: 80px; height: auto;"
+          >
+          <VCardTitle class="text-h6 text-center pa-0">FabriCatraca</VCardTitle>
+        </div>
+
       </VCard>
-    </div>
-  </div>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
+
+<style scoped>
+.login-page {
+  min-height: 100vh;
+}
+</style>
