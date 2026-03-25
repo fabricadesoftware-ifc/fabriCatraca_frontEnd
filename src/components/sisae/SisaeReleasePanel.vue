@@ -1,160 +1,50 @@
 <script setup lang="ts">
-import type { User } from "@/types";
-import { computed, onMounted, reactive, ref, watch } from "vue";
-import { toast } from "vue3-toastify";
+import { onMounted, ref } from "vue";
 import ReleaseAuditTable from "@/components/release-audits/ReleaseAuditTable.vue";
-import { TemporaryUserReleasesService, UsersService } from "@/services";
+import { useUserStore } from "@/stores";
+import { useAuthStore } from "@/stores";
 
-const loadingUsers = ref(false);
-const saving = ref(false);
-const userOptions = ref<User[]>([]);
+const userStore = useUserStore();
+const authStore = useAuthStore();
 const userSearch = ref("");
-const selectedUserId = ref<number | null>(null);
 
-const form = reactive({
-  duration_minutes: 30,
-  valid_from: "",
-  notes: "",
-});
-
-const selectedUser = computed(() =>
-  userOptions.value.find(user => user.id === selectedUserId.value) || null,
-);
-
-async function loadUsers(search?: string) {
-  loadingUsers.value = true;
-  try {
-    const response = await UsersService.getUsers({
-      search: search || undefined,
-      page_size: 30,
-      ordering: "name",
-    });
-    userOptions.value = response.results;
-  } catch (error) {
-    console.error(error);
-    toast.error("Erro ao carregar alunos");
-  } finally {
-    loadingUsers.value = false;
-  }
+async function pageChanger(page: number | string) {
+  const pageNum = typeof page === "number" ? page : Number(page);
+  await userStore.loadUsers({
+    page: pageNum,
+    search: userSearch.value || undefined,
+  });
 }
 
-async function scheduleRelease() {
-  if (!selectedUserId.value) {
-    toast.warning("Selecione um aluno");
-    return;
-  }
-  if (!form.notes.trim()) {
-    toast.warning("Informe a justificativa da liberação");
-    return;
-  }
-  if (!form.valid_from) {
-    toast.warning("Informe a data e hora da liberação");
-    return;
-  }
-
-  saving.value = true;
-  try {
-    await TemporaryUserReleasesService.createTemporaryUserRelease({
-      user_id: selectedUserId.value,
-      duration_minutes: Number(form.duration_minutes),
-      valid_from: new Date(form.valid_from).toISOString(),
-      notes: form.notes.trim(),
-    });
-    form.notes = "";
-    toast.success("Liberação agendada com sucesso");
-  } catch (error: any) {
-    console.error(error);
-    const message
-      = error?.response?.data?.non_field_errors?.[0]
-        || error?.response?.data?.user_id?.[0]
-        || error?.response?.data?.error
-        || "Erro ao agendar liberação";
-    toast.error(message);
-  } finally {
-    saving.value = false;
-  }
+async function itemsPerPageChanger(pageSize: number | string) {
+  const pageSizeNum = typeof pageSize === "number" ? pageSize : Number(pageSize);
+  await userStore.loadUsers({
+    page: userStore.current_page,
+    page_size: pageSizeNum,
+    search: userSearch.value || undefined,
+  });
 }
-
-watch(userSearch, async value => {
-  await loadUsers(value);
-});
 
 onMounted(async () => {
-  await loadUsers();
+  await userStore.loadUsers();
 });
 </script>
 
 <template>
   <v-container class="pa-0" fluid>
     <v-row>
-      <v-col cols="12" md="5">
-        <v-card>
-          <v-card-title>Selecionar aluno</v-card-title>
-          <v-card-text>
-            <v-autocomplete
-              v-model="selectedUserId"
-              v-model:search="userSearch"
-              :items="userOptions"
-              item-title="name"
-              item-value="id"
-              label="Buscar aluno por nome ou matrícula"
-              :loading="loadingUsers"
-              no-filter
-            >
-              <template #item="{ props, item }">
-                <v-list-item
-                  v-bind="props"
-                  :subtitle="item.raw.registration || 'Sem matrícula'"
-                  :title="item.raw.name"
-                />
-              </template>
-            </v-autocomplete>
-
-            <v-alert v-if="selectedUser" class="mt-4" type="info" variant="tonal">
-              <div><strong>Aluno:</strong> {{ selectedUser.name }}</div>
-              <div><strong>Matrícula:</strong> {{ selectedUser.registration || "—" }}</div>
-            </v-alert>
-          </v-card-text>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" md="7">
-        <v-card>
-          <v-card-title>Agendar liberação</v-card-title>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12" md="4">
-                <v-text-field
-                  v-model.number="form.duration_minutes"
-                  label="Duração (minutos)"
-                  min="1"
-                  type="number"
-                />
-              </v-col>
-              <v-col cols="12" md="8">
-                <v-text-field
-                  v-model="form.valid_from"
-                  label="Data e hora da liberação"
-                  type="datetime-local"
-                />
-              </v-col>
-              <v-col cols="12">
-                <v-textarea
-                  v-model="form.notes"
-                  auto-grow
-                  label="Justificativa"
-                  rows="3"
-                />
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-card-actions class="px-4 pb-4">
-            <v-spacer />
-            <v-btn color="primary" :loading="saving" @click="scheduleRelease">
-              Agendar liberação
-            </v-btn>
-          </v-card-actions>
-        </v-card>
+      <v-col md="12">
+        <UserComponent
+          :app_role="authStore.role"
+          :current-page="userStore.current_page"
+          :page-size="userStore.page_size"
+          :total-items="userStore.count"
+          :total-pages="userStore.total_pages"
+          :users="userStore.users"
+          @item-per-page="itemsPerPageChanger($event)"
+          @page-changed="pageChanger($event)"
+          @search-changed="searchChanged($event)"
+        />
       </v-col>
 
       <v-col cols="12">

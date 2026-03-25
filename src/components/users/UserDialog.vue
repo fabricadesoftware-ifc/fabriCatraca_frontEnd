@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { User as BaseUser } from "@/types";
-import { onMounted, ref, toValue, watch } from "vue";
-import { useGroupStore } from "@/stores";
+import { computed, onMounted, ref, toValue, watch } from "vue";
+import { useAuthStore, useGroupStore } from "@/stores";
 import UserAccessLogsPanel from "./UserAccessLogsPanel.vue";
 import UserBioPanel from "./UserBioPanel.vue";
 import UserCardsPanel from "./UserCardsPanel.vue";
@@ -27,6 +27,19 @@ const emit = defineEmits<{
 }>();
 
 const groupStore = useGroupStore();
+const authStore = useAuthStore();
+const isSisaeViewer = computed(() => authStore.role === "sisae");
+const panelRoles = ["admin", "guarita", "sisae"] as const;
+
+const currentTargetRole = computed(() => {
+  const directRole = props.user?.app_role;
+  const effectiveRole = props.user?.effective_app_role;
+  return (directRole || effectiveRole || appRole.value || "") as string;
+});
+
+const canShowPasswordField = computed(() =>
+  panelRoles.includes(currentTargetRole.value as (typeof panelRoles)[number]),
+);
 const tab = ref("dados");
 const isVisitor = ref(false);
 const deviceAdmin = ref(false);
@@ -39,6 +52,11 @@ const registration = ref("");
 const pin = ref("");
 const showPin = ref(false);
 const loading = ref(false);
+const hasEmailField = ref(false);
+const hasAppRoleField = ref(false);
+const hasPanelAccessOnlyField = ref(false);
+const hasUserTypeField = ref(false);
+const hasDeviceAdminField = ref(false);
 const roleOptions = [
   { title: "Sem perfil do painel", value: "" },
   { title: "Administrador", value: "admin" },
@@ -46,21 +64,31 @@ const roleOptions = [
   { title: "SISAE", value: "sisae" },
 ];
 
+function hasOwn(obj: unknown, key: string): boolean {
+  return !!obj && Object.prototype.hasOwnProperty.call(obj, key);
+}
+
 // Atualiza os campos locais quando o props.user mudar
 watch(
   () => props.user,
   (newUser) => {
     if (newUser) {
+      hasEmailField.value = hasOwn(newUser, "email");
+      hasAppRoleField.value = hasOwn(newUser, "app_role");
+      hasPanelAccessOnlyField.value = hasOwn(newUser, "panel_access_only");
+      hasUserTypeField.value = hasOwn(newUser, "user_type_id");
+      hasDeviceAdminField.value = hasOwn(newUser, "device_admin");
+
       name.value = newUser.name;
-      email.value = newUser.email || "";
+      email.value = hasEmailField.value ? (newUser.email ?? "") : "";
       password.value = "";
-      appRole.value = newUser.app_role || "";
-      panelAccessOnly.value = !!newUser.panel_access_only;
-      registration.value = newUser.registration || "";
-      pin.value = newUser.pin || "";
+      appRole.value = hasAppRoleField.value ? (newUser.app_role ?? "") : "";
+      panelAccessOnly.value = hasPanelAccessOnlyField.value ? !!newUser.panel_access_only : false;
+      registration.value = newUser.registration ?? "";
+      pin.value = newUser.pin ?? "";
       showPin.value = false;
-      isVisitor.value = newUser.user_type_id === 1;
-      deviceAdmin.value = !!newUser.device_admin;
+      isVisitor.value = hasUserTypeField.value ? newUser.user_type_id === 1 : false;
+      deviceAdmin.value = hasDeviceAdminField.value ? !!newUser.device_admin : false;
       userGroups.value = newUser.user_groups?.map((g) => (typeof g === "number" ? g : g.id)) || [];
     }
   },
@@ -73,17 +101,35 @@ function closeDialog() {
 
 async function salvarUsuario() {
   if (props.user) {
-    emit("save", {
+    const payload: User = {
       ...props.user,
       name: name.value,
-      email: email.value,
-      password: password.value,
-      app_role: appRole.value,
-      panel_access_only: panelAccessOnly.value,
       registration: registration.value,
-      user_type_id: isVisitor.value ? 1 : (null as unknown as number),
-      device_admin: deviceAdmin.value,
       user_groups: userGroups.value,
+    };
+
+    if (canShowPasswordField.value && password.value.trim()) {
+      payload.password = password.value;
+    }
+
+    if (hasEmailField.value) {
+      payload.email = email.value;
+    }
+    if (hasAppRoleField.value) {
+      payload.app_role = appRole.value;
+    }
+    if (hasPanelAccessOnlyField.value) {
+      payload.panel_access_only = panelAccessOnly.value;
+    }
+    if (hasUserTypeField.value) {
+      payload.user_type_id = isVisitor.value ? 1 : (null as unknown as number);
+    }
+    if (hasDeviceAdminField.value) {
+      payload.device_admin = deviceAdmin.value;
+    }
+
+    emit("save", {
+      ...payload,
     });
     closeDialog();
   }
@@ -134,20 +180,25 @@ onMounted(async () => {
                     required
                     :rules="[(v) => !!v || 'Nome é obrigatório']"
                   />
-                  <v-text-field v-model="email" label="E-mail para login" />
+                  <v-text-field v-if="hasEmailField" v-model="email" label="E-mail para login" />
                   <v-select
+                    v-if="hasAppRoleField"
                     v-model="appRole"
                     :items="roleOptions"
                     item-title="title"
                     item-value="value"
                     label="Perfil do painel"
+                    :disabled="isSisaeViewer"
                   />
                   <v-switch
+                    v-if="hasPanelAccessOnlyField"
                     v-model="panelAccessOnly"
                     color="info"
                     label="Conta somente do painel"
+                    :disabled="isSisaeViewer"
                   />
                   <v-text-field
+                    v-if="canShowPasswordField"
                     v-model="password"
                     label="Senha do painel"
                     placeholder="Preencha para definir ou alterar a senha"
@@ -155,11 +206,19 @@ onMounted(async () => {
                   />
                   <v-text-field v-model="registration" label="Matrícula" />
 
-                  <v-switch v-model="isVisitor" color="warning" label="Visitante" />
                   <v-switch
+                    v-if="hasUserTypeField"
+                    v-model="isVisitor"
+                    color="warning"
+                    label="Visitante"
+                    :disabled="isSisaeViewer"
+                  />
+                  <v-switch
+                    v-if="hasDeviceAdminField"
                     v-model="deviceAdmin"
                     color="primary"
                     label="Administrador da catraca"
+                    :disabled="isSisaeViewer"
                   />
                 </v-col>
 

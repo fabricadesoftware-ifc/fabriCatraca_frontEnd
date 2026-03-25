@@ -15,6 +15,7 @@ defineProps<{
   pageSize: number;
   totalPages: number;
   totalItems: number;
+  app_role: string;
 }>();
 
 const emit = defineEmits<{
@@ -29,6 +30,8 @@ const selection = ref({
 });
 const search = ref("");
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  //TODO: Mostrar headers diferentes para diferentes roles exemplo: admin vê tudo, guarita não vê admin, sisae só vê sisae e alunos
 
 const headers = [
   { title: "ID", key: "id", align: "start" as const },
@@ -69,13 +72,11 @@ async function salvarUsuario(user: User) {
         device_admin: user.device_admin,
       });
 
-      // Para usuário novo, adicionar todos os grupos selecionados
       const userGroupIds = (user.user_groups || []).map((g) => (typeof g === "number" ? g : g.id));
       for (const groupId of userGroupIds) {
         await userStore.addUserToGroup(savedUser.id, groupId);
       }
     } else {
-      // Para usuário existente, verificar se dados básicos mudaram
       const currentUser = await userStore.getUserById(user.id);
 
       if (!currentUser) {
@@ -231,7 +232,6 @@ function appRoleLabel(value?: string) {
     <h2 class="text-h5">Gerenciar Usuários</h2>
 
     <div>
-      <!-- Debug visual (remova depois que funcionar) -->
       <span class="mr-2 text-caption">Selecionados: {{ selection.selected.length }}</span>
 
       <v-btn
