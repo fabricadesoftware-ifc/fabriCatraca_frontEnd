@@ -49,6 +49,10 @@ declare module 'vue' {
     UserCardsPanel: typeof import('./components/users/UserCardsPanel.vue')['default']
     UserComponent: typeof import('./components/users/UserComponent.vue')['default']
     UserDialog: typeof import('./components/users/UserDialog.vue')['default']
+    UserGeneralTab: typeof import('./components/users/UserGeneralTab.vue')['default']
+    UserGroupsTab: typeof import('./components/users/UserGroupsTab.vue')['default']
+    UserPinTab: typeof import('./components/users/UserPinTab.vue')['default']
+    UserSchedulesTab: typeof import('./components/users/UserSchedulesTab.vue')['default']
     UserTemporaryReleasePanel: typeof import('./components/users/UserTemporaryReleasePanel.vue')['default']
   }
 }

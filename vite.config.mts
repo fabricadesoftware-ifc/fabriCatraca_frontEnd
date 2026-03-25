@@ -19,6 +19,14 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3000,
+    proxy: {
+      '/ifc-horarios': {
+        target: 'https://horarios.araquari.ifc.edu.br',
+        changeOrigin: true,
+        secure: true,
+        rewrite: path => path.replace(/^\/ifc-horarios/, ''),
+      },
+    },
   },
   plugins: [
     Vue({

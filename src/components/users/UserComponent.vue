@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { User as BaseUser } from "@/types";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { toast } from "vue3-toastify";
 import { useUserStore } from "@/stores";
 import UserDialog from "./UserDialog.vue";
@@ -9,7 +9,7 @@ interface User extends Omit<BaseUser, "user_groups"> {
   user_groups?: (number | { id: number; name: string })[];
 }
 
-defineProps<{
+const { users, currentPage, pageSize, totalPages, totalItems, app_role } = defineProps<{
   users: User[];
   currentPage: number;
   pageSize: number;
@@ -33,7 +33,7 @@ let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
   //TODO: Mostrar headers diferentes para diferentes roles exemplo: admin vê tudo, guarita não vê admin, sisae só vê sisae e alunos
 
-const headers = [
+const DefaultHeaders = [
   { title: "ID", key: "id", align: "start" as const },
   { title: "Nome", key: "name", align: "start" as const },
   { title: "Perfil", key: "app_role", align: "start" as const },
@@ -41,6 +41,16 @@ const headers = [
   { title: "Turma", key: "user_groups", align: "start" as const },
   { title: "Matrícula", key: "registration", align: "start" as const },
 ];
+
+const HeadersByRole = {
+  admin: DefaultHeaders,
+  guarita: DefaultHeaders.filter((h) => h.key !== "app_role" && h.key !== "device_admin"), // Guarita não vê perfil e admin catraca
+  sisae: DefaultHeaders.filter((h) => h.key !== "app_role" && h.key !== "device_admin"), // SISAE não vê perfil e admin catraca
+};
+
+const tableHeaders = computed(
+  () => HeadersByRole[app_role as keyof typeof HeadersByRole] ?? DefaultHeaders,
+);
 
 // Watch para debounce na pesquisa (aguarda 500ms após parar de digitar)
 watch(search, (newSearch) => {
@@ -266,7 +276,7 @@ function appRoleLabel(value?: string) {
   <v-data-table-server
     v-model="selection.selected"
     class="rounded-lg"
-    :headers="headers"
+    :headers="tableHeaders"
     hover
     item-key="id"
     :items="users"

@@ -1,6 +1,8 @@
 <script lang="ts" setup>
   import { onMounted, ref } from 'vue'
+  import { useAuthStore } from '@/stores/auth'
   import { useUserStore } from '@/stores/user'
+  const authStore = useAuthStore()
   const userStore = useUserStore()
   const searchTerm = ref('')
 
@@ -42,6 +44,7 @@
     <v-divider class="my-4" />
 
     <UserComponent
+      :app_role="authStore.role"
       :current-page="userStore.current_page"
       :page-size="userStore.page_size"
       :total-items="userStore.count"
