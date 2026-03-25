@@ -1,6 +1,9 @@
+import axios from "axios";
+
+const apiUrl = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 const IFC_SCHEDULES_URL =
   import.meta.env.VITE_IFC_SCHEDULES_PROXY_URL ||
-  "/ifc-horarios/data/horario2026.23_mar%C3%A7o_years_days_horizontal.html";
+  `${apiUrl}/control_id_monitor/ifc-schedules/source`;
 
 export interface IfcScheduleRow {
   label: string;
@@ -117,13 +120,17 @@ class IfcSchedulesService {
   }
 
   private async fetchAllSchedules(): Promise<IfcGroupSchedule[]> {
-    const response = await fetch(IFC_SCHEDULES_URL);
+    const response = await axios.get(IFC_SCHEDULES_URL, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
 
-    if (!response.ok) {
-      throw new Error("Nao foi possivel carregar os horarios do IFC.");
+
+    const html = response.data
+    if (html.includes('<div id="app"></div>')) {
+      throw new Error("A origem dos horarios retornou a pagina da aplicacao em vez do HTML do IFC.");
     }
-
-    const html = await response.text();
     const parser = new DOMParser();
     const documentNode = parser.parseFromString(html, "text/html");
 
