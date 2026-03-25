@@ -275,7 +275,7 @@ onMounted(async () => {
             />
           </v-window-item>
 
-          <v-window-item value="departamentos">
+          <v-window-item value="departamentos" v-if="appRole == 'admin'">
             <UserGroupsTab
               :groups="groupStore.groups"
               :loading="loading"
@@ -284,7 +284,7 @@ onMounted(async () => {
             />
           </v-window-item>
 
-          <v-window-item value="cartoes">
+          <v-window-item value="cartoes" v-if="appRole == 'admin'">
             <UserCardsPanel :user-id="props.user.id" />
           </v-window-item>
 
@@ -302,11 +302,11 @@ onMounted(async () => {
             <UserTemporaryReleasePanel :user-id="props.user.id" />
           </v-window-item>
 
-          <v-window-item value="pin">
+          <v-window-item value="pin" v-if="appRole == 'admin'">
             <UserPinTab :pin="pin" />
           </v-window-item>
 
-          <v-window-item value="biometria">
+          <v-window-item value="biometria" v-if="appRole == 'admin'">
             <UserBioPanel :user-id="props.user.id" />
           </v-window-item>
 
@@ -315,12 +315,6 @@ onMounted(async () => {
           </v-window-item>
         </v-window>
       </v-card-text>
-
-      <v-card-actions>
-        <v-spacer />
-        <v-btn color="error" variant="text" @click="closeDialog">Cancelar</v-btn>
-        <v-btn color="primary" variant="flat" @click="salvarUsuario">Salvar</v-btn>
-      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>

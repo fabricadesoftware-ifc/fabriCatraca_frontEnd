@@ -41,12 +41,14 @@ const emit = defineEmits<{
           label="Nome"
           required
           :rules="[(v) => !!v || 'Nome é obrigatório']"
+          :disabled="isSisaeViewer"
           @update:model-value="emit('update:name', String($event ?? ''))"
         />
         <v-text-field
           v-if="hasEmailField"
           :model-value="email"
           label="E-mail para login"
+          :disabled="isSisaeViewer"
           @update:model-value="emit('update:email', String($event ?? ''))"
         />
         <v-select
@@ -78,6 +80,7 @@ const emit = defineEmits<{
         <v-text-field
           :model-value="registration"
           label="Matrícula"
+          :disabled="isSisaeViewer"
           @update:model-value="emit('update:registration', String($event ?? ''))"
         />
 
