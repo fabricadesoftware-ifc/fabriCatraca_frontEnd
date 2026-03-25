@@ -13,8 +13,15 @@ const cancellingId = ref<number | null>(null);
 const durationMinutes = ref(5);
 const notes = ref("");
 
+function toDateTimeLocalValue(date = new Date()) {
+  const timezoneOffset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 16);
+}
+
+const validFrom = ref(toDateTimeLocalValue());
+
 const openRelease = computed(() =>
-  releases.value.find(release => ["pending", "active"].includes(release.status)),
+  releases.value.find((release) => ["pending", "active"].includes(release.status)),
 );
 
 function getStatusLabel(status: TemporaryUserRelease["status"]) {
@@ -87,14 +94,21 @@ async function createRelease() {
     return;
   }
 
+  if (!validFrom.value) {
+    toast.warning("Informe uma data e hora válidas para a liberação");
+    return;
+  }
+
   saving.value = true;
   try {
     await TemporaryUserReleasesService.createTemporaryUserRelease({
       user_id: props.userId,
       duration_minutes: durationMinutes.value,
       notes: notes.value,
+      valid_from: new Date(validFrom.value).toISOString(),
     });
     notes.value = "";
+    validFrom.value = toDateTimeLocalValue();
     toast.success("Liberação temporária criada com sucesso");
     await loadReleases();
   } catch (error) {
@@ -120,6 +134,7 @@ async function cancelRelease(release: TemporaryUserRelease) {
 watch(
   () => props.userId,
   () => {
+    validFrom.value = toDateTimeLocalValue();
     loadReleases();
   },
 );
@@ -154,15 +169,20 @@ onMounted(loadReleases);
                   type="number"
                   variant="outlined"
                 />
+                <v-text-field
+                  v-model="validFrom"
+                  label="Data e hora da liberação"
+                  type="datetime-local"
+                  variant="outlined"
+                />
               </v-col>
 
               <v-col cols="12" md="8">
                 <v-textarea
                   v-model="notes"
-                  auto-grow
                   label="Observação"
-                  rows="2"
                   variant="outlined"
+                  max-height="136"
                 />
               </v-col>
             </v-row>
@@ -213,11 +233,7 @@ onMounted(loadReleases);
               <tbody>
                 <tr v-for="release in releases" :key="release.id">
                   <td>
-                    <v-chip
-                      :color="getStatusColor(release.status)"
-                      size="small"
-                      variant="tonal"
-                    >
+                    <v-chip :color="getStatusColor(release.status)" size="small" variant="tonal">
                       {{ getStatusLabel(release.status) }}
                     </v-chip>
                   </td>
@@ -237,10 +253,7 @@ onMounted(loadReleases);
                     <div class="text-body-2">
                       {{ release.result_message || "Aguardando processamento" }}
                     </div>
-                    <div
-                      v-if="release.consumed_log"
-                      class="text-caption text-medium-emphasis"
-                    >
+                    <div v-if="release.consumed_log" class="text-caption text-medium-emphasis">
                       Uso em {{ formatDateTime(release.consumed_log.time) }}
                       <span v-if="release.consumed_log.portal_name">
                         • {{ release.consumed_log.portal_name }}
