@@ -156,7 +156,7 @@ onBeforeUnmount(() => {
         <template #prepend>
           <v-img class="mr-2" height="40" src="@/assets/fabrica_nice.png" width="40" />
         </template>
-        <v-list-item-title class="text-h6"> FabriCatraca </v-list-item-title>
+        <v-list-item-title class="text-h6 font-weight-bold"> FabriCatraca </v-list-item-title>
       </v-list-item>
       <v-list density="compact" nav>
         <template v-for="item in items" :key="item.title">
