@@ -236,12 +236,12 @@ onMounted(async () => {
       <v-card-text>
         <v-tabs v-model="tab" bg-color="transparent" color="primary">
           <v-tab value="dados">Dados Gerais</v-tab>
-          <v-tab value="departamentos" v-if="props.user.name && props.user.app_role == 'admin'">Grupos</v-tab>
-          <v-tab value="cartoes" v-if="props.user.name && props.user.app_role == 'admin'">Cartões</v-tab>
+          <v-tab value="departamentos" v-if="props.user.name && authStore.role == 'admin'">Grupos</v-tab>
+          <v-tab value="cartoes" v-if="props.user.name && authStore.role == 'admin'">Cartões</v-tab>
           <v-tab value="horarios" v-if="props.user.name">Horários</v-tab>
           <v-tab value="liberacao" v-if="props.user.id">Liberação temporária</v-tab>
-          <v-tab value="pin" v-if="props.user.pin && props.user.app_role == 'admin'">PIN</v-tab>
-          <v-tab value="biometria" v-if="props.user.name && props.user.app_role == 'admin'">Biometria</v-tab>
+          <v-tab value="pin" v-if="props.user.pin && authStore.role == 'admin'">PIN</v-tab>
+          <v-tab value="biometria" v-if="props.user.name && authStore.role == 'admin'">Biometria</v-tab>
           <v-tab value="acessos" v-if="props.user.name">Acessos</v-tab>
         </v-tabs>
 
@@ -315,7 +315,7 @@ onMounted(async () => {
           </v-window-item>
         </v-window>
       </v-card-text>
-        <v-card-actions v-if="appRole == 'admin'">
+        <v-card-actions v-if="authStore.role == 'admin'">
         <v-spacer />
         <v-btn color="error" variant="text" @click="closeDialog">Cancelar</v-btn>
         <v-btn color="primary" variant="flat" @click="salvarUsuario">Salvar</v-btn>

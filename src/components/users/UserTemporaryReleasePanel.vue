@@ -183,6 +183,7 @@ onMounted(loadReleases);
                   label="Observação"
                   variant="outlined"
                   max-height="136"
+                  required
                 />
               </v-col>
             </v-row>
