@@ -172,16 +172,13 @@ async function removerSelecionados() {
         throw new Error("Nenhum usuário válido para remover");
       }
 
-      // Deletar cada usuário selecionado
       await Promise.all(validUsers.map((user) => userStore.deleteUser(user.id)));
-      // Recarregar a lista após deletar
       await userStore.loadUsers({
         page: userStore.current_page,
         page_size: userStore.page_size,
       });
 
       const removedCount = validUsers.length;
-      // Limpar seleção
       selection.value.selected = [];
       toast.success(`${removedCount} usuário(s) removido(s) com sucesso!`);
     } catch (error) {
@@ -241,7 +238,7 @@ function appRoleLabel(value?: string) {
   <div class="d-flex justify-space-between align-center mb-4">
     <h2 class="text-h5">Gerenciar Usuários</h2>
 
-    <div>
+    <div v-if="app_role == 'admin'">
       <span class="mr-2 text-caption">Selecionados: {{ selection.selected.length }}</span>
 
       <v-btn
@@ -285,8 +282,8 @@ function appRoleLabel(value?: string) {
     :loading="users.length === 0"
     :page="currentPage ?? 1"
     return-object
-    select-strategy="all"
-    show-select
+    :select-strategy="app_role === 'admin' ? 'all' : 'single'"
+    :show-select="app_role === 'admin'"
     @click:row="showUserDetails"
     @update:items-per-page="itemsPerPageChanged"
     @update:page="trocarPagina"

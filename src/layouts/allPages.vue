@@ -141,7 +141,6 @@ async function handleAlertClick(alertId: number) {
 }
 
 onMounted(async () => {
-  await authStore.getMe();
   await alertsStore.initialize();
 });
 

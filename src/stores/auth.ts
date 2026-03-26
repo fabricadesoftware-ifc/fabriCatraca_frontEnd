@@ -11,6 +11,7 @@ export const useAuthStore = defineStore("auth", () => {
   const refresh = ref<string>(localStorage.getItem("refresh_token") ?? "");
   const loading = ref<boolean>(false);
   const error = ref<string | null>(null);
+  let meRequest: Promise<void> | null = null;
 
   const user = computed(() => me.value);
   const isAuthenticated = computed(() => !!access.value);
@@ -73,18 +74,28 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function getMe() {
+    if (meRequest) {
+      await meRequest;
+      return;
+    }
+
     loading.value = true;
 
-    try {
-      const response = await AuthService.getMe();
-      me.value = response;
-      persistCurrentUser(response);
-    } catch (err) {
-      console.error(err);
-      logout(false);
-    } finally {
-      loading.value = false;
-    }
+    meRequest = (async () => {
+      try {
+        const response = await AuthService.getMe();
+        me.value = response;
+        persistCurrentUser(response);
+      } catch (err) {
+        console.error(err);
+        logout(false);
+      } finally {
+        loading.value = false;
+        meRequest = null;
+      }
+    })();
+
+    await meRequest;
   }
 
   async function takeDatas(user: Array<{ value: string }>) {
