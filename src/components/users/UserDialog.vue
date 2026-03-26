@@ -315,6 +315,11 @@ onMounted(async () => {
           </v-window-item>
         </v-window>
       </v-card-text>
+        <v-card-actions v-if="appRole == 'admin'">
+        <v-spacer />
+        <v-btn color="error" variant="text" @click="closeDialog">Cancelar</v-btn>
+        <v-btn color="primary" variant="flat" @click="salvarUsuario">Salvar</v-btn>
+      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
