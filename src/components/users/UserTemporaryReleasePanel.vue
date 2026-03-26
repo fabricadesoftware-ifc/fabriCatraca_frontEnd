@@ -109,7 +109,7 @@ async function createRelease() {
     });
     notes.value = "";
     validFrom.value = toDateTimeLocalValue();
-    toast.success("Liberação temporária criada com sucesso");
+    toast.success("Liberação temporária criada com sucesso", { autoClose: 3000 });
     await loadReleases();
   } catch (error) {
     toast.error(getErrorMessage(error, "Erro ao criar liberação temporária"));
@@ -150,7 +150,7 @@ onMounted(loadReleases);
           <v-card-title class="text-subtitle-1">Nova Liberação</v-card-title>
           <v-card-text>
             <v-alert
-              v-if="openRelease"
+              v-if="openRelease?.status === 'active'"
               class="mb-4"
               color="warning"
               icon="mdi-alert-circle"
