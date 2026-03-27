@@ -232,7 +232,7 @@ onMounted(async () => {
 
     >
     <v-card v-if="props.user">
-      <v-card-title class="text-h5 flex">Editar Usuário</v-card-title>
+      <v-card-title class="text-h5">{{ isSisaeViewer ? '' : 'Editar Usuário'}}</v-card-title>
 
  <!-- TODO: Colocar botão de fechar X-->
 

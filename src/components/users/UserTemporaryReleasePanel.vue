@@ -88,6 +88,8 @@ async function loadReleases() {
   }
 }
 
+const notesRules = [(v) => (!!v && v.trim() !== "") || "A observação é obrigatória"];
+
 async function createRelease() {
   if (durationMinutes.value <= 0) {
     toast.warning("Informe uma duração válida em minutos");
@@ -99,12 +101,13 @@ async function createRelease() {
     return;
   }
 
+  if (notes.value.trim() === "") {
+    toast.warning("A observação é obrigatória");
+    return;
+  }
+
   saving.value = true;
   try {
-    if (notes .value.trim() === "") {
-      toast.warning("A observação é obrigatória");
-      return;
-    }
     await TemporaryUserReleasesService.createTemporaryUserRelease({
       user_id: props.userId,
       duration_minutes: durationMinutes.value,
@@ -161,7 +164,8 @@ onMounted(loadReleases);
               variant="tonal"
             >
               Já existe uma liberação em aberto para este usuário com status
-              <strong>{{ getStatusLabel(openRelease.status) }}</strong>.
+              <strong>{{ getStatusLabel(openRelease.status) }}</strong
+              >.
             </v-alert>
 
             <v-row>
@@ -187,7 +191,8 @@ onMounted(loadReleases);
                   label="Observação"
                   variant="outlined"
                   max-height="136"
-                  required="true"
+                  :rules="notesRules"
+                  required
                 />
               </v-col>
             </v-row>
@@ -196,7 +201,7 @@ onMounted(loadReleases);
             <v-spacer />
             <v-btn
               color="primary"
-              :disabled="!!openRelease"
+              :disabled="!!openRelease || notes.trim() === ''"
               :loading="saving"
               prepend-icon="mdi-lock-open-check"
               @click="createRelease"
