@@ -124,7 +124,7 @@ export const useDeviceStore = defineStore('device', {
 
     getDeviceStatusLabel (status: string) {
       switch (status) {
-        case 'online': {
+        case 'active': {
           return 'Online'
         }
         case 'offline': {

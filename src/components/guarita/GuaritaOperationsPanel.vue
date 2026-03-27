@@ -1,68 +1,110 @@
 <script setup lang="ts">
-import type { EasySetupDevice, Portal } from "@/types";
+import type { Device, Portal } from "@/types";
 import { computed, onMounted, reactive, ref } from "vue";
 import { toast } from "vue3-toastify";
 import ReleaseAuditTable from "@/components/release-audits/ReleaseAuditTable.vue";
-import { useAuthStore } from "@/stores";
+import { useAuthStore, useDeviceStore } from "@/stores";
 import DeviceActionsService from "@/services/device_actions";
-import EasySetupService from "@/services/easy_setup";
 import PortalsService from "@/services/portals";
 
 const authStore = useAuthStore();
-const devices = ref<EasySetupDevice[]>([]);
+const deviceStore = useDeviceStore();
+
 const portals = ref<Portal[]>([]);
 const loading = ref(false);
 const submitting = ref(false);
-const selectedDeviceIds = ref<number[]>([]);
+const releasingDeviceId = ref<number | null>(null);
+const releasingDirection = ref<string | null>(null);
 
 const form = reactive({
   release_mode: "single_turn" as "device_event" | "single_turn",
   portal_id: null as number | null,
   direction: "clockwise" as "clockwise" | "anticlockwise",
   event: 7,
-  user_name: "",
+  user_name: "Liberação da guarita",
   notes: "",
 });
 
-const selectedDevices = computed(() =>
-  devices.value.filter(device => selectedDeviceIds.value.includes(device.id)),
+const activeDevices = computed(() =>
+  deviceStore.devices.filter((d) => d.is_active),
 );
 
-async function loadData() {
-  loading.value = true;
-  try {
-    const [deviceResponse, portalResponse] = await Promise.all([
-      EasySetupService.getDevices(),
-      PortalsService.getPortals({ page_size: 1000 }),
-    ]);
-    devices.value = deviceResponse.devices;
-    portals.value = portalResponse.results;
-    if (!form.portal_id && portalResponse.results.length > 0) {
-      form.portal_id = portalResponse.results[0].id;
-    }
-  } catch (error) {
-    console.error(error);
-    toast.error("Erro ao carregar dados da guarita");
-  } finally {
-    loading.value = false;
+function isReleasing(deviceId: number, dir?: string) {
+  if (dir) {
+    return releasingDeviceId.value === deviceId && releasingDirection.value === dir;
   }
+  return releasingDeviceId.value === deviceId;
 }
 
-function toggleDevice(id: number) {
-  if (selectedDeviceIds.value.includes(id)) {
-    selectedDeviceIds.value = selectedDeviceIds.value.filter(deviceId => deviceId !== id);
+async function releaseDevice(device: Device, direction: "clockwise" | "anticlockwise" | "both") {
+  if (!portals.value.length) {
+    toast.warning("Nenhum portal configurado. Configure um portal primeiro.");
     return;
   }
-  selectedDeviceIds.value = [...selectedDeviceIds.value, id];
+
+  const portalId = form.portal_id || portals.value[0].id;
+  releasingDeviceId.value = device.id;
+  releasingDirection.value = direction;
+
+  try {
+    if (direction === "both") {
+      await Promise.all([
+        DeviceActionsService.remoteUserAuthorization({
+          device_ids: [device.id],
+          event: 7,
+          user_id: 0,
+          user_name: "Liberação da guarita",
+          user_image: false,
+          portal_id: portalId,
+          release_mode: "single_turn",
+          notes: `Liberação rápida (ambos) - ${device.name}`,
+          actions: [{ action: "catra", parameters: "allow=clockwise" }],
+        }),
+        DeviceActionsService.remoteUserAuthorization({
+          device_ids: [device.id],
+          event: 7,
+          user_id: 0,
+          user_name: "Liberação da guarita",
+          user_image: false,
+          portal_id: portalId,
+          release_mode: "single_turn",
+          notes: `Liberação rápida (ambos) - ${device.name}`,
+          actions: [{ action: "catra", parameters: "allow=anticlockwise" }],
+        }),
+      ]);
+      toast.success(`${device.name}: liberada nos dois sentidos!`);
+    } else {
+      await DeviceActionsService.remoteUserAuthorization({
+        device_ids: [device.id],
+        event: 7,
+        user_id: 0,
+        user_name: "Liberação da guarita",
+        user_image: false,
+        portal_id: portalId,
+        release_mode: "single_turn",
+        notes: `Liberação rápida (${direction === "clockwise" ? "direita" : "esquerda"}) - ${device.name}`,
+        actions: [{ action: "catra", parameters: `allow=${direction}` }],
+      });
+      toast.success(
+        `${device.name}: liberada para ${direction === "clockwise" ? "direita" : "esquerda"}!`,
+      );
+    }
+  } catch (error: any) {
+    console.error(error);
+    toast.error(error?.response?.data?.error || "Erro ao executar liberação");
+  } finally {
+    releasingDeviceId.value = null;
+    releasingDirection.value = null;
+  }
 }
 
 async function submit() {
-  if (!selectedDeviceIds.value.length) {
-    toast.warning("Selecione pelo menos uma catraca");
+  if (!activeDevices.value.length) {
+    toast.warning("Nenhuma catraca ativa encontrada");
     return;
   }
-  if (!form.portal_id) {
-    toast.warning("Selecione um portal");
+  if (!form.portal_id && !portals.value.length) {
+    toast.warning("Nenhum portal configurado");
     return;
   }
   if (!form.notes.trim()) {
@@ -70,15 +112,18 @@ async function submit() {
     return;
   }
 
+  const deviceIds = activeDevices.value.map((d) => d.id);
+  const portalId = form.portal_id || portals.value[0].id;
+
   submitting.value = true;
   try {
     await DeviceActionsService.remoteUserAuthorization({
-      device_ids: selectedDeviceIds.value,
+      device_ids: deviceIds,
       event: Number(form.event),
       user_id: 0,
       user_name: form.user_name.trim() || "Operação da guarita",
       user_image: false,
-      portal_id: Number(form.portal_id),
+      portal_id: portalId,
       release_mode: form.release_mode,
       notes: form.notes.trim(),
       actions: [
@@ -98,50 +143,127 @@ async function submit() {
   }
 }
 
-onMounted(loadData);
+async function loadPortals() {
+  try {
+    const response = await PortalsService.getPortals({ page_size: 100 });
+    portals.value = response.results;
+    if (portals.value.length) {
+      form.portal_id = portals.value[0].id;
+    }
+  } catch (error) {
+    console.error("Erro ao carregar portais:", error);
+  }
+}
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    await Promise.all([deviceStore.loadDevices({ page_size: 100 }), loadPortals()]);
+  } finally {
+    loading.value = false;
+  }
+});
 </script>
 
 <template>
   <v-container class="pa-0" fluid>
     <v-row>
-      <v-col cols="12" md="5">
-        <v-card>
-          <v-card-title class="d-flex align-center justify-space-between">
-            <span>Catracas da guarita</span>
-            <v-btn
-              color="default"
-              prepend-icon="mdi-refresh"
-              size="small"
-              variant="outlined"
-              @click="loadData"
-            >
-              Atualizar
-            </v-btn>
-          </v-card-title>
-          <v-card-text>
-            <v-progress-linear v-if="loading" color="primary" indeterminate />
-            <v-list v-else>
-              <v-list-item
-                v-for="device in devices"
-                :key="device.id"
-                @click="toggleDevice(device.id)"
-              >
-                <template #prepend>
-                  <v-checkbox
-                    color="primary"
-                    hide-details
-                    :model-value="selectedDeviceIds.includes(device.id)"
+      <!-- Grid de catracas ativas (estilo DeviceLogoTab) -->
+      <v-col cols="12" md="8">
+        <div class="d-flex align-center justify-space-between mb-4">
+          <div class="text-h6 font-weight-bold">
+            Catracas ativas
+          </div>
+          <v-btn
+            :loading="loading"
+            prepend-icon="mdi-refresh"
+            size="small"
+            variant="text"
+            @click="deviceStore.loadDevices({ page_size: 100 })"
+          >
+            Atualizar
+          </v-btn>
+        </div>
+
+        <v-progress-linear v-if="loading" class="mb-4" color="primary" indeterminate />
+
+        <v-row v-else>
+          <v-col
+            v-for="device in activeDevices"
+            :key="device.id"
+            cols="12"
+            lg="3"
+            md="6"
+          >
+            <v-card :loading="isReleasing(device.id)" variant="outlined">
+              <v-card-title class="d-flex align-center justify-space-between">
+                <span class="text-body-1 font-weight-medium">{{ device.name }}</span>
+              </v-card-title>
+
+              <v-card-text>
+                <div
+                  class="border rounded d-flex align-center justify-center mb-3 bg-grey-lighten-4"
+                  style="height: 120px;"
+                >
+                  <v-textarea
+                    :model-value="form.notes"
+                    label="Motivo"
+                    variant="outlined"
+                    rows="3"
+
                   />
-                </template>
-                <v-list-item-title>{{ device.name }}</v-list-item-title>
-                <v-list-item-subtitle>{{ device.ip }}</v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
+                </div>
+              </v-card-text>
+
+              <v-card-actions class="flex-wrap ga-2 px-4 pb-4 justify-center">
+                <v-btn
+                  color="warning"
+                  :loading="isReleasing(device.id, 'anticlockwise')"
+                  prepend-icon="mdi-arrow-left"
+                  size="small"
+                  variant="tonal"
+                  @click="releaseDevice(device, 'anticlockwise')"
+                >
+                  Esquerda
+                </v-btn>
+                <v-btn
+                  color="warning"
+                  :loading="isReleasing(device.id, 'clockwise')"
+                  prepend-icon="mdi-arrow-right"
+                  size="small"
+                  variant="tonal"
+                  @click="releaseDevice(device, 'clockwise')"
+                >
+                  Direita
+                </v-btn>
+              </v-card-actions>
+
+              <div class="px-4 pb-4 d-flex justify-center">
+                <v-btn
+                  block
+                  color="success"
+                  :loading="isReleasing(device.id, 'both')"
+                  prepend-icon="mdi-arrow-left-right"
+                  size="small"
+                  variant="tonal"
+                  @click="releaseDevice(device, 'both')"
+                >
+                  Liberar
+                </v-btn>
+              </div>
+            </v-card>
+          </v-col>
+
+          <v-col v-if="!activeDevices.length && !loading" cols="12">
+            <v-alert type="info" variant="tonal">
+              Nenhuma catraca ativa encontrada.
+            </v-alert>
+          </v-col>
+        </v-row>
       </v-col>
 
-      <v-col cols="12" md="7">
+      <!-- Liberação operacional (mantido) -->
+      <v-col cols="12" md="4">
         <v-card>
           <v-card-title>Liberação operacional</v-card-title>
           <v-card-text>
@@ -158,68 +280,41 @@ onMounted(loadData);
                   label="Tipo de liberação"
                 />
               </v-col>
-              <v-col cols="12" md="6">
-                <v-select
-                  v-model="form.portal_id"
-                  :items="portals"
-                  item-title="name"
-                  item-value="id"
-                  label="Portal"
-                />
-              </v-col>
+
               <v-col cols="12" md="6">
                 <v-select
                   v-model="form.direction"
                   :items="[
-                    { title: 'Entrada / Horário', value: 'clockwise' },
-                    { title: 'Saída / Anti-horário', value: 'anticlockwise' },
+                    { title: 'Entrada / Anti-horário', value: 'clockwise' },
+                    { title: 'Saída / Horário', value: 'anticlockwise' },
                   ]"
                   item-title="title"
                   item-value="value"
                   label="Sentido"
                 />
               </v-col>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model.number="form.event"
-                  label="Código do evento"
-                  type="number"
-                />
-              </v-col>
+
               <v-col cols="12">
-                <v-text-field
-                  v-model="form.user_name"
-                  label="Identificação exibida"
-                  placeholder="Ex.: Evento institucional"
-                />
-              </v-col>
-              <v-col cols="12">
-                <v-textarea
-                  v-model="form.notes"
-                  auto-grow
-                  label="Motivo da liberação"
-                  rows="3"
-                />
+                <v-textarea :model-value="form.notes" auto-grow label="Motivo da liberação" rows="3" />
               </v-col>
             </v-row>
           </v-card-text>
           <v-card-actions class="px-4 pb-4">
             <div class="text-caption text-medium-emphasis">
-              {{ selectedDevices.length }} catraca(s) selecionada(s)
+              {{ activeDevices.length }} catraca(s) ativa(s)
             </div>
             <v-spacer />
-            <v-btn color="primary" :loading="submitting" @click="submit">
-              Liberar agora
-            </v-btn>
+            <v-btn color="primary" :loading="submitting" @click="submit"> Liberar agora </v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
 
+      <!-- Tabela de auditoria (mantido) -->
       <v-col cols="12">
         <ReleaseAuditTable
-          title="Minhas liberações na guarita"
           :filters="{ requested_by: authStore.user?.id }"
           :release-types="['device_event', 'single_turn']"
+          title="Minhas liberações na guarita"
         />
       </v-col>
     </v-row>

@@ -98,23 +98,7 @@
               {{ value }}
             </span>
 
-            <!-- Trend indicator -->
-            <div
-              v-if="trendValue"
-              class="d-flex align-center ml-4"
-            >
-              <v-icon
-                class="mr-1"
-                :color="trendColor"
-                :icon="trendIcon"
-                size="20"
-              />
-              <span
-                :class="`text-caption font-weight-medium text-${trendColor}`"
-              >
-                {{ trendValue }}
-              </span>
-            </div>
+
           </div>
         </div>
 

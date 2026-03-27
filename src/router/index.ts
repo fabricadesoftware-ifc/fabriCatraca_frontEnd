@@ -25,6 +25,7 @@ const allowedPathsByRole: Record<string, RegExp[]> = {
     /^\/data\/import$/,
     /^\/guarita$/,
     /^\/sisae$/,
+    /^\/liberar-usuario$/,
   ],
   guarita: [/^\/$/, /^\/guarita$/],
   sisae: [/^\/$/, /^\/liberar-usuario$/, /^\/logs$/],
