@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { User as BaseUser } from "@/types";
 
-defineProps<{
+const props = defineProps<{
   name: string;
   email: string;
   password: string;
@@ -17,6 +17,7 @@ defineProps<{
   hasDeviceAdminField: boolean;
   canShowPasswordField: boolean;
   isSisaeViewer: boolean;
+  groups: Array<string>
   roleOptions: { title: string; value: string }[];
 }>();
 
@@ -36,6 +37,12 @@ const emit = defineEmits<{
   <v-container>
     <v-row>
       <v-col cols="8">
+        <v-text-field
+                  :model-value="groups[0] || 'Usuario sem turma'"
+                  label="Turma"
+                  type="text"
+                  disabled
+                />
         <v-text-field
           :model-value="name"
           label="Nome"
@@ -100,15 +107,30 @@ const emit = defineEmits<{
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:deviceAdmin', Boolean($event))"
         />
+          <!-- TODO: Arrumar data de nascimento -->
+        <v-text-field
+                  v-model="validFrom"
+                  label="Data de nascimento"
+                  type="date"
+                  disabled
+                />
+
+        <v-text-field
+                  v-model="validFrom"
+                  label="(xx) xxxxx-xxxx"
+                  type="tel"
+                  disabled
+                />
+
       </v-col>
 
       <v-col class="d-flex flex-column align-center" cols="4">
         <v-avatar class="mb-4" size="150">
           <v-img :src="`https://randomuser.me/api/portraits/lego/${Math.floor(Math.random() * 10)}.jpg`" />
         </v-avatar>
-        <v-btn class="mb-2" color="primary">Arquivo</v-btn>
-        <v-btn class="mb-2" color="primary">Câmera</v-btn>
-        <v-btn class="mb-2" color="error">Remover</v-btn>
+        <v-btn class="mb-2" color="primary" v-if="!isSisaeViewer">Arquivo</v-btn>
+        <v-btn class="mb-2" color="primary" v-if="!isSisaeViewer">Câmera</v-btn>
+        <v-btn class="mb-2" color="error" v-if="!isSisaeViewer">Remover</v-btn>
       </v-col>
     </v-row>
   </v-container>

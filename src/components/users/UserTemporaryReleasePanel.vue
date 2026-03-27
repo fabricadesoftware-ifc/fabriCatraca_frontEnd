@@ -101,6 +101,10 @@ async function createRelease() {
 
   saving.value = true;
   try {
+    if (notes .value.trim() === "") {
+      toast.warning("A observação é obrigatória");
+      return;
+    }
     await TemporaryUserReleasesService.createTemporaryUserRelease({
       user_id: props.userId,
       duration_minutes: durationMinutes.value,
@@ -183,7 +187,7 @@ onMounted(loadReleases);
                   label="Observação"
                   variant="outlined"
                   max-height="136"
-                  required
+                  required="true"
                 />
               </v-col>
             </v-row>

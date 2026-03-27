@@ -229,9 +229,12 @@ onMounted(async () => {
     :max-width="tab === 'horarios' ? 1280 : 900"
     :model-value="props.modelValue"
     @update:model-value="emit('update:modelValue', $event)"
-  >
+
+    >
     <v-card v-if="props.user">
-      <v-card-title class="text-h5">Editar Usuário</v-card-title>
+      <v-card-title class="text-h5 flex">Editar Usuário</v-card-title>
+
+ <!-- TODO: Colocar botão de fechar X-->
 
       <v-card-text>
         <v-tabs v-model="tab" bg-color="transparent" color="primary">
@@ -264,6 +267,7 @@ onMounted(async () => {
               :password="password"
               :registration="registration"
               :role-options="roleOptions"
+              :groups="selectedGroupNames"
               @update:app-role="appRole = $event"
               @update:device-admin="deviceAdmin = $event"
               @update:email="email = $event"
@@ -319,6 +323,10 @@ onMounted(async () => {
         <v-spacer />
         <v-btn color="error" variant="text" @click="closeDialog">Cancelar</v-btn>
         <v-btn color="primary" variant="flat" @click="salvarUsuario">Salvar</v-btn>
+      </v-card-actions>
+        <v-card-actions v-if="authStore.role == 'sisae'">
+        <v-spacer />
+        <v-btn color="error" variant="text" @click="closeDialog">Fechar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
