@@ -109,14 +109,12 @@ const emit = defineEmits<{
         />
           <!-- TODO: Arrumar data de nascimento -->
         <v-text-field
-                  v-model="validFrom"
                   label="Data de nascimento"
                   type="date"
                   disabled
                 />
 
         <v-text-field
-                  v-model="validFrom"
                   label="(xx) xxxxx-xxxx"
                   type="tel"
                   disabled

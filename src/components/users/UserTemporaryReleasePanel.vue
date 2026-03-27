@@ -88,7 +88,7 @@ async function loadReleases() {
   }
 }
 
-const notesRules = [(v) => (!!v && v.trim() !== "") || "A observação é obrigatória"];
+const notesRules = [(v: any) => (!!v && v.trim() !== "") || "A observação é obrigatória"];
 
 async function createRelease() {
   if (durationMinutes.value <= 0) {

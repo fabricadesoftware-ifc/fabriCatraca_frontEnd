@@ -98,10 +98,13 @@ const rawItems = [
 
 const items = computed(() =>
   rawItems
-    .filter(item => authStore.hasRole((item.roles || []) as any))
-    .map(item => ({
+    .filter((item) => authStore.hasRole((item.roles || []) as any))
+    .map((item) => ({
       ...item,
-      subitems: item.subitems?.filter(subitem => !("roles" in subitem) || authStore.hasRole(((subitem as any).roles || []) as any)),
+      subitems: item.subitems?.filter(
+        (subitem) =>
+          !("roles" in subitem) || authStore.hasRole(((subitem as any).roles || []) as any),
+      ),
     })),
 );
 
@@ -238,11 +241,7 @@ onBeforeUnmount(() => {
               <v-card min-width="360" rounded="lg">
                 <v-card-title class="d-flex align-center justify-space-between">
                   <span>Alertas</span>
-                  <v-btn
-                    size="small"
-                    variant="text"
-                    @click="alertsStore.markAllAsRead()"
-                  >
+                  <v-btn size="small" variant="text" @click="alertsStore.markAllAsRead()">
                     Marcar tudo como lido
                   </v-btn>
                 </v-card-title>
@@ -274,20 +273,10 @@ onBeforeUnmount(() => {
                       <span v-if="alert.device_name"> • {{ alert.device_name }}</span>
                     </v-list-item-subtitle>
                     <template #append>
-                      <v-chip
-                        v-if="alert.is_active"
-                        color="error"
-                        size="x-small"
-                        variant="tonal"
-                      >
+                      <v-chip v-if="alert.is_active" color="error" size="x-small" variant="tonal">
                         Ativo
                       </v-chip>
-                      <v-chip
-                        v-else
-                        color="success"
-                        size="x-small"
-                        variant="tonal"
-                      >
+                      <v-chip v-else color="success" size="x-small" variant="tonal">
                         Resolvido
                       </v-chip>
                     </template>
@@ -300,12 +289,16 @@ onBeforeUnmount(() => {
             </v-menu>
 
             <div class="ml-2">
-              <div
-                class="text-subtitle-2 font-weight-medium cursor-pointer"
-                @click="authStore.logout()"
-              >
-                {{ authStore.user?.name || "Usuário" }}
-              </div>
+              <div class="text-subtitle-2 font-weight-medium cursor-pointer" ></div>
+              <v-speed-dial location="bottom right" transition="fade-transition" >
+                <template v-slot:activator="{ props: activatorProps }">
+                  <v-fab v-bind="activatorProps" size="large" variant="tonal"
+                    ><v-icon>mdi-account</v-icon> {{ authStore.user?.name || "Usuário" }}
+                  </v-fab>
+                </template>
+
+                <v-btn key="1" width="10vw" color="red" @click="authStore.logout()">Sair</v-btn>
+              </v-speed-dial>
             </div>
           </v-card>
         </v-sheet>
