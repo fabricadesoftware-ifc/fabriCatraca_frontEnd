@@ -57,7 +57,7 @@ async function releaseDevice(device: Device, direction: "clockwise" | "anticlock
           user_image: false,
           portal_id: portalId,
           release_mode: "single_turn",
-          notes: `Liberação rápida (ambos) - ${device.name}`,
+          notes: form.notes.trim() || `Liberação rápida (ambos) - ${device.name} - ${authStore.user?.name || "Usuário desconhecido"}`,
           actions: [{ action: "catra", parameters: "allow=clockwise" }],
         }),
         DeviceActionsService.remoteUserAuthorization({
@@ -68,7 +68,7 @@ async function releaseDevice(device: Device, direction: "clockwise" | "anticlock
           user_image: false,
           portal_id: portalId,
           release_mode: "single_turn",
-          notes: `Liberação rápida (ambos) - ${device.name}`,
+          notes: form.notes.trim() || `Liberação rápida (ambos) - ${device.name} - ${authStore.user?.name || "Usuário desconhecido"}`,
           actions: [{ action: "catra", parameters: "allow=anticlockwise" }],
         }),
       ]);
@@ -82,7 +82,7 @@ async function releaseDevice(device: Device, direction: "clockwise" | "anticlock
         user_image: false,
         portal_id: portalId,
         release_mode: "single_turn",
-        notes: `Liberação rápida (${direction === "clockwise" ? "direita" : "esquerda"}) - ${device.name}`,
+        notes: form.notes.trim() || `Liberação rápida (${direction}) - ${device.name} - ${authStore.user?.name || "Usuário desconhecido"}`,
         actions: [{ action: "catra", parameters: `allow=${direction}` }],
       });
       toast.success(
@@ -195,14 +195,14 @@ onMounted(async () => {
             lg="3"
             md="6"
           >
-            <v-card :loading="isReleasing(device.id)" variant="outlined">
+            <v-card :loading="isReleasing(device.id)" >
               <v-card-title class="d-flex align-center justify-space-between">
                 <span class="text-body-1 font-weight-medium">{{ device.name }}</span>
               </v-card-title>
 
               <v-card-text>
                 <div
-                  class="border rounded d-flex align-center justify-center mb-3 bg-grey-lighten-4"
+                  class="rounded d-flex align-center justify-center mb-3 bg-grey-lighten-4"
                   style="height: 120px;"
                 >
                   <v-textarea
