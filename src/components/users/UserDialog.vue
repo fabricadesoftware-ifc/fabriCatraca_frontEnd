@@ -234,7 +234,6 @@ onMounted(async () => {
     <v-card v-if="props.user">
       <v-card-title class="text-h5">{{ isSisaeViewer ? 'Liberar Usuário' : 'Editar Usuário'}}</v-card-title>
 
- <!-- TODO: Colocar botão de fechar X-->
 
       <v-card-text>
         <v-tabs v-model="tab" bg-color="transparent" color="primary">

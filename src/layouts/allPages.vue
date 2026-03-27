@@ -60,9 +60,9 @@ const rawItems = [
     roles: ["admin", "guarita"],
   },
   {
-    title: "SISAE",
+    title: "Liberar Usuário",
     icon: "mdi-account-clock",
-    to: "/sisae",
+    to: "/liberar-usuario",
     roles: ["admin", "sisae"],
   },
   {
@@ -75,7 +75,7 @@ const rawItems = [
     title: "Logs de Acesso",
     icon: "mdi-clipboard-text-clock",
     to: "/logs",
-    roles: ["admin"],
+    roles: ["admin", "sisae"],
   },
   {
     title: "Dados",

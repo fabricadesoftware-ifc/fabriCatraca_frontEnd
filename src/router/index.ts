@@ -26,14 +26,8 @@ const allowedPathsByRole: Record<string, RegExp[]> = {
     /^\/guarita$/,
     /^\/sisae$/,
   ],
-  guarita: [
-    /^\/$/,
-    /^\/guarita$/,
-  ],
-  sisae: [
-    /^\/$/,
-    /^\/sisae$/,
-  ],
+  guarita: [/^\/$/, /^\/guarita$/],
+  sisae: [/^\/$/, /^\/liberar-usuario$/, /^\/logs$/],
 };
 
 const router = createRouter({
