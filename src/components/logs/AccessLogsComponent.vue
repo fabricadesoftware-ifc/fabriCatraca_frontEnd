@@ -9,7 +9,6 @@ const props = defineProps<{
   logs: LogEntry[];
   loading: boolean;
   totalItems: number;
-  name: string;
   stats: {
     granted: number;
     denied: number;
