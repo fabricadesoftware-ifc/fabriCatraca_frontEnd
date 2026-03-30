@@ -16,6 +16,9 @@ const submitting = ref(false);
 const releasingDeviceId = ref<number | null>(null);
 const releasingDirection = ref<string | null>(null);
 
+// Notes independente por device
+const deviceNotes = reactive<Record<number, string>>({});
+
 const form = reactive({
   release_mode: "single_turn" as "device_event" | "single_turn",
   portal_id: null as number | null,
@@ -25,9 +28,7 @@ const form = reactive({
   notes: "",
 });
 
-const activeDevices = computed(() =>
-  deviceStore.devices.filter((d) => d.is_active),
-);
+const activeDevices = computed(() => deviceStore.devices.filter((d) => d.is_active));
 
 function isReleasing(deviceId: number, dir?: string) {
   if (dir) {
@@ -37,6 +38,13 @@ function isReleasing(deviceId: number, dir?: string) {
 }
 
 async function releaseDevice(device: Device, direction: "clockwise" | "anticlockwise" | "both") {
+  const notes = deviceNotes[device.id]?.trim();
+
+  if (!notes) {
+    toast.warning("Informe o motivo da liberação");
+    return;
+  }
+
   if (!portals.value.length) {
     toast.warning("Nenhum portal configurado. Configure um portal primeiro.");
     return;
@@ -56,8 +64,10 @@ async function releaseDevice(device: Device, direction: "clockwise" | "anticlock
           user_name: "Liberação da guarita",
           user_image: false,
           portal_id: portalId,
-          release_mode: "single_turn",
-          notes: form.notes.trim() || `Liberação rápida (ambos) - ${device.name} - ${authStore.user?.name || "Usuário desconhecido"}`,
+          release_mode: "device_event",
+          notes:
+            notes ||
+            `Liberação rápida (ambos) - ${device.name} - ${authStore.user?.name || "Usuário desconhecido"}`,
           actions: [{ action: "catra", parameters: "allow=clockwise" }],
         }),
         DeviceActionsService.remoteUserAuthorization({
@@ -67,8 +77,10 @@ async function releaseDevice(device: Device, direction: "clockwise" | "anticlock
           user_name: "Liberação da guarita",
           user_image: false,
           portal_id: portalId,
-          release_mode: "single_turn",
-          notes: form.notes.trim() || `Liberação rápida (ambos) - ${device.name} - ${authStore.user?.name || "Usuário desconhecido"}`,
+          release_mode: "device_event",
+          notes:
+            notes ||
+            `Liberação rápida (ambos) - ${device.name} - ${authStore.user?.name || "Usuário desconhecido"}`,
           actions: [{ action: "catra", parameters: "allow=anticlockwise" }],
         }),
       ]);
@@ -81,14 +93,19 @@ async function releaseDevice(device: Device, direction: "clockwise" | "anticlock
         user_name: "Liberação da guarita",
         user_image: false,
         portal_id: portalId,
-        release_mode: "single_turn",
-        notes: form.notes.trim() || `Liberação rápida (${direction}) - ${device.name} - ${authStore.user?.name || "Usuário desconhecido"}`,
+        release_mode: "device_event",
+        notes:
+          notes ||
+          `Liberação rápida (${direction}) - ${device.name} - ${authStore.user?.name || "Usuário desconhecido"}`,
         actions: [{ action: "catra", parameters: `allow=${direction}` }],
       });
       toast.success(
         `${device.name}: liberada para ${direction === "clockwise" ? "direita" : "esquerda"}!`,
       );
     }
+
+    // Limpa o notes do device após sucesso
+    deviceNotes[device.id] = "";
   } catch (error: any) {
     console.error(error);
     toast.error(error?.response?.data?.error || "Erro ao executar liberação");
@@ -168,12 +185,9 @@ onMounted(async () => {
 <template>
   <v-container class="pa-0" fluid>
     <v-row>
-      <!-- Grid de catracas ativas (estilo DeviceLogoTab) -->
+      <!-- Grid de catracas ativas -->
       <v-col cols="12" md="8">
-        <div class="d-flex align-center justify-space-between mb-4">
-          <div class="text-h6 font-weight-bold">
-            Catracas ativas
-          </div>
+        <div class="d-flex align-center justify-end mb-4">
           <v-btn
             :loading="loading"
             prepend-icon="mdi-refresh"
@@ -188,31 +202,21 @@ onMounted(async () => {
         <v-progress-linear v-if="loading" class="mb-4" color="primary" indeterminate />
 
         <v-row v-else>
-          <v-col
-            v-for="device in activeDevices"
-            :key="device.id"
-            cols="12"
-            lg="3"
-            md="6"
-          >
-            <v-card :loading="isReleasing(device.id)" >
-              <v-card-title class="d-flex align-center justify-space-between">
+          <v-col v-for="device in activeDevices" :key="device.id" cols="12" lg="3" md="6">
+            <v-card :loading="isReleasing(device.id)">
+              <v-card-title class="d-flex align-center justify-space-between pb-4">
                 <span class="text-body-1 font-weight-medium">{{ device.name }}</span>
               </v-card-title>
 
               <v-card-text>
-                <div
-                  class="rounded d-flex align-center justify-center mb-3 bg-grey-lighten-4"
-                  style="height: 120px;"
-                >
-                  <v-textarea
-                    :model-value="form.notes"
-                    label="Motivo"
-                    variant="outlined"
-                    rows="3"
-
-                  />
-                </div>
+                <!-- Notes independente por device via v-model -->
+                <v-textarea
+                  v-model="deviceNotes[device.id]"
+                  label="Motivo"
+                  variant="outlined"
+                  rows="3"
+                  hide-details
+                />
               </v-card-text>
 
               <v-card-actions class="flex-wrap ga-2 px-4 pb-4 justify-center">
@@ -222,6 +226,7 @@ onMounted(async () => {
                   prepend-icon="mdi-arrow-left"
                   size="small"
                   variant="tonal"
+                  :disabled="!deviceNotes[device.id]?.trim()"
                   @click="releaseDevice(device, 'anticlockwise')"
                 >
                   Esquerda
@@ -232,13 +237,14 @@ onMounted(async () => {
                   prepend-icon="mdi-arrow-right"
                   size="small"
                   variant="tonal"
+                  :disabled="!deviceNotes[device.id]?.trim()"
                   @click="releaseDevice(device, 'clockwise')"
                 >
                   Direita
                 </v-btn>
               </v-card-actions>
 
-              <div class="px-4 pb-4 d-flex justify-center">
+              <div class="px-4 pb-8 d-flex justify-center">
                 <v-btn
                   block
                   color="success"
@@ -246,6 +252,7 @@ onMounted(async () => {
                   prepend-icon="mdi-arrow-left-right"
                   size="small"
                   variant="tonal"
+                  :disabled="!deviceNotes[device.id]?.trim()"
                   @click="releaseDevice(device, 'both')"
                 >
                   Liberar
@@ -255,14 +262,12 @@ onMounted(async () => {
           </v-col>
 
           <v-col v-if="!activeDevices.length && !loading" cols="12">
-            <v-alert type="info" variant="tonal">
-              Nenhuma catraca ativa encontrada.
-            </v-alert>
+            <v-alert type="info" variant="tonal"> Nenhuma catraca ativa encontrada. </v-alert>
           </v-col>
         </v-row>
       </v-col>
 
-      <!-- Liberação operacional (mantido) -->
+      <!-- Liberação operacional -->
       <v-col cols="12" md="4">
         <v-card>
           <v-card-title>Liberação operacional</v-card-title>
@@ -295,7 +300,7 @@ onMounted(async () => {
               </v-col>
 
               <v-col cols="12">
-                <v-textarea :model-value="form.notes" auto-grow label="Motivo da liberação" rows="3" />
+                <v-textarea v-model="form.notes" auto-grow label="Motivo da liberação" rows="3" />
               </v-col>
             </v-row>
           </v-card-text>
@@ -304,12 +309,19 @@ onMounted(async () => {
               {{ activeDevices.length }} catraca(s) ativa(s)
             </div>
             <v-spacer />
-            <v-btn color="primary" :loading="submitting" @click="submit"> Liberar agora </v-btn>
+            <v-btn
+              color="primary"
+              :loading="submitting"
+              :disabled="!form.notes?.trim()"
+              @click="submit"
+            >
+              Liberar agora
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
 
-      <!-- Tabela de auditoria (mantido) -->
+      <!-- Tabela de auditoria -->
       <v-col cols="12">
         <ReleaseAuditTable
           :filters="{ requested_by: authStore.user?.id }"

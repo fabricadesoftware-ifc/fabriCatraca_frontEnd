@@ -9,6 +9,7 @@ const props = defineProps<{
   logs: LogEntry[];
   loading: boolean;
   totalItems: number;
+  name: string;
   stats: {
     granted: number;
     denied: number;
@@ -36,15 +37,15 @@ const headers = [
   { title: "Data/Hora", key: "time", align: "start" as const, width: "180px" },
   { title: "Usuário", key: "user", align: "start" as const },
   {
-    title: "Tipo de Evento",
+    title: "Ação do Dispositivo",
     key: "event_type",
     align: "center" as const,
     width: "200px",
   },
   { title: "Dispositivo", key: "device", align: "start" as const },
-  { title: "Portal", key: "portal", align: "start" as const },
+  { title: "Entradas/Saidas", key: "portal", align: "start" as const },
   {
-    title: "Ações",
+    title: "Detalhes",
     key: "actions",
     align: "center" as const,
     width: "100px",
@@ -459,6 +460,14 @@ function getEventIcon(eventType: number) {
               <v-list-item-title>ID do Dispositivo</v-list-item-title>
               <v-list-item-subtitle>{{ selectedLog.device_id }}</v-list-item-subtitle>
             </v-list-item>
+            <v-list-item v-if="selectedLog.device_id">
+              <template #prepend>
+                <v-icon color="primary"> mdi-identifier </v-icon>
+              </template>
+              <v-list-item-title>Sentido</v-list-item-title>
+              <v-list-item-subtitle>{{ selectedLog.name }}</v-list-item-subtitle>
+            </v-list-item>
+
           </v-list>
         </v-card-text>
 
