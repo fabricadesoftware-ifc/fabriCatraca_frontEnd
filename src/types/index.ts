@@ -261,6 +261,7 @@ export interface AccessLogs {
   card_value: string;
   confidence: number;
   mask: string;
+  sentido: string;
 }
 
 export interface getToken {

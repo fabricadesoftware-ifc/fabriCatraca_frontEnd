@@ -4,7 +4,7 @@ import { useAccessLogStore } from "@/stores";
 import { formatApiDateTime } from "@/utils/dateTime";
 
 type LogEntry = Record<string, unknown>;
-
+// TODO: Rever tipos de logs problemas com user
 const props = defineProps<{
   logs: LogEntry[];
   loading: boolean;
@@ -464,7 +464,7 @@ function getEventIcon(eventType: number) {
                 <v-icon color="primary"> mdi-identifier </v-icon>
               </template>
               <v-list-item-title>Sentido</v-list-item-title>
-              <v-list-item-subtitle>{{ selectedLog.name }}</v-list-item-subtitle>
+              <v-list-item-subtitle>{{ selectedLog.sentido }}</v-list-item-subtitle>
             </v-list-item>
 
           </v-list>
