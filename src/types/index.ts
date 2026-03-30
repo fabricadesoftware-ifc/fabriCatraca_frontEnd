@@ -578,6 +578,31 @@ export interface TemporaryUserReleaseCreatePayload {
   valid_from?: string;
 }
 
+export interface TemporaryGroupRelease {
+  id: number;
+  group: TemporaryReleaseActor;
+  requested_by: TemporaryReleaseActor;
+  access_rule: TemporaryReleaseRule;
+  status: "pending" | "active" | "consumed" | "expired" | "cancelled" | "failed";
+  valid_from: string;
+  valid_until: string;
+  activated_at: string | null;
+  consumed_at: string | null;
+  closed_at: string | null;
+  consumed_log: TemporaryReleaseLog | null;
+  notes: string;
+  result_message: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TemporaryGroupReleaseCreatePayload {
+  group_id: number;
+  duration_minutes: number;
+  notes?: string;
+  valid_from?: string;
+}
+
 export interface ReleaseAuditActor {
   id: number | null;
   name: string;

@@ -66,6 +66,12 @@ const rawItems = [
     roles: ["admin", "sisae"],
   },
   {
+    title: "Liberar Turma",
+    icon: "mdi-account-group-outline",
+    to: "/liberar-turma",
+    roles: ["admin", "sisae"],
+  },
+  {
     title: "Reconfigurar Catracas",
     icon: "mdi-cog-sync",
     to: "/easy-setup",

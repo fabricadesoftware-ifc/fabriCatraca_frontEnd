@@ -29,6 +29,7 @@ declare module 'vue-router/auto-routes' {
     '/easy-setup/': RouteRecordInfo<'/easy-setup/', '/easy-setup', Record<never, never>, Record<never, never>>,
     '/groups/': RouteRecordInfo<'/groups/', '/groups', Record<never, never>, Record<never, never>>,
     '/guarita/': RouteRecordInfo<'/guarita/', '/guarita', Record<never, never>, Record<never, never>>,
+    '/liberar-turma/': RouteRecordInfo<'/liberar-turma/', '/liberar-turma', Record<never, never>, Record<never, never>>,
     '/liberar-usuario/': RouteRecordInfo<'/liberar-usuario/', '/liberar-usuario', Record<never, never>, Record<never, never>>,
     '/login/': RouteRecordInfo<'/login/', '/login', Record<never, never>, Record<never, never>>,
     '/logs/': RouteRecordInfo<'/logs/', '/logs', Record<never, never>, Record<never, never>>,
