@@ -27,6 +27,7 @@
     <v-divider class="my-4" />
 
     <GroupComponent
+      app_role="admin"
       :current-page="groupStore.current_page"
       :groups="groupStore.groups"
       :page-size="groupStore.page_size"

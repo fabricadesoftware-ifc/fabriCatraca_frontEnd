@@ -4,6 +4,7 @@
   import exportUsersService from '@/services/export_users'
   import userGroupsImportService from '@/services/user_groups_import'
   import { useAccessRuleStore } from '@/stores'
+  import GroupTemporaryReleasePanel from './GroupTemporaryReleasePanel.vue'
 
   interface Group extends Omit<BaseGroup, 'access_rules'> {
     access_rules?: (number | AccessRule)[]
@@ -12,6 +13,7 @@
   const props = defineProps<{
     modelValue: boolean
     group: Group | null
+    app_role?: string
   }>()
 
   const emit = defineEmits<{
@@ -138,14 +140,21 @@
 <template>
   <v-dialog max-width="900" :model-value="props.modelValue" @update:model-value="emit('update:modelValue', $event)">
     <v-card v-if="props.group">
-      <v-card-title class="text-h5">{{ props.group.id ? 'Editar Grupo' : 'Novo Grupo' }}</v-card-title>
+      <v-card-title class="text-h5">
+        {{ props.app_role === 'sisae'
+          ? props.group.name || 'Turma'
+          : (props.group.id ? 'Editar Grupo' : 'Novo Grupo') }}
+      </v-card-title>
 
       <v-card-text>
         <v-tabs v-model="tab" bg-color="transparent" color="primary">
           <v-tab value="dados">Dados Gerais</v-tab>
-          <v-tab value="regras">Regras de Acesso</v-tab>
-          <v-tab value="importar">Importar Usuários</v-tab>
-          <v-tab value="exportar">Exportar Usuários</v-tab>
+          <v-tab v-if="props.group.id" value="liberacao">Liberação</v-tab>
+          <template v-if="props.app_role !== 'sisae'">
+            <v-tab value="regras">Regras de Acesso</v-tab>
+            <v-tab value="importar">Importar Usuários</v-tab>
+            <v-tab value="exportar">Exportar Usuários</v-tab>
+          </template>
         </v-tabs>
 
         <v-window v-model="tab">
@@ -157,12 +166,19 @@
                   <v-text-field
                     v-model="name"
                     label="Nome do Grupo"
+                    :readonly="props.app_role === 'sisae'"
                     required
-                    :rules="[v => !!v || 'Nome é obrigatório']"
+                    :rules="props.app_role !== 'sisae' ? [v => !!v || 'Nome é obrigatório'] : []"
                   />
+                  
                 </v-col>
               </v-row>
             </v-container>
+          </v-window-item>
+
+          <!-- Aba Liberação -->
+          <v-window-item value="liberacao">
+            <GroupTemporaryReleasePanel v-if="props.group.id" :group-id="props.group.id" />
           </v-window-item>
 
           <!-- Aba Regras de Acesso -->
@@ -324,7 +340,7 @@
       <v-card-actions>
         <v-spacer />
         <v-btn color="error" variant="text" @click="close">Cancelar</v-btn>
-        <v-btn color="primary" variant="flat" @click="save">Salvar</v-btn>
+        <v-btn v-if="props.app_role !== 'sisae'" color="primary" variant="flat" @click="save">Salvar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
