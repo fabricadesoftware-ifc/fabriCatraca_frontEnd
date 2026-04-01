@@ -51,7 +51,10 @@
 <template>
   <v-dialog max-width="600" :model-value="props.modelValue" @update:model-value="emit('update:modelValue', $event)">
     <v-card>
-      <v-card-title class="text-h6">Importar Usuários</v-card-title>
+      <v-card-title class=" d-flex text-h5 justify-space-between">
+        Importar Usuários
+        <v-btn icon="mdi-close" variant="text" @click="emit('update:modelValue', false)" />
+      </v-card-title>
       <v-card-text>
         <v-alert v-if="errorMsg" class="mb-3" type="error" variant="tonal">{{ errorMsg }}</v-alert>
         <v-file-input

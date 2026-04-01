@@ -46,7 +46,10 @@
 <template>
   <v-dialog max-width="500" :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
     <v-card>
-      <v-card-title class="text-h6">Exportar Usuários</v-card-title>
+      <v-card-title class="d-flex text-h5 justify-space-between">
+        Exportar Usuários
+        <v-btn icon="mdi-close" variant="text" @click="emit('update:modelValue', false)" />
+      </v-card-title>
       <v-card-text>
         <v-select
           v-model="selectedGroup"

@@ -116,7 +116,10 @@
 <template>
   <v-dialog max-width="900" :model-value="props.modelValue" @update:model-value="emit('update:modelValue', $event)">
     <v-card v-if="props.rule">
-      <v-card-title class="text-h5">{{ props.rule.id ? 'Editar Regra' : 'Nova Regra' }}</v-card-title>
+      <v-card-title class=" d-flex text-h5 justify-space-between">
+        {{ props.rule.id ? 'Editar Regra' : 'Nova Regra' }}
+        <v-btn icon="mdi-close" variant="text" @click="emit('update:modelValue', false)" />
+      </v-card-title>
 
       <v-card-text>
         <v-tabs v-model="tab" bg-color="transparent" color="primary">

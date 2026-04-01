@@ -58,7 +58,10 @@
 <template>
   <v-dialog max-width="600" :model-value="props.modelValue" @update:model-value="emit('update:modelValue', $event)">
     <v-card>
-      <v-card-title class="text-h6">{{ props.device?.id ? 'Editar Dispositivo' : 'Novo Dispositivo' }}</v-card-title>
+      <v-card-title class=" d-flex text-h5 justify-space-between">
+        {{ props.device?.id ? 'Editar Dispositivo' : 'Novo Dispositivo' }}
+        <v-btn icon="mdi-close" variant="text" @click="emit('update:modelValue', false)" />
+      </v-card-title>
       <v-card-text>
         <v-form ref="formRef">
           <v-text-field

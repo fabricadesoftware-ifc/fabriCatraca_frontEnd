@@ -140,10 +140,11 @@
 <template>
   <v-dialog max-width="900" :model-value="props.modelValue" @update:model-value="emit('update:modelValue', $event)">
     <v-card v-if="props.group">
-      <v-card-title class="text-h5">
+      <v-card-title class="d-flex text-h5 justify-space-between">
         {{ props.app_role === 'sisae'
           ? props.group.name || 'Turma'
           : (props.group.id ? 'Editar Grupo' : 'Novo Grupo') }}
+          <v-btn icon="mdi-close" variant="text" @click="emit('update:modelValue', false)" />
       </v-card-title>
 
       <v-card-text>
@@ -170,7 +171,7 @@
                     required
                     :rules="props.app_role !== 'sisae' ? [v => !!v || 'Nome é obrigatório'] : []"
                   />
-                  
+
                 </v-col>
               </v-row>
             </v-container>
@@ -337,10 +338,10 @@
         </v-window>
       </v-card-text>
 
-      <v-card-actions>
+      <v-card-actions v-if="props.app_role !== 'sisae'">
         <v-spacer />
-        <v-btn color="error" variant="text" @click="close">Cancelar</v-btn>
-        <v-btn v-if="props.app_role !== 'sisae'" color="primary" variant="flat" @click="save">Salvar</v-btn>
+        <v-btn color="error" variant="text" @click="emit('update:modelValue', false)">Cancelar</v-btn>
+        <v-btn color="primary" variant="flat" @click="save">Salvar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

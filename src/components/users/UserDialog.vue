@@ -152,7 +152,8 @@ watch(
     pin.value = newUser.pin ?? "";
     isVisitor.value = hasUserTypeField.value ? newUser.user_type_id === 1 : false;
     deviceAdmin.value = hasDeviceAdminField.value ? !!newUser.device_admin : false;
-    userGroups.value = newUser.user_groups?.map((group) => (typeof group === "number" ? group : group.id)) || [];
+    userGroups.value =
+      newUser.user_groups?.map((group) => (typeof group === "number" ? group : group.id)) || [];
     groupSchedules.value = [];
     schedulesError.value = "";
     lastScheduleKey.value = "";
@@ -229,21 +230,26 @@ onMounted(async () => {
     :max-width="tab === 'horarios' ? 1280 : 900"
     :model-value="props.modelValue"
     @update:model-value="emit('update:modelValue', $event)"
-
-    >
+  >
     <v-card v-if="props.user">
-      <v-card-title class="text-h5">{{ isSisaeViewer ? 'Liberar Usuário' : 'Editar Usuário'}}</v-card-title>
-
+      <v-card-title class="d-flex text-h5 justify-space-between"
+        >{{ isSisaeViewer ? "Liberar Usuário" : "Editar Usuário" }}
+        <v-btn icon="mdi-close" variant="text" @click="emit('update:modelValue', false)" />
+      </v-card-title>
 
       <v-card-text>
         <v-tabs v-model="tab" bg-color="transparent" color="primary">
           <v-tab value="dados">Dados Gerais</v-tab>
-          <v-tab value="departamentos" v-if="props.user.name && authStore.role == 'admin'">Grupos</v-tab>
+          <v-tab value="departamentos" v-if="props.user.name && authStore.role == 'admin'"
+            >Grupos</v-tab
+          >
           <v-tab value="cartoes" v-if="props.user.name && authStore.role == 'admin'">Cartões</v-tab>
           <v-tab value="horarios" v-if="props.user.name">Horários</v-tab>
           <v-tab value="liberacao" v-if="props.user.id">Liberação temporária</v-tab>
           <v-tab value="pin" v-if="props.user.pin && authStore.role == 'admin'">PIN</v-tab>
-          <v-tab value="biometria" v-if="props.user.name && authStore.role == 'admin'">Biometria</v-tab>
+          <v-tab value="biometria" v-if="props.user.name && authStore.role == 'admin'"
+            >Biometria</v-tab
+          >
           <v-tab value="acessos" v-if="props.user.name">Acessos</v-tab>
         </v-tabs>
 
@@ -309,7 +315,7 @@ onMounted(async () => {
             <UserPinTab :pin="pin" />
           </v-window-item>
 
-          <v-window-item value="biometria" v-if="appRole == 'admin'">
+          <v-window-item value="biometria" :disabled="appRole == 'admin'">
             <UserBioPanel :user-id="props.user.id" />
           </v-window-item>
 
@@ -318,14 +324,10 @@ onMounted(async () => {
           </v-window-item>
         </v-window>
       </v-card-text>
-        <v-card-actions v-if="authStore.role == 'admin'">
+      <v-card-actions v-if="authStore.role == 'admin'">
         <v-spacer />
         <v-btn color="error" variant="text" @click="closeDialog">Cancelar</v-btn>
         <v-btn color="primary" variant="flat" @click="salvarUsuario">Salvar</v-btn>
-      </v-card-actions>
-        <v-card-actions v-if="authStore.role == 'sisae'">
-        <v-spacer />
-        <v-btn color="error" variant="text" @click="closeDialog">Fechar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
