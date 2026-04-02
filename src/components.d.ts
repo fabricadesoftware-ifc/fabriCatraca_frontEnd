@@ -29,6 +29,7 @@ declare module 'vue' {
     GroupScheduleDialog: typeof import('./components/access-rules/GroupScheduleDialog.vue')['default']
     GroupTemporaryReleasePanel: typeof import('./components/groups/GroupTemporaryReleasePanel.vue')['default']
     GuaritaOperationsPanel: typeof import('./components/guarita/GuaritaOperationsPanel.vue')['default']
+    GuaritaVisitorPanel: typeof import('./components/guarita/GuaritaVisitorPanel.vue')['default']
     HardwareConfigTab: typeof import('./components/devices/config-tabs/HardwareConfigTab.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     HomeGraph: typeof import('./components/graphs/HomeGraph.vue')['default']

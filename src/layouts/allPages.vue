@@ -60,6 +60,12 @@ const rawItems = [
     roles: ["admin", "guarita"],
   },
   {
+    title: "Visitantes",
+    icon: "mdi-account-plus",
+    to: "/visitantes",
+    roles: ["admin", "guarita"],
+  },
+  {
     title: "Liberar Usuário",
     icon: "mdi-account-clock",
     to: "/liberar-usuario",

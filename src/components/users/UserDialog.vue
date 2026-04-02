@@ -20,6 +20,8 @@ interface User extends Omit<BaseUser, "user_groups"> {
 const props = defineProps<{
   modelValue: boolean;
   user: User | null;
+  minimalMode?: boolean;
+  saveLabel?: string;
 }>();
 
 const emit = defineEmits<{
@@ -56,6 +58,7 @@ const hasDeviceAdminField = ref(false);
 const lastScheduleKey = ref("");
 
 const isSisaeViewer = computed(() => authStore.role === "sisae");
+const isMinimalMode = computed(() => !!props.minimalMode);
 const panelRoles = ["admin", "guarita", "sisae"] as const;
 const roleOptions = [
   { title: "Sem perfil do painel", value: "" },
@@ -154,7 +157,10 @@ watch(
     registration.value = newUser.registration ?? "";
     pin.value = newUser.pin ?? "";
     deviceScope.value = newUser.device_scope ?? "all_active";
-    selectedDeviceIds.value = newUser.selected_devices?.map((device) => device.id) ?? [];
+    selectedDeviceIds.value =
+      newUser.selected_device_ids ??
+      newUser.selected_devices?.map((device) => device.id) ??
+      [];
     isVisitor.value = hasUserTypeField.value ? newUser.user_type_id === 1 : false;
     deviceAdmin.value = hasDeviceAdminField.value ? !!newUser.device_admin : false;
     userGroups.value =
@@ -176,6 +182,21 @@ watch(
     await loadGroupSchedules();
   },
   { immediate: true },
+);
+
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (!isOpen || !isMinimalMode.value) {
+      return;
+    }
+
+    tab.value = "dados";
+    isVisitor.value = true;
+    panelAccessOnly.value = false;
+    deviceAdmin.value = false;
+    appRole.value = "";
+  },
 );
 
 function closeDialog() {
@@ -240,25 +261,21 @@ onMounted(async () => {
     @update:model-value="emit('update:modelValue', $event)"
   >
     <v-card v-if="props.user">
-      <v-card-title class="d-flex text-h5 justify-space-between"
-        >{{ isSisaeViewer ? "Liberar Usuário" : "Editar Usuário" }}
+      <v-card-title class="d-flex text-h5 justify-space-between">
+        {{ isMinimalMode ? "Cadastrar Visitante" : isSisaeViewer ? "Liberar Usuario" : "Editar Usuario" }}
         <v-btn icon="mdi-close" variant="text" @click="emit('update:modelValue', false)" />
       </v-card-title>
 
       <v-card-text>
         <v-tabs v-model="tab" bg-color="transparent" color="primary">
           <v-tab value="dados">Dados Gerais</v-tab>
-          <v-tab value="departamentos" v-if="props.user.name && authStore.role == 'admin'"
-            >Grupos</v-tab
-          >
-          <v-tab value="cartoes" v-if="props.user.name && authStore.role == 'admin'">Cartões</v-tab>
-          <v-tab value="horarios" v-if="props.user.name">Horários</v-tab>
-          <v-tab value="liberacao" v-if="props.user.id">Liberação temporária</v-tab>
-          <v-tab value="pin" v-if="props.user.pin && authStore.role == 'admin'">PIN</v-tab>
-          <v-tab value="biometria" v-if="props.user.name && authStore.role == 'admin'"
-            >Biometria</v-tab
-          >
-          <v-tab value="acessos" v-if="props.user.name">Acessos</v-tab>
+          <v-tab value="departamentos" v-if="props.user.name && authStore.role == 'admin' && !isMinimalMode">Grupos</v-tab>
+          <v-tab value="cartoes" v-if="props.user.name && authStore.role == 'admin' && !isMinimalMode">Cartoes</v-tab>
+          <v-tab value="horarios" v-if="props.user.name && !isMinimalMode">Horarios</v-tab>
+          <v-tab value="liberacao" v-if="props.user.id && !isMinimalMode">Liberacao temporaria</v-tab>
+          <v-tab value="pin" v-if="props.user.pin && authStore.role == 'admin' && !isMinimalMode">PIN</v-tab>
+          <v-tab value="biometria" v-if="props.user.name && authStore.role == 'admin' && !isMinimalMode">Biometria</v-tab>
+          <v-tab value="acessos" v-if="props.user.name && !isMinimalMode">Acessos</v-tab>
         </v-tabs>
 
         <v-window v-model="tab">
@@ -270,6 +287,7 @@ onMounted(async () => {
               :device-options="deviceStore.devices.filter((device) => device.is_active)"
               :device-scope="deviceScope"
               :email="email"
+              :groups="selectedGroupNames"
               :has-app-role-field="hasAppRoleField"
               :has-device-admin-field="hasDeviceAdminField"
               :has-email-field="hasEmailField"
@@ -277,13 +295,13 @@ onMounted(async () => {
               :has-user-type-field="hasUserTypeField"
               :is-sisae-viewer="isSisaeViewer"
               :is-visitor="isVisitor"
+              :minimal-mode="isMinimalMode"
               :name="name"
               :panel-access-only="panelAccessOnly"
               :password="password"
               :registration="registration"
               :role-options="roleOptions"
               :selected-device-ids="selectedDeviceIds"
-              :groups="selectedGroupNames"
               @update:app-role="appRole = $event"
               @update:device-admin="deviceAdmin = $event"
               @update:device-scope="deviceScope = $event"
@@ -297,7 +315,7 @@ onMounted(async () => {
             />
           </v-window-item>
 
-          <v-window-item value="departamentos" v-if="appRole == 'admin'">
+          <v-window-item value="departamentos" v-if="appRole == 'admin' && !isMinimalMode">
             <UserGroupsTab
               :groups="groupStore.groups"
               :loading="loading"
@@ -306,11 +324,11 @@ onMounted(async () => {
             />
           </v-window-item>
 
-          <v-window-item value="cartoes" v-if="appRole == 'admin'">
+          <v-window-item value="cartoes" v-if="appRole == 'admin' && !isMinimalMode">
             <UserCardsPanel :user-id="props.user.id" />
           </v-window-item>
 
-          <v-window-item value="horarios">
+          <v-window-item value="horarios" v-if="!isMinimalMode">
             <UserSchedulesTab
               :group-schedules="groupSchedules"
               :schedules-error="schedulesError"
@@ -320,27 +338,30 @@ onMounted(async () => {
             />
           </v-window-item>
 
-          <v-window-item value="liberacao">
+          <v-window-item value="liberacao" v-if="!isMinimalMode">
             <UserTemporaryReleasePanel :user-id="props.user.id" />
           </v-window-item>
 
-          <v-window-item value="pin" v-if="appRole == 'admin'">
+          <v-window-item value="pin" v-if="appRole == 'admin' && !isMinimalMode">
             <UserPinTab :pin="pin" />
           </v-window-item>
 
-          <v-window-item value="biometria" :disabled="appRole == 'admin'">
+          <v-window-item value="biometria" v-if="!isMinimalMode" :disabled="appRole == 'admin'">
             <UserBioPanel :user-id="props.user.id" />
           </v-window-item>
 
-          <v-window-item value="acessos">
+          <v-window-item value="acessos" v-if="!isMinimalMode">
             <UserAccessLogsPanel :user-id="props.user.id" />
           </v-window-item>
         </v-window>
       </v-card-text>
-      <v-card-actions v-if="authStore.role == 'admin'">
+
+      <v-card-actions v-if="authStore.role == 'admin' || isMinimalMode">
         <v-spacer />
         <v-btn color="error" variant="text" @click="closeDialog">Cancelar</v-btn>
-        <v-btn color="primary" variant="flat" @click="salvarUsuario">Salvar</v-btn>
+        <v-btn color="primary" variant="flat" @click="salvarUsuario">
+          {{ props.saveLabel || "Salvar" }}
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

@@ -9,13 +9,19 @@ interface User extends Omit<BaseUser, "user_groups"> {
   user_groups?: (number | { id: number; name: string })[];
 }
 
-const { users, currentPage, pageSize, totalPages, totalItems, app_role } = defineProps<{
+const props = defineProps<{
   users: User[];
   currentPage: number;
   pageSize: number;
   totalPages: number;
   totalItems: number;
   app_role: string;
+  title?: string;
+  createLabel?: string;
+  canCreate?: boolean;
+  minimalDialog?: boolean;
+  newUserDefaults?: Partial<User>;
+  reloadQuery?: Record<string, unknown>;
 }>();
 
 const emit = defineEmits<{
@@ -31,28 +37,35 @@ const selection = ref({
 const search = ref("");
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  //TODO: Mostrar headers diferentes para diferentes roles exemplo: admin vê tudo, guarita não vê admin, sisae só vê sisae e alunos
+const canCreateUsers = computed(() => props.canCreate ?? props.app_role === "admin");
 
-const DefaultHeaders = [
+function buildReloadQuery() {
+  return {
+    page: userStore.current_page,
+    page_size: userStore.page_size,
+    ...(props.reloadQuery || {}),
+  };
+}
+
+const defaultHeaders = [
   { title: "ID", key: "id", align: "start" as const },
   { title: "Nome", key: "name", align: "start" as const },
   { title: "Perfil", key: "app_role", align: "start" as const },
   { title: "Admin catraca", key: "device_admin", align: "start" as const },
   { title: "Turma", key: "user_groups", align: "start" as const },
-  { title: "Matrícula", key: "registration", align: "start" as const },
+  { title: "Matricula", key: "registration", align: "start" as const },
 ];
 
-const HeadersByRole = {
-  admin: DefaultHeaders,
-  guarita: DefaultHeaders.filter((h) => h.key !== "app_role" && h.key !== "device_admin"), // Guarita não vê perfil e admin catraca
-  sisae: DefaultHeaders.filter((h) => h.key !== "app_role" && h.key !== "device_admin"), // SISAE não vê perfil e admin catraca
+const headersByRole = {
+  admin: defaultHeaders,
+  guarita: defaultHeaders.filter((h) => h.key !== "app_role" && h.key !== "device_admin"),
+  sisae: defaultHeaders.filter((h) => h.key !== "app_role" && h.key !== "device_admin"),
 };
 
 const tableHeaders = computed(
-  () => HeadersByRole[app_role as keyof typeof HeadersByRole] ?? DefaultHeaders,
+  () => headersByRole[props.app_role as keyof typeof headersByRole] ?? defaultHeaders,
 );
 
-// Watch para debounce na pesquisa (aguarda 500ms após parar de digitar)
 watch(search, (newSearch) => {
   if (searchTimeout) {
     clearTimeout(searchTimeout);
@@ -63,14 +76,11 @@ watch(search, (newSearch) => {
   }, 500);
 });
 
-// Debug para verificar se a seleção está funcionando
-
 async function salvarUsuario(user: User) {
   try {
     let savedUser: User;
 
     if (user.id === 0) {
-      // Criar novo usuário
       savedUser = await userStore.createUser({
         name: user.name,
         email: user.email,
@@ -92,8 +102,9 @@ async function salvarUsuario(user: User) {
       const currentUser = await userStore.getUserById(user.id);
 
       if (!currentUser) {
-        throw new Error("Usuário não encontrado");
+        throw new Error("Usuario nao encontrado");
       }
+
       const basicDataChanged =
         currentUser.name !== user.name ||
         currentUser.email !== user.email ||
@@ -102,9 +113,8 @@ async function salvarUsuario(user: User) {
         currentUser.registration !== user.registration ||
         currentUser.user_type_id !== user.user_type_id ||
         !!currentUser.device_admin !== !!user.device_admin ||
-        !!user.password; // Incluir senha na verificação de mudanças
+        !!user.password;
 
-      // Atualizar dados básicos apenas se mudaram
       savedUser = basicDataChanged
         ? await userStore.updateUser(user.id, {
             name: user.name,
@@ -120,38 +130,27 @@ async function salvarUsuario(user: User) {
           })
         : currentUser;
 
-      // Gerenciar grupos do usuário
       const userGroupIds = (user.user_groups || []).map((g) => (typeof g === "number" ? g : g.id));
       const currentGroups =
         currentUser.user_groups?.map((g) => (typeof g === "number" ? g : g.id)) || [];
 
-      const groupsToAdd = userGroupIds.filter(
-        (groupId: number) => !currentGroups.includes(groupId),
-      );
-      const groupsToRemove = currentGroups.filter(
-        (groupId: number) => !userGroupIds.includes(groupId),
-      );
+      const groupsToAdd = userGroupIds.filter((groupId: number) => !currentGroups.includes(groupId));
+      const groupsToRemove = currentGroups.filter((groupId: number) => !userGroupIds.includes(groupId));
 
-      // Adiciona novos grupos
       for (const groupId of groupsToAdd) {
         await userStore.addUserToGroup(user.id, groupId);
       }
 
-      // Remove grupos
       for (const groupId of groupsToRemove) {
         await userStore.removeUserFromGroup(user.id, groupId);
       }
     }
 
-    // Recarrega a lista de usuários
-    await userStore.loadUsers({
-      page: userStore.current_page,
-      page_size: userStore.page_size,
-    });
-    toast.success("Usuário salvo com sucesso!");
+    await userStore.loadUsers(buildReloadQuery());
+    toast.success("Usuario salvo com sucesso.");
   } catch (error) {
     console.error(error);
-    toast.error("Erro ao salvar usuário. Por favor, tente novamente.");
+    toast.error("Erro ao salvar usuario. Por favor, tente novamente.");
   }
 }
 
@@ -164,50 +163,45 @@ async function removerSelecionados() {
   const selectedItems = selection.value.selected;
   if (selectedItems.length === 0) return;
 
-  // Debug para verificar os IDs
-
-  if (confirm(`Remover ${selectedItems.length} usuário(s)?`)) {
+  if (confirm(`Remover ${selectedItems.length} usuario(s)?`)) {
     try {
-      // Filtrar apenas usuários com ID válido
       const validUsers = selectedItems.filter(
         (user) => typeof user.id === "number" && !Number.isNaN(user.id),
       );
       if (validUsers.length === 0) {
-        throw new Error("Nenhum usuário válido para remover");
+        throw new Error("Nenhum usuario valido para remover");
       }
 
       await Promise.all(validUsers.map((user) => userStore.deleteUser(user.id)));
-      await userStore.loadUsers({
-        page: userStore.current_page,
-        page_size: userStore.page_size,
-      });
+      await userStore.loadUsers(buildReloadQuery());
 
       const removedCount = validUsers.length;
       selection.value.selected = [];
-      toast.success(`${removedCount} usuário(s) removido(s) com sucesso!`);
+      toast.success(`${removedCount} usuario(s) removido(s) com sucesso.`);
     } catch (error) {
       console.error(error);
-      toast.error("Erro ao remover usuários. Por favor, tente novamente.");
+      toast.error("Erro ao remover usuarios. Por favor, tente novamente.");
     }
   }
 }
 
 function novoUsuario() {
-    selectedUser.value = {
-      id: 0,
-      name: "",
-      registration: "",
-      user_groups: [],
-      device_scope: "all_active",
-      selected_devices: [],
-      selected_device_ids: [],
-      app_role: "",
-      panel_access_only: false,
+  selectedUser.value = {
+    id: 0,
+    name: "",
+    registration: "",
+    user_groups: [],
+    device_scope: "all_active",
+    selected_devices: [],
+    selected_device_ids: [],
+    app_role: "",
+    panel_access_only: false,
     user_type_id: 1,
     device_admin: false,
     devices: [],
     email: "",
     pin: "",
+    ...props.newUserDefaults,
   };
   dialog.value = true;
 }
@@ -221,14 +215,12 @@ function itemsPerPageChanged(newPageSize: number) {
 }
 
 function onSelect(items: User[]) {
-  // Garantir que temos um array
   const selectedItems = Array.isArray(items) ? items : [items].filter(Boolean);
-  // Atualizar seleção apenas se tivermos itens válidos
   selection.value.selected =
     selectedItems.length > 0
       ? selectedItems.map((item) => ({
           ...item,
-          id: Number(item.id), // Garantir que o ID é um número
+          id: Number(item.id),
         }))
       : [];
 }
@@ -243,9 +235,9 @@ function appRoleLabel(value?: string) {
 
 <template>
   <div class="d-flex justify-space-between align-center mb-4">
-    <h2 class="text-h5">Gerenciar Usuários</h2>
+    <h2 class="text-h5">{{ props.title || "Gerenciar Usuarios" }}</h2>
 
-    <div v-if="app_role == 'admin'">
+    <div v-if="props.app_role == 'admin'">
       <span class="mr-2 text-caption">Selecionados: {{ selection.selected.length }}</span>
 
       <v-btn
@@ -259,12 +251,17 @@ function appRoleLabel(value?: string) {
       </v-btn>
 
       <v-btn color="primary" prepend-icon="mdi-plus" @click="novoUsuario">
-        Adicionar Usuário
+        {{ props.createLabel || "Adicionar Usuario" }}
+      </v-btn>
+    </div>
+
+    <div v-else-if="canCreateUsers">
+      <v-btn color="primary" prepend-icon="mdi-plus" @click="novoUsuario">
+        {{ props.createLabel || "Adicionar Usuario" }}
       </v-btn>
     </div>
   </div>
 
-  <!-- Campo de pesquisa -->
   <v-text-field
     v-model="search"
     append-inner-icon="mdi-magnify"
@@ -272,7 +269,7 @@ function appRoleLabel(value?: string) {
     clearable
     density="comfortable"
     hide-details
-    label="Pesquisar por nome ou matrícula"
+    label="Pesquisar por nome ou matricula"
     single-line
     variant="outlined"
   />
@@ -283,14 +280,14 @@ function appRoleLabel(value?: string) {
     :headers="tableHeaders"
     hover
     item-key="id"
-    :items="users"
-    :items-length="totalItems ?? 0"
-    :items-per-page="pageSize ?? 10"
-    :loading="users.length === 0"
-    :page="currentPage ?? 1"
+    :items="props.users"
+    :items-length="props.totalItems ?? 0"
+    :items-per-page="props.pageSize ?? 10"
+    :loading="props.users.length === 0"
+    :page="props.currentPage ?? 1"
     return-object
-    :select-strategy="app_role === 'admin' ? 'all' : 'single'"
-    :show-select="app_role === 'admin'"
+    :select-strategy="props.app_role === 'admin' ? 'all' : 'single'"
+    :show-select="props.app_role === 'admin'"
     @click:row="showUserDetails"
     @update:items-per-page="itemsPerPageChanged"
     @update:page="trocarPagina"
@@ -300,14 +297,13 @@ function appRoleLabel(value?: string) {
       {{ appRoleLabel(item.effective_app_role || item.app_role) }}
     </template>
 
-    <!-- Template para user_groups -->
     <template #item.user_groups="{ item }">
       {{
         item.user_groups?.length
           ? typeof item.user_groups[0] === "object"
             ? item.user_groups[0].name
             : "Grupo " + item.user_groups[0]
-          : "Não há grupo"
+          : "Nao ha grupo"
       }}
     </template>
 
@@ -318,11 +314,16 @@ function appRoleLabel(value?: string) {
     </template>
   </v-data-table-server>
 
-  <UserDialog v-model="dialog" :user="selectedUser" @save="salvarUsuario" />
+  <UserDialog
+    v-model="dialog"
+    :minimal-mode="props.minimalDialog"
+    :save-label="props.createLabel"
+    :user="selectedUser"
+    @save="salvarUsuario"
+  />
 </template>
 
 <style scoped>
-/* O Vuetify já cuida do hover quando você usa hover="true" */
 .v-data-table >>> tbody tr {
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;

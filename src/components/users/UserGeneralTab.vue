@@ -22,6 +22,7 @@ const props = defineProps<{
   isSisaeViewer: boolean;
   groups: Array<string>;
   roleOptions: { title: string; value: string }[];
+  minimalMode?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -49,6 +50,7 @@ const deviceScopeOptions = [
     <v-row>
       <v-col cols="8">
         <v-text-field
+          v-if="!minimalMode"
           :model-value="groups[0] || 'Usuario sem turma'"
           label="Turma"
           type="text"
@@ -63,14 +65,14 @@ const deviceScopeOptions = [
           @update:model-value="emit('update:name', String($event ?? ''))"
         />
         <v-text-field
-          v-if="hasEmailField"
+          v-if="hasEmailField && !minimalMode"
           :model-value="email"
           label="E-mail para login"
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:email', String($event ?? ''))"
         />
         <v-select
-          v-if="hasAppRoleField"
+          v-if="hasAppRoleField && !minimalMode"
           :model-value="appRole"
           :items="roleOptions"
           item-title="title"
@@ -80,7 +82,7 @@ const deviceScopeOptions = [
           @update:model-value="emit('update:appRole', $event)"
         />
         <v-switch
-          v-if="hasPanelAccessOnlyField"
+          v-if="hasPanelAccessOnlyField && !minimalMode"
           :model-value="panelAccessOnly"
           color="info"
           label="Conta somente do painel"
@@ -88,7 +90,7 @@ const deviceScopeOptions = [
           @update:model-value="emit('update:panelAccessOnly', Boolean($event))"
         />
         <v-text-field
-          v-if="canShowPasswordField"
+          v-if="canShowPasswordField && !minimalMode"
           :model-value="password"
           label="Senha do painel"
           placeholder="Preencha para definir ou alterar a senha"
@@ -127,7 +129,7 @@ const deviceScopeOptions = [
         />
 
         <v-switch
-          v-if="hasUserTypeField"
+          v-if="hasUserTypeField && !minimalMode"
           :model-value="isVisitor"
           color="warning"
           label="Visitante"
@@ -135,18 +137,18 @@ const deviceScopeOptions = [
           @update:model-value="emit('update:isVisitor', Boolean($event))"
         />
         <v-switch
-          v-if="hasDeviceAdminField"
+          v-if="hasDeviceAdminField && !minimalMode"
           :model-value="deviceAdmin"
           color="primary"
           label="Administrador da catraca"
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:deviceAdmin', Boolean($event))"
         />
-        <v-text-field label="Data de nascimento" type="date" disabled />
-        <v-text-field label="(xx) xxxxx-xxxx" type="tel" disabled />
+        <v-text-field v-if="!minimalMode" label="Data de nascimento" type="date" disabled />
+        <v-text-field v-if="!minimalMode" label="(xx) xxxxx-xxxx" type="tel" disabled />
       </v-col>
 
-      <v-col class="d-flex flex-column align-center" cols="4">
+      <v-col v-if="!minimalMode" class="d-flex flex-column align-center" cols="4">
         <v-avatar class="mb-4" size="150">
           <v-img :src="`https://randomuser.me/api/portraits/lego/${Math.floor(Math.random() * 10)}.jpg`" />
         </v-avatar>
