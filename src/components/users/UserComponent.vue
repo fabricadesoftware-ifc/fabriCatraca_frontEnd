@@ -18,6 +18,7 @@ const props = defineProps<{
   app_role: string;
   title?: string;
   createLabel?: string;
+  saveButtonLabel?: string;
   canCreate?: boolean;
   minimalDialog?: boolean;
   newUserDefaults?: Partial<User>;

@@ -42,6 +42,7 @@ onMounted(async () => {
     :app_role="authStore.role"
     :can-create="authStore.role === 'admin' || authStore.role === 'guarita'"
     :create-label="'Cadastrar visitante'"
+    :save-button-label="'Salvar visitante'"
     :current-page="userStore.current_page"
     :minimal-dialog="true"
     :new-user-defaults="{

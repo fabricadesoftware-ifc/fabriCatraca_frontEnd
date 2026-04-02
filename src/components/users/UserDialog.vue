@@ -22,6 +22,7 @@ const props = defineProps<{
   user: User | null;
   minimalMode?: boolean;
   saveLabel?: string;
+  saveButtonLabel?: string;
 }>();
 
 const emit = defineEmits<{
@@ -360,7 +361,7 @@ onMounted(async () => {
         <v-spacer />
         <v-btn color="error" variant="text" @click="closeDialog">Cancelar</v-btn>
         <v-btn color="primary" variant="flat" @click="salvarUsuario">
-          {{ props.saveLabel || "Salvar" }}
+          {{ props.saveButtonLabel || "Salvar" }}
         </v-btn>
       </v-card-actions>
     </v-card>
