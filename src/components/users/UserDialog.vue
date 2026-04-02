@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { User as BaseUser } from "@/types";
 import { computed, onMounted, ref, watch } from "vue";
+import { toast } from "vue3-toastify";
 import type { IfcGroupSchedule } from "@/services/ifc_schedules";
 import ifcSchedulesService from "@/services/ifc_schedules";
 import { useAuthStore, useDeviceStore, useGroupStore } from "@/stores";
@@ -40,6 +41,8 @@ const isVisitor = ref(false);
 const deviceAdmin = ref(false);
 const name = ref("");
 const email = ref("");
+const cpf = ref("");
+const phone = ref("");
 const password = ref("");
 const appRole = ref<BaseUser["app_role"]>("");
 const panelAccessOnly = ref(false);
@@ -152,6 +155,8 @@ watch(
 
     name.value = newUser.name;
     email.value = hasEmailField.value ? (newUser.email ?? "") : "";
+    cpf.value = newUser.cpf ?? "";
+    phone.value = newUser.phone ?? "";
     password.value = "";
     appRole.value = hasAppRoleField.value ? (newUser.app_role ?? "") : "";
     panelAccessOnly.value = hasPanelAccessOnlyField.value ? !!newUser.panel_access_only : false;
@@ -209,9 +214,16 @@ async function salvarUsuario() {
     return;
   }
 
+  if (isMinimalMode.value && !phone.value.trim()) {
+    toast.warning("Telefone e obrigatorio para cadastrar visitante.");
+    return;
+  }
+
   const payload: User = {
     ...props.user,
     name: name.value,
+    cpf: cpf.value,
+    phone: phone.value,
     registration: registration.value,
     user_groups: userGroups.value,
     device_scope: panelAccessOnly.value ? "none" : deviceScope.value,
@@ -284,6 +296,7 @@ onMounted(async () => {
             <UserGeneralTab
               :app-role="appRole"
               :can-show-password-field="canShowPasswordField"
+              :cpf="cpf"
               :device-admin="deviceAdmin"
               :device-options="deviceStore.devices.filter((device) => device.is_active)"
               :device-scope="deviceScope"
@@ -300,10 +313,12 @@ onMounted(async () => {
               :name="name"
               :panel-access-only="panelAccessOnly"
               :password="password"
+              :phone="phone"
               :registration="registration"
               :role-options="roleOptions"
               :selected-device-ids="selectedDeviceIds"
               @update:app-role="appRole = $event"
+              @update:cpf="cpf = $event"
               @update:device-admin="deviceAdmin = $event"
               @update:device-scope="deviceScope = $event"
               @update:email="email = $event"
@@ -311,6 +326,7 @@ onMounted(async () => {
               @update:name="name = $event"
               @update:panel-access-only="panelAccessOnly = $event"
               @update:password="password = $event"
+              @update:phone="phone = $event"
               @update:registration="registration = $event"
               @update:selected-device-ids="selectedDeviceIds = $event"
             />

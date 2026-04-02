@@ -23,6 +23,7 @@ const props = defineProps<{
   minimalDialog?: boolean;
   newUserDefaults?: Partial<User>;
   reloadQuery?: Record<string, unknown>;
+  customHeaders?: Array<{ title: string; key: string; align?: "start" | "center" | "end" }>;
 }>();
 
 const emit = defineEmits<{
@@ -64,7 +65,9 @@ const headersByRole = {
 };
 
 const tableHeaders = computed(
-  () => headersByRole[props.app_role as keyof typeof headersByRole] ?? defaultHeaders,
+  () =>
+    props.customHeaders ||
+    (headersByRole[props.app_role as keyof typeof headersByRole] ?? defaultHeaders),
 );
 
 watch(search, (newSearch) => {
@@ -85,6 +88,8 @@ async function salvarUsuario(user: User) {
       savedUser = await userStore.createUser({
         name: user.name,
         email: user.email,
+        cpf: user.cpf,
+        phone: user.phone,
         password: user.password,
         app_role: user.app_role,
         panel_access_only: user.panel_access_only,
@@ -120,6 +125,8 @@ async function salvarUsuario(user: User) {
         ? await userStore.updateUser(user.id, {
             name: user.name,
             email: user.email,
+            cpf: user.cpf,
+            phone: user.phone,
             password: user.password,
             app_role: user.app_role,
             panel_access_only: user.panel_access_only,
@@ -191,6 +198,8 @@ function novoUsuario() {
     id: 0,
     name: "",
     registration: "",
+    cpf: "",
+    phone: "",
     user_groups: [],
     device_scope: "all_active",
     selected_devices: [],

@@ -4,6 +4,8 @@ import type { Device, User as BaseUser } from "@/types";
 const props = defineProps<{
   name: string;
   email: string;
+  cpf?: string;
+  phone?: string;
   password: string;
   appRole: BaseUser["app_role"];
   panelAccessOnly: boolean;
@@ -28,6 +30,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "update:name", value: string): void;
   (e: "update:email", value: string): void;
+  (e: "update:cpf", value: string): void;
+  (e: "update:phone", value: string): void;
   (e: "update:password", value: string): void;
   (e: "update:appRole", value: BaseUser["app_role"]): void;
   (e: "update:panelAccessOnly", value: boolean): void;
@@ -65,11 +69,27 @@ const deviceScopeOptions = [
           @update:model-value="emit('update:name', String($event ?? ''))"
         />
         <v-text-field
-          v-if="hasEmailField && !minimalMode"
+          v-if="hasEmailField"
           :model-value="email"
-          label="E-mail para login"
+          :label="minimalMode ? 'E-mail' : 'E-mail para login'"
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:email', String($event ?? ''))"
+        />
+        <v-text-field
+          v-if="minimalMode"
+          :model-value="cpf"
+          label="CPF"
+          :disabled="isSisaeViewer"
+          @update:model-value="emit('update:cpf', String($event ?? ''))"
+        />
+        <v-text-field
+          v-if="minimalMode"
+          :model-value="phone"
+          label="Telefone"
+          required
+          :rules="[(v) => !!v || 'Telefone e obrigatorio para visitantes']"
+          :disabled="isSisaeViewer"
+          @update:model-value="emit('update:phone', String($event ?? ''))"
         />
         <v-select
           v-if="hasAppRoleField && !minimalMode"
@@ -98,6 +118,7 @@ const deviceScopeOptions = [
           @update:model-value="emit('update:password', String($event ?? ''))"
         />
         <v-text-field
+          v-if="!minimalMode"
           :model-value="registration"
           label="Matricula"
           :disabled="isSisaeViewer"

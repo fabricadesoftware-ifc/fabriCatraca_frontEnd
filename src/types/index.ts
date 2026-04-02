@@ -30,6 +30,7 @@ export interface QueryParams {
   status?: string;
   app_role?: string;
   panel_access_only?: boolean;
+  user_type_id?: number;
 }
 
 export type AppRole = "admin" | "guarita" | "sisae" | "";
@@ -241,6 +242,8 @@ export interface User {
   name: string;
   registration: string;
   user_type_id: number;
+  cpf?: string;
+  phone?: string;
   device_scope?: "all_active" | "selected" | "none";
   selected_devices?: Device[];
   selected_device_ids?: number[];

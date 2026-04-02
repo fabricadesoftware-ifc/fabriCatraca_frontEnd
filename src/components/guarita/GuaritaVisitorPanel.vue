@@ -42,8 +42,14 @@ onMounted(async () => {
     :app_role="authStore.role"
     :can-create="authStore.role === 'admin' || authStore.role === 'guarita'"
     :create-label="'Cadastrar visitante'"
-    :save-button-label="'Salvar visitante'"
     :current-page="userStore.current_page"
+    :custom-headers="[
+      { title: 'ID', key: 'id', align: 'start' },
+      { title: 'Nome', key: 'name', align: 'start' },
+      { title: 'CPF', key: 'cpf', align: 'start' },
+      { title: 'E-mail', key: 'email', align: 'start' },
+      { title: 'Telefone', key: 'phone', align: 'start' },
+    ]"
     :minimal-dialog="true"
     :new-user-defaults="{
       user_type_id: 1,
