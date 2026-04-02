@@ -77,6 +77,8 @@ async function salvarUsuario(user: User) {
         password: user.password,
         app_role: user.app_role,
         panel_access_only: user.panel_access_only,
+        device_scope: user.panel_access_only ? "none" : user.device_scope,
+        selected_device_ids: user.panel_access_only ? [] : user.selected_device_ids,
         registration: user.registration,
         user_type_id: user.user_type_id,
         device_admin: user.device_admin,
@@ -110,6 +112,8 @@ async function salvarUsuario(user: User) {
             password: user.password,
             app_role: user.app_role,
             panel_access_only: user.panel_access_only,
+            device_scope: user.panel_access_only ? "none" : user.device_scope,
+            selected_device_ids: user.panel_access_only ? [] : user.selected_device_ids,
             registration: user.registration,
             user_type_id: user.user_type_id,
             device_admin: user.device_admin,
@@ -189,13 +193,16 @@ async function removerSelecionados() {
 }
 
 function novoUsuario() {
-  selectedUser.value = {
-    id: 0,
-    name: "",
-    registration: "",
-    user_groups: [],
-    app_role: "",
-    panel_access_only: false,
+    selectedUser.value = {
+      id: 0,
+      name: "",
+      registration: "",
+      user_groups: [],
+      device_scope: "all_active",
+      selected_devices: [],
+      selected_device_ids: [],
+      app_role: "",
+      panel_access_only: false,
     user_type_id: 1,
     device_admin: false,
     devices: [],

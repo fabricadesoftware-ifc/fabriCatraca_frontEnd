@@ -1,10 +1,11 @@
-import type { Bio, BioCreate, QueryParams } from '@/types'
+import type { Bio, BioCreate, LocalCaptureSession, QueryParams } from '@/types'
 import { defineStore } from 'pinia'
 import bioService from '@/services/bio'
 
 export const useBioStore = defineStore('bio', {
   state: () => ({
     bios: [] as Bio[],
+    captureSession: null as LocalCaptureSession | null,
     loading: false,
     saving: false,
   }),
@@ -43,6 +44,27 @@ export const useBioStore = defineStore('bio', {
       } finally {
         this.saving = false
       }
+    },
+
+    async startLocalCapture (data: {
+      user_id: number;
+      extractor_device_id?: number | null;
+      sensor_identifier?: string;
+    }) {
+      this.saving = true
+      try {
+        const response = await bioService.startLocalCapture(data)
+        this.captureSession = response.capture_session
+        return response.capture_session
+      } finally {
+        this.saving = false
+      }
+    },
+
+    async loadLocalCaptureStatus (sessionId: number) {
+      const response = await bioService.getLocalCaptureStatus(sessionId)
+      this.captureSession = response.capture_session
+      return response.capture_session
     },
   },
 })

@@ -3,7 +3,7 @@ import type { User as BaseUser } from "@/types";
 import { computed, onMounted, ref, watch } from "vue";
 import type { IfcGroupSchedule } from "@/services/ifc_schedules";
 import ifcSchedulesService from "@/services/ifc_schedules";
-import { useAuthStore, useGroupStore } from "@/stores";
+import { useAuthStore, useDeviceStore, useGroupStore } from "@/stores";
 import UserAccessLogsPanel from "./UserAccessLogsPanel.vue";
 import UserBioPanel from "./UserBioPanel.vue";
 import UserCardsPanel from "./UserCardsPanel.vue";
@@ -28,6 +28,7 @@ const emit = defineEmits<{
 }>();
 
 const groupStore = useGroupStore();
+const deviceStore = useDeviceStore();
 const authStore = useAuthStore();
 
 const tab = ref("dados");
@@ -41,6 +42,8 @@ const appRole = ref<BaseUser["app_role"]>("");
 const panelAccessOnly = ref(false);
 const registration = ref("");
 const pin = ref("");
+const deviceScope = ref<BaseUser["device_scope"]>("all_active");
+const selectedDeviceIds = ref<number[]>([]);
 const loading = ref(false);
 const schedulesLoading = ref(false);
 const schedulesError = ref("");
@@ -150,6 +153,8 @@ watch(
     panelAccessOnly.value = hasPanelAccessOnlyField.value ? !!newUser.panel_access_only : false;
     registration.value = newUser.registration ?? "";
     pin.value = newUser.pin ?? "";
+    deviceScope.value = newUser.device_scope ?? "all_active";
+    selectedDeviceIds.value = newUser.selected_devices?.map((device) => device.id) ?? [];
     isVisitor.value = hasUserTypeField.value ? newUser.user_type_id === 1 : false;
     deviceAdmin.value = hasDeviceAdminField.value ? !!newUser.device_admin : false;
     userGroups.value =
@@ -187,6 +192,8 @@ async function salvarUsuario() {
     name: name.value,
     registration: registration.value,
     user_groups: userGroups.value,
+    device_scope: panelAccessOnly.value ? "none" : deviceScope.value,
+    selected_device_ids: panelAccessOnly.value ? [] : selectedDeviceIds.value,
   };
 
   if (canShowPasswordField.value && password.value.trim()) {
@@ -217,6 +224,7 @@ onMounted(async () => {
   loading.value = true;
   try {
     await groupStore.loadGroups();
+    await deviceStore.loadDevices();
   } catch (error) {
     console.error(error);
   } finally {
@@ -259,6 +267,8 @@ onMounted(async () => {
               :app-role="appRole"
               :can-show-password-field="canShowPasswordField"
               :device-admin="deviceAdmin"
+              :device-options="deviceStore.devices.filter((device) => device.is_active)"
+              :device-scope="deviceScope"
               :email="email"
               :has-app-role-field="hasAppRoleField"
               :has-device-admin-field="hasDeviceAdminField"
@@ -272,15 +282,18 @@ onMounted(async () => {
               :password="password"
               :registration="registration"
               :role-options="roleOptions"
+              :selected-device-ids="selectedDeviceIds"
               :groups="selectedGroupNames"
               @update:app-role="appRole = $event"
               @update:device-admin="deviceAdmin = $event"
+              @update:device-scope="deviceScope = $event"
               @update:email="email = $event"
               @update:is-visitor="isVisitor = $event"
               @update:name="name = $event"
               @update:panel-access-only="panelAccessOnly = $event"
               @update:password="password = $event"
               @update:registration="registration = $event"
+              @update:selected-device-ids="selectedDeviceIds = $event"
             />
           </v-window-item>
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { User as BaseUser } from "@/types";
+import type { Device, User as BaseUser } from "@/types";
 
 const props = defineProps<{
   name: string;
@@ -10,6 +10,9 @@ const props = defineProps<{
   registration: string;
   isVisitor: boolean;
   deviceAdmin: boolean;
+  deviceScope: BaseUser["device_scope"];
+  selectedDeviceIds: number[];
+  deviceOptions: Device[];
   hasEmailField: boolean;
   hasAppRoleField: boolean;
   hasPanelAccessOnlyField: boolean;
@@ -17,7 +20,7 @@ const props = defineProps<{
   hasDeviceAdminField: boolean;
   canShowPasswordField: boolean;
   isSisaeViewer: boolean;
-  groups: Array<string>
+  groups: Array<string>;
   roleOptions: { title: string; value: string }[];
 }>();
 
@@ -30,7 +33,15 @@ const emit = defineEmits<{
   (e: "update:registration", value: string): void;
   (e: "update:isVisitor", value: boolean): void;
   (e: "update:deviceAdmin", value: boolean): void;
+  (e: "update:deviceScope", value: BaseUser["device_scope"]): void;
+  (e: "update:selectedDeviceIds", value: number[]): void;
 }>();
+
+const deviceScopeOptions = [
+  { title: "Todas as catracas ativas", value: "all_active" },
+  { title: "Somente catracas selecionadas", value: "selected" },
+  { title: "Nao sincronizar com catracas", value: "none" },
+];
 </script>
 
 <template>
@@ -38,16 +49,16 @@ const emit = defineEmits<{
     <v-row>
       <v-col cols="8">
         <v-text-field
-                  :model-value="groups[0] || 'Usuario sem turma'"
-                  label="Turma"
-                  type="text"
-                  disabled
-                />
+          :model-value="groups[0] || 'Usuario sem turma'"
+          label="Turma"
+          type="text"
+          disabled
+        />
         <v-text-field
           :model-value="name"
           label="Nome"
           required
-          :rules="[(v) => !!v || 'Nome é obrigatório']"
+          :rules="[(v) => !!v || 'Nome e obrigatorio']"
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:name', String($event ?? ''))"
         />
@@ -86,9 +97,33 @@ const emit = defineEmits<{
         />
         <v-text-field
           :model-value="registration"
-          label="Matrícula"
+          label="Matricula"
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:registration', String($event ?? ''))"
+        />
+
+        <v-select
+          :model-value="deviceScope"
+          :items="deviceScopeOptions"
+          item-title="title"
+          item-value="value"
+          label="Escopo de catracas"
+          :disabled="isSisaeViewer || panelAccessOnly"
+          @update:model-value="emit('update:deviceScope', $event)"
+        />
+
+        <v-select
+          v-if="deviceScope === 'selected'"
+          :model-value="selectedDeviceIds"
+          :items="deviceOptions"
+          item-title="name"
+          item-value="id"
+          chips
+          clearable
+          label="Catracas selecionadas"
+          multiple
+          :disabled="isSisaeViewer || panelAccessOnly"
+          @update:model-value="emit('update:selectedDeviceIds', ($event as number[]) || [])"
         />
 
         <v-switch
@@ -107,19 +142,8 @@ const emit = defineEmits<{
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:deviceAdmin', Boolean($event))"
         />
-          <!-- TODO: Arrumar data de nascimento -->
-        <v-text-field
-                  label="Data de nascimento"
-                  type="date"
-                  disabled
-                />
-
-        <v-text-field
-                  label="(xx) xxxxx-xxxx"
-                  type="tel"
-                  disabled
-                />
-
+        <v-text-field label="Data de nascimento" type="date" disabled />
+        <v-text-field label="(xx) xxxxx-xxxx" type="tel" disabled />
       </v-col>
 
       <v-col class="d-flex flex-column align-center" cols="4">
@@ -127,7 +151,7 @@ const emit = defineEmits<{
           <v-img :src="`https://randomuser.me/api/portraits/lego/${Math.floor(Math.random() * 10)}.jpg`" />
         </v-avatar>
         <v-btn class="mb-2" color="primary" v-if="!isSisaeViewer">Arquivo</v-btn>
-        <v-btn class="mb-2" color="primary" v-if="!isSisaeViewer">Câmera</v-btn>
+        <v-btn class="mb-2" color="primary" v-if="!isSisaeViewer">Camera</v-btn>
         <v-btn class="mb-2" color="error" v-if="!isSisaeViewer">Remover</v-btn>
       </v-col>
     </v-row>

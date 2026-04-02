@@ -82,7 +82,24 @@ export interface Bio {
 
 export interface BioCreate {
   user_id: number;
-  enrollment_device_id: number;
+  capture_mode?: "catraca" | "local";
+  enrollment_device_id?: number;
+  extractor_device_id?: number | null;
+  sensor_identifier?: string;
+}
+
+export interface LocalCaptureSession {
+  id: number;
+  user_id: number;
+  status: "pending" | "processing" | "completed" | "failed" | "expired" | "cancelled";
+  sensor_identifier: string;
+  selected_quality: number | null;
+  error_message: string;
+  attempts: Array<Record<string, unknown>>;
+  expires_at: string;
+  finished_at: string | null;
+  template_id: number | null;
+  extractor_device: { id: number; name: string } | null;
 }
 
 export interface Card {
@@ -224,6 +241,9 @@ export interface User {
   name: string;
   registration: string;
   user_type_id: number;
+  device_scope?: "all_active" | "selected" | "none";
+  selected_devices?: Device[];
+  selected_device_ids?: number[];
   pin?: string;
   device_admin?: boolean;
   devices: Device[];
