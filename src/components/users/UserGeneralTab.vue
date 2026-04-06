@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Device, User as BaseUser } from "@/types";
+import { ref } from "vue";
 
 const props = defineProps<{
   name: string;
@@ -25,6 +26,7 @@ const props = defineProps<{
   groups: Array<string>;
   roleOptions: { title: string; value: string }[];
   minimalMode?: boolean;
+  pictureUrl?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -40,7 +42,27 @@ const emit = defineEmits<{
   (e: "update:deviceAdmin", value: boolean): void;
   (e: "update:deviceScope", value: BaseUser["device_scope"]): void;
   (e: "update:selectedDeviceIds", value: number[]): void;
+  (e: "select-picture", value: File | null): void;
+  (e: "remove-picture"): void;
 }>();
+
+const fileInput = ref<HTMLInputElement | null>(null);
+
+function onFileSelected(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0] || null;
+  if (file) {
+    emit("select-picture", file);
+  }
+}
+
+function openFilePicker() {
+  fileInput.value?.click();
+}
+
+function onRemovePicture() {
+  emit("remove-picture");
+}
 
 const deviceScopeOptions = [
   { title: "Todas as catracas ativas", value: "all_active" },
@@ -170,12 +192,26 @@ const deviceScopeOptions = [
       </v-col>
 
       <v-col v-if="!minimalMode" class="d-flex flex-column align-center" cols="4">
+        <input
+          ref="fileInput"
+          accept="image/*"
+          style="display: none"
+          type="file"
+          @change="onFileSelected"
+        />
         <v-avatar class="mb-4" size="150">
-          <v-img :src="`https://randomuser.me/api/portraits/lego/${Math.floor(Math.random() * 10)}.jpg`" />
+          <v-img
+            v-if="pictureUrl"
+            :src="pictureUrl"
+          />
+          <v-icon v-else size="100">mdi-account-circle</v-icon>
         </v-avatar>
-        <v-btn class="mb-2" color="primary" v-if="!isSisaeViewer">Arquivo</v-btn>
-        <v-btn class="mb-2" color="primary" v-if="!isSisaeViewer">Camera</v-btn>
-        <v-btn class="mb-2" color="error" v-if="!isSisaeViewer">Remover</v-btn>
+        <v-btn class="mb-2" color="primary" v-if="!isSisaeViewer" @click="openFilePicker"
+          >Arquivo</v-btn
+        >
+        <v-btn class="mb-2" color="error" v-if="pictureUrl && !isSisaeViewer" @click="onRemovePicture"
+          >Remover</v-btn
+        >
       </v-col>
     </v-row>
   </v-container>

@@ -244,6 +244,10 @@ export interface User {
   user_type_id: number;
   cpf?: string;
   phone?: string;
+  birth_date?: string | null;
+  picture_url?: string | null;
+  picture_id?: number | null;
+  remove_picture?: boolean;
   device_scope?: "all_active" | "selected" | "none";
   selected_devices?: Device[];
   selected_device_ids?: number[];
@@ -559,6 +563,10 @@ export interface TemporaryReleaseActor {
   id: number;
   name: string;
   registration?: string | null;
+  cpf?: string | null;
+  phone?: string | null;
+  birth_date?: string | null;
+  picture_url?: string | null;
 }
 
 export interface TemporaryReleaseRule {

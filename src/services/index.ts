@@ -23,4 +23,5 @@ export { default as TimeSpansService } from "./time_spans";
 export { default as TimeZonesService } from "./time_zones";
 export { default as UserAccessRulesService } from "./user_access_rules";
 export { default as UserGroupsService } from "./user_groups";
+export { default as UploaderService } from "./uploader";
 export { default as UsersService } from "./users";

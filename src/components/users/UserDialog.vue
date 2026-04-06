@@ -4,6 +4,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { toast } from "vue3-toastify";
 import type { IfcGroupSchedule } from "@/services/ifc_schedules";
 import ifcSchedulesService from "@/services/ifc_schedules";
+import { UploaderService } from "@/services";
 import { useAuthStore, useDeviceStore, useGroupStore } from "@/stores";
 import UserAccessLogsPanel from "./UserAccessLogsPanel.vue";
 import UserBioPanel from "./UserBioPanel.vue";
@@ -60,6 +61,9 @@ const hasPanelAccessOnlyField = ref(false);
 const hasUserTypeField = ref(false);
 const hasDeviceAdminField = ref(false);
 const lastScheduleKey = ref("");
+const pictureFile = ref<File | null>(null);
+const pictureUploadPending = ref(false);
+const pictureRemoved = ref(false);
 
 const isSisaeViewer = computed(() => authStore.role === "sisae");
 const isMinimalMode = computed(() => !!props.minimalMode);
@@ -174,6 +178,9 @@ watch(
     groupSchedules.value = [];
     schedulesError.value = "";
     lastScheduleKey.value = "";
+    pictureFile.value = null;
+    pictureUploadPending.value = false;
+    pictureRemoved.value = false;
   },
   { immediate: true },
 );
@@ -209,6 +216,16 @@ function closeDialog() {
   emit("update:modelValue", false);
 }
 
+function onSelectPicture(file: File | null) {
+  pictureFile.value = file;
+  pictureRemoved.value = false;
+}
+
+function onRemovePicture() {
+  pictureFile.value = null;
+  pictureRemoved.value = true;
+}
+
 async function salvarUsuario() {
   if (!props.user) {
     return;
@@ -219,8 +236,28 @@ async function salvarUsuario() {
     return;
   }
 
+  let savedUser = props.user;
+
+  // Upload picture first if selected
+  if (pictureFile.value) {
+    try {
+      pictureUploadPending.value = true;
+      const archive = await UploaderService.uploadArchive(pictureFile.value);
+      savedUser = {
+        ...savedUser,
+        picture_id: archive.id,
+      };
+    } catch (error) {
+      toast.error("Erro ao enviar a foto. Verifique o arquivo e tente novamente.");
+      pictureUploadPending.value = false;
+      return;
+    } finally {
+      pictureUploadPending.value = false;
+    }
+  }
+
   const payload: User = {
-    ...props.user,
+    ...savedUser,
     name: name.value,
     cpf: cpf.value,
     phone: phone.value,
@@ -228,6 +265,8 @@ async function salvarUsuario() {
     user_groups: userGroups.value,
     device_scope: panelAccessOnly.value ? "none" : deviceScope.value,
     selected_device_ids: panelAccessOnly.value ? [] : selectedDeviceIds.value,
+    picture_id: savedUser.picture_id,
+    remove_picture: pictureRemoved.value,
   };
 
   if (canShowPasswordField.value && password.value.trim()) {
@@ -314,9 +353,12 @@ onMounted(async () => {
               :panel-access-only="panelAccessOnly"
               :password="password"
               :phone="phone"
+              :picture-url="props.user.picture_url"
               :registration="registration"
               :role-options="roleOptions"
               :selected-device-ids="selectedDeviceIds"
+              @remove-picture="onRemovePicture"
+              @select-picture="onSelectPicture"
               @update:app-role="appRole = $event"
               @update:cpf="cpf = $event"
               @update:device-admin="deviceAdmin = $event"
@@ -376,8 +418,8 @@ onMounted(async () => {
       <v-card-actions v-if="authStore.role == 'admin' || isMinimalMode">
         <v-spacer />
         <v-btn color="error" variant="text" @click="closeDialog">Cancelar</v-btn>
-        <v-btn color="primary" variant="flat" @click="salvarUsuario">
-          {{ props.saveButtonLabel || "Salvar" }}
+        <v-btn color="primary" variant="flat" :disabled="pictureUploadPending" @click="salvarUsuario">
+          {{ pictureUploadPending ? "Enviando foto..." : props.saveButtonLabel || "Salvar" }}
         </v-btn>
       </v-card-actions>
     </v-card>
