@@ -37,6 +37,8 @@ declare module 'vue' {
     MonitorConfigTab: typeof import('./components/devices/config-tabs/MonitorConfigTab.vue')['default']
     PortalComponent: typeof import('./components/portals/PortalComponent.vue')['default']
     PortalDialog: typeof import('./components/portals/PortalDialog.vue')['default']
+    PortalGroupComponent: typeof import('./components/portal-groups/PortalGroupComponent.vue')['default']
+    PortalGroupDialog: typeof import('./components/portal-groups/PortalGroupDialog.vue')['default']
     PushServerConfigTab: typeof import('./components/devices/config-tabs/PushServerConfigTab.vue')['default']
     RegisterBioDialog: typeof import('./components/users/RegisterBioDialog.vue')['default']
     ReleaseAuditTable: typeof import('./components/release-audits/ReleaseAuditTable.vue')['default']

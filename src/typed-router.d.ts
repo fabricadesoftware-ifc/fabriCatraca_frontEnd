@@ -34,6 +34,7 @@ declare module 'vue-router/auto-routes' {
     '/login/': RouteRecordInfo<'/login/', '/login', Record<never, never>, Record<never, never>>,
     '/logs/': RouteRecordInfo<'/logs/', '/logs', Record<never, never>, Record<never, never>>,
     '/portal/': RouteRecordInfo<'/portal/', '/portal', Record<never, never>, Record<never, never>>,
+    '/portal-groups/': RouteRecordInfo<'/portal-groups/', '/portal-groups', Record<never, never>, Record<never, never>>,
     '/users/': RouteRecordInfo<'/users/', '/users', Record<never, never>, Record<never, never>>,
     '/visitantes/': RouteRecordInfo<'/visitantes/', '/visitantes', Record<never, never>, Record<never, never>>,
   }
