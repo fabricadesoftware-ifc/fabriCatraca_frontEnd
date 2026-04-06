@@ -98,6 +98,8 @@ async function salvarUsuario(user: User) {
         registration: user.registration,
         user_type_id: user.user_type_id,
         device_admin: user.device_admin,
+        picture_id: user.picture_id,
+        remove_picture: user.remove_picture,
       });
 
       const userGroupIds = (user.user_groups || []).map((g) => (typeof g === "number" ? g : g.id));
@@ -119,7 +121,9 @@ async function salvarUsuario(user: User) {
         currentUser.registration !== user.registration ||
         currentUser.user_type_id !== user.user_type_id ||
         !!currentUser.device_admin !== !!user.device_admin ||
-        !!user.password;
+        !!user.password ||
+        !!user.picture_id ||
+        !!user.remove_picture;
 
       savedUser = basicDataChanged
         ? await userStore.updateUser(user.id, {
@@ -135,6 +139,8 @@ async function salvarUsuario(user: User) {
             registration: user.registration,
             user_type_id: user.user_type_id,
             device_admin: user.device_admin,
+            picture_id: user.picture_id,
+            remove_picture: user.remove_picture,
           })
         : currentUser;
 

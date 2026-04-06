@@ -5,6 +5,7 @@ export { default as AreaAccessRulesService } from "./area_access_rules";
 export { default as AreasService } from "./areas";
 export { default as AuthService } from "./auth";
 export { default as BioService } from "./bio";
+export { default as CardEnrollService } from "./card_enroll";
 export { default as CardsService } from "./cards";
 export { default as ConfigService } from "./config";
 export { default as ControlIdConfigService } from "./control_id_config";

@@ -47,15 +47,29 @@
     () => HeadersByRole[app_role] ?? DefaultHeaders,
   )
 
+  function normalizeAccessRules (access_rules: Group['access_rules']) {
+    const rules = access_rules || []
+    if (rules.length === 0) return []
+    // New format: array of { access_rule_id, portal_group_id }
+    if (typeof rules[0] === 'object' && 'access_rule_id' in rules[0]) {
+      return rules as Array<{ access_rule_id: number, portal_group_id: number | null }>
+    }
+    // Old format: array of numbers or AccessRule objects
+    return rules.map(r => ({
+      access_rule_id: typeof r === 'number' ? r : r.id,
+      portal_group_id: null as number | null,
+    }))
+  }
+
   async function salvarGrupo (group: Group) {
     try {
       let savedGroup: Group
 
       if (group.id === 0) {
         savedGroup = await groupStore.createGroup({ name: group.name })
-        const groupAccessRuleIds = (group.access_rules || []).map(r => typeof r === 'number' ? r : r.id)
-        for (const accessRuleId of groupAccessRuleIds) {
-          await groupStore.addAccessRuleToGroup(savedGroup.id, accessRuleId)
+        const desiredRules = normalizeAccessRules(group.access_rules)
+        for (const rule of desiredRules) {
+          await groupStore.addAccessRuleToGroup(savedGroup.id, rule.access_rule_id, rule.portal_group_id)
         }
       } else {
         const currentGroup = await groupStore.getGroupById(group.id)
@@ -66,18 +80,38 @@
           ? await groupStore.updateGroup(group.id, { name: group.name })
           : currentGroup
 
-        const groupAccessRuleIds = (group.access_rules || []).map(r => typeof r === 'number' ? r : r.id)
+        const desiredRules = normalizeAccessRules(group.access_rules)
+        const desiredRuleIds = new Set(desiredRules.map(r => r.access_rule_id))
+
+        // Fetch current relations from server to include portal_group info
         const relations = await groupAccessRulesService.getGroupAccessRules({ group_id: group.id })
-        const currentAccessRules = (relations.results || [])
+        const currentRelations = (relations.results || [])
           .filter((rel: any) => ((rel?.group?.id ?? rel?.group_id) === group.id))
-          .map((rel: any) => rel?.access_rule?.id ?? rel?.access_rule_id)
-          .filter((id: any) => typeof id === 'number')
+          .map((rel: any) => ({
+            ruleId: rel?.access_rule?.id ?? rel?.access_rule_id,
+            portalGroupId: rel?.portal_group?.id ?? rel?.portal_group_id ?? null,
+            relationId: rel.id,
+          }))
 
-        const rulesToAdd = groupAccessRuleIds.filter((ruleId: number) => !currentAccessRules.includes(ruleId))
-        const rulesToRemove = currentAccessRules.filter((ruleId: number) => !groupAccessRuleIds.includes(ruleId))
+        // Check which rules match by (access_rule_id, portal_group_id)
+        const currentKeySet = new Set(
+          currentRelations.filter(r => r.ruleId).map(r => `${r.ruleId}-${r.portalGroupId}`)
+        )
+        const desiredKeySet = new Set(
+          desiredRules.map(r => `${r.access_rule_id}-${r.portal_group_id}`)
+        )
 
-        for (const ruleId of rulesToAdd) await groupStore.addAccessRuleToGroup(group.id, ruleId)
-        for (const ruleId of rulesToRemove) await groupStore.removeAccessRuleFromGroup(group.id, ruleId)
+        const rulesToAdd = desiredRules.filter(r => !currentKeySet.has(`${r.access_rule_id}-${r.portal_group_id}`))
+        const rulesToRemove = currentRelations.filter(r => r.ruleId && !desiredKeySet.has(`${r.ruleId}-${r.portalGroupId}`))
+
+        for (const rule of rulesToAdd) {
+          await groupStore.addAccessRuleToGroup(group.id, rule.access_rule_id, rule.portal_group_id)
+        }
+        for (const rel of rulesToRemove) {
+          if (rel.relationId != null) {
+            await groupAccessRulesService.deleteGroupAccessRule(rel.relationId)
+          }
+        }
       }
 
       await groupStore.loadGroups()
@@ -90,7 +124,6 @@
 
   async function showGroupDetails (event: Event, { item }: { item: Group }) {
     if (app_role === 'sisae') {
-      // Sisae só precisa do básico (sem carregar regras de acesso)
       selectedGroup.value = item
       dialog.value = true
       return
@@ -99,16 +132,19 @@
     try {
       const fullGroup = await groupStore.getGroupById(item.id)
       const relations = await groupAccessRulesService.getGroupAccessRules({ group_id: item.id })
-      const relationIds = (relations.results || [])
+      const rulesWithPortalGroup = (relations.results || [])
         .filter((rel: any) => ((rel?.group?.id ?? rel?.group_id) === item.id))
-        .map((rel: any) => rel?.access_rule?.id ?? rel?.access_rule_id)
-        .filter((id: any) => typeof id === 'number')
+        .map((rel: any) => ({
+          access_rule_id: rel?.access_rule?.id ?? rel?.access_rule_id,
+          portal_group_id: rel?.portal_group?.id ?? rel?.portal_group_id ?? null,
+        }))
+        .filter((r: any) => typeof r.access_rule_id === 'number')
 
-      const normalizedIds = relationIds.length > 0
-        ? relationIds
-        : ((fullGroup as any)?.access_rules || []).map((r: any) => typeof r === 'number' ? r : r.id)
+      const accessRules = rulesWithPortalGroup.length > 0
+        ? rulesWithPortalGroup
+        : ((fullGroup as any)?.access_rules || []).map((r: any) => typeof r === 'number' ? { access_rule_id: r, portal_group_id: null } : { access_rule_id: r.id, portal_group_id: null })
 
-      selectedGroup.value = Object.assign({}, item, fullGroup || {}, { access_rules: normalizedIds })
+      selectedGroup.value = Object.assign({}, item, fullGroup || {}, { access_rules })
     } catch {
       selectedGroup.value = item
     } finally {

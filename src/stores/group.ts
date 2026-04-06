@@ -132,11 +132,12 @@ export const useGroupStore = defineStore('group', {
       }
     },
 
-    async addAccessRuleToGroup (groupId: number, accessRuleId: number) {
+    async addAccessRuleToGroup (groupId: number, accessRuleId: number, portalGroupId?: number | null) {
       try {
         await groupAccessRulesService.createGroupAccessRule({
           group_id: groupId,
           access_rule_id: accessRuleId,
+          portal_group_id: portalGroupId,
         })
       } catch (error) {
         console.error(error)
@@ -144,9 +145,8 @@ export const useGroupStore = defineStore('group', {
       }
     },
 
-    async removeAccessRuleFromGroup (groupId: number, accessRuleId: number) {
+    async removeAccessRuleFromGroup (groupId: number, accessRuleId: number, portalGroupId?: number | null) {
       try {
-        // Buscar a relação específica e deletar pelo ID do recurso
         const response = await groupAccessRulesService.getGroupAccessRules({
           group_id: groupId,
           access_rule_id: accessRuleId,
@@ -154,7 +154,8 @@ export const useGroupStore = defineStore('group', {
         const relation = (response.results || []).find(
           (rel: any) =>
             (rel?.group?.id ?? rel?.group_id) === groupId
-            && (rel?.access_rule?.id ?? rel?.access_rule_id) === accessRuleId,
+            && (rel?.access_rule?.id ?? rel?.access_rule_id) === accessRuleId
+            && ((rel?.portal_group?.id ?? rel?.portal_group_id ?? null) === (portalGroupId ?? null)),
         )
         if (relation?.id != null) {
           await groupAccessRulesService.deleteGroupAccessRule(relation.id)

@@ -178,11 +178,13 @@ export interface GroupAccessRule {
   id: number;
   group: Group;
   access_rule: AccessRule;
+  portal_group?: SimplePortalGroup | null;
 }
 
 export interface GroupAccessRuleCreate {
   group_id: number;
   access_rule_id: number;
+  portal_group_id?: number | null;
 }
 
 export interface Portal {
@@ -201,6 +203,11 @@ export interface PortalAccessRule {
 export interface PortalAccessRuleCreate {
   portal_id: number;
   access_rule_id: number;
+}
+
+export interface SimplePortalGroup {
+  id: number;
+  name: string;
 }
 
 export interface TimeSpan {

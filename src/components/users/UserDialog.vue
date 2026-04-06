@@ -5,6 +5,7 @@ import { toast } from "vue3-toastify";
 import type { IfcGroupSchedule } from "@/services/ifc_schedules";
 import ifcSchedulesService from "@/services/ifc_schedules";
 import { UploaderService } from "@/services";
+import CardEnrollService from "@/services/card_enroll";
 import { useAuthStore, useDeviceStore, useGroupStore } from "@/stores";
 import UserAccessLogsPanel from "./UserAccessLogsPanel.vue";
 import UserBioPanel from "./UserBioPanel.vue";
@@ -64,6 +65,9 @@ const lastScheduleKey = ref("");
 const pictureFile = ref<File | null>(null);
 const pictureUploadPending = ref(false);
 const pictureRemoved = ref(false);
+const cardEnrollDevice = ref<number | null>(null);
+const capturedCardValue = ref<number | null>(null);
+const enrollingCard = ref(false);
 
 const isSisaeViewer = computed(() => authStore.role === "sisae");
 const isMinimalMode = computed(() => !!props.minimalMode);
@@ -181,6 +185,9 @@ watch(
     pictureFile.value = null;
     pictureUploadPending.value = false;
     pictureRemoved.value = false;
+    cardEnrollDevice.value = null;
+    capturedCardValue.value = null;
+    enrollingCard.value = false;
   },
   { immediate: true },
 );
@@ -226,6 +233,25 @@ function onRemovePicture() {
   pictureRemoved.value = true;
 }
 
+async function startCardEnroll() {
+  if (!cardEnrollDevice.value) {
+    toast.warning("Selecione uma catraca para capturar o cartao");
+    return;
+  }
+
+  enrollingCard.value = true;
+  try {
+    const result = await CardEnrollService.enrollCard(cardEnrollDevice.value);
+    capturedCardValue.value = result.card_value;
+    toast.success(`Cartao capturado com sucesso! (${result.card_value})`);
+  } catch (err: any) {
+    const msg = err?.response?.data?.error || "Erro ao capturar cartao";
+    toast.error(msg);
+  } finally {
+    enrollingCard.value = false;
+  }
+}
+
 async function salvarUsuario() {
   if (!props.user) {
     return;
@@ -234,6 +260,41 @@ async function salvarUsuario() {
   if (isMinimalMode.value && !phone.value.trim()) {
     toast.warning("Telefone e obrigatorio para cadastrar visitante.");
     return;
+  }
+
+  // In minimal mode, use create_with_card if card was captured
+  if (isMinimalMode.value && capturedCardValue.value && cardEnrollDevice.value) {
+    try {
+      pictureUploadPending.value = true;
+      let pictureId: number | undefined;
+
+      if (pictureFile.value) {
+        const archive = await UploaderService.uploadArchive(pictureFile.value);
+        pictureId = archive.id;
+      }
+
+      const result = await CardEnrollService.createUserWithCard({
+        enrollment_device_id: cardEnrollDevice.value,
+        name: name.value,
+        phone: phone.value,
+        cpf: cpf.value || undefined,
+        registration: registration.value || undefined,
+        picture_id: pictureId || undefined,
+        user_type_id: 1,
+      });
+
+      toast.success("Visitante e cartao cadastrados com sucesso!");
+      emit("save", result.user);
+      closeDialog();
+      return;
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || "Erro ao cadastrar visitante com cartao";
+      toast.error(msg);
+      pictureUploadPending.value = false;
+      return;
+    } finally {
+      pictureUploadPending.value = false;
+    }
   }
 
   let savedUser = props.user;
@@ -372,6 +433,50 @@ onMounted(async () => {
               @update:registration="registration = $event"
               @update:selected-device-ids="selectedDeviceIds = $event"
             />
+
+            <!-- Card enrollment section (minimal mode only) -->
+            <v-card v-if="isMinimalMode" class="mt-4" variant="outlined">
+              <v-card-title class="text-subtitle-1 d-flex align-center">
+                <v-icon class="mr-2" color="primary" icon="mdi-credit-card-wireless" />
+                Cadastrar Cartao
+              </v-card-title>
+              <v-card-text>
+                <v-row>
+                  <v-col cols="12" md="6">
+                    <v-select
+                      v-model="cardEnrollDevice"
+                      item-title="name"
+                      item-value="id"
+                      :items="deviceStore.devices.filter((d) => d.is_active)"
+                      label="Catraca para captura"
+                      density="comfortable"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="6" class="d-flex align-center">
+                    <v-btn
+                      color="primary"
+                      :loading="enrollingCard"
+                      :disabled="!cardEnrollDevice"
+                      prepend-icon="mdi-credit-card-plus"
+                      block
+                      @click="startCardEnroll"
+                    >
+                      Capturar Cartao
+                    </v-btn>
+                  </v-col>
+                </v-row>
+                <v-alert
+                  v-if="capturedCardValue"
+                  class="mt-2"
+                  color="success"
+                  density="compact"
+                  icon="mdi-check-circle"
+                  variant="tonal"
+                >
+                  Cartao capturado: <strong>{{ capturedCardValue }}</strong>
+                </v-alert>
+              </v-card-text>
+            </v-card>
           </v-window-item>
 
           <v-window-item value="departamentos" v-if="appRole == 'admin' && !isMinimalMode">

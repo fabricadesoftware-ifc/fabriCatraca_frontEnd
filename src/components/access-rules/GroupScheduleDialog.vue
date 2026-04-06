@@ -1,12 +1,12 @@
 <script lang="ts" setup>
   import type { AccessRule } from '@/types'
-  import { onMounted, reactive, ref, watch } from 'vue'
+  import { computed, onMounted, reactive, ref, watch } from 'vue'
   import { toast } from 'vue3-toastify'
   import accessRuleTimeZonesService from '@/services/access_rule_time_zones'
   import groupAccessRulesService from '@/services/group_access_rules'
   import timeSpansService from '@/services/time_spans'
   import timeZonesService from '@/services/time_zones'
-  import { useGroupStore } from '@/stores'
+  import { useGroupStore, usePortalGroupStore } from '@/stores'
 
   const props = defineProps<{
     modelValue: boolean
@@ -18,8 +18,16 @@
   }>()
 
   const groupStore = useGroupStore()
+  const portalGroupStore = usePortalGroupStore()
+  const portalGroupOptions = computed(() => {
+    return [
+      { id: null as number | null, name: 'Todas as catracas' },
+      ...portalGroupStore.portalGroups.map(pg => ({ id: pg.id, name: pg.name })),
+    ]
+  })
   const groupIsLocked = ref(false)
   const selectedGroupId = ref<number | null>(null)
+  const selectedPortalGroupId = ref<number | null>(null)
   const saving = ref(false)
 
   type DayKey = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'
@@ -130,7 +138,7 @@
     }
   }
 
-  async function ensureGroupAccessRule (groupId: number, accessRuleId: number) {
+  async function ensureGroupAccessRule (groupId: number, accessRuleId: number, portalGroupId?: number | null) {
     const existing = await groupAccessRulesService.getGroupAccessRules({
       group_id: groupId,
       access_rule_id: accessRuleId,
@@ -139,6 +147,7 @@
       await groupAccessRulesService.createGroupAccessRule({
         group_id: groupId,
         access_rule_id: accessRuleId,
+        portal_group_id: portalGroupId ?? null,
       })
     }
   }
@@ -247,7 +256,7 @@
 
     try {
       // Garante vínculo grupo-regra
-      await ensureGroupAccessRule(groupId, ruleId)
+      await ensureGroupAccessRule(groupId, ruleId, selectedPortalGroupId.value)
 
       // PASSO 1: DELETAR TODOS OS HORÁRIOS EXISTENTES (substituição completa)
       await deleteExistingSchedulesForGroup(groupId, ruleId)
@@ -353,23 +362,26 @@
     () => props.modelValue,
     async v => {
       if (v) {
-        // Carrega os grupos se necessário
         if (groupStore.groups.length === 0) {
           await groupStore.loadGroups()
+        }
+        if (portalGroupStore.portalGroups.length === 0) {
+          await portalGroupStore.loadPortalGroups({ page_size: 100 })
         }
 
         groupIsLocked.value = false
         selectedGroupId.value = null
+        selectedPortalGroupId.value = null
 
-
-        // Busca grupo-regra existente
         if (props.accessRule) {
           const relations = await groupAccessRulesService.getGroupAccessRules({
             access_rule_id: props.accessRule.id,
           })
-          const existingGroup = relations.results?.[0]?.group
+          const existingRel = relations.results?.[0]
+          const existingGroup = existingRel?.group
           if (existingGroup) {
             selectedGroupId.value = existingGroup.id
+            selectedPortalGroupId.value = existingRel?.portal_group?.id ?? existingRel?.portal_group_id ?? null
             groupIsLocked.value = true
             await loadExistingForGroup(existingGroup.id)
           }
@@ -404,6 +416,32 @@
           Ative os dias desejados e defina o intervalo de acesso. Cada dia
           criará uma faixa horária independente.
         </v-alert>
+
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-select
+              v-model="selectedGroupId"
+              :disabled="groupIsLocked"
+              :items="groupStore.groups"
+              item-title="name"
+              item-value="id"
+              label="Turma"
+              variant="outlined"
+            />
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-select
+              v-model="selectedPortalGroupId"
+              :items="portalGroupOptions"
+              item-title="name"
+              item-value="id"
+              label="Grupo de Portais"
+              variant="outlined"
+              hint="Selecione onde esta liberação será aplicada"
+              persistent-hint
+            />
+          </v-col>
+        </v-row>
 
         <v-row>
           <v-col

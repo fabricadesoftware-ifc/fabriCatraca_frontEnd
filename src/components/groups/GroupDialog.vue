@@ -1,9 +1,9 @@
 <script lang="ts" setup>
   import type { AccessRule, Group as BaseGroup } from '@/types'
-  import { onMounted, ref, watch } from 'vue'
+  import { computed, onMounted, ref, watch } from 'vue'
   import exportUsersService from '@/services/export_users'
   import userGroupsImportService from '@/services/user_groups_import'
-  import { useAccessRuleStore } from '@/stores'
+  import { useAccessRuleStore, usePortalGroupStore } from '@/stores'
   import GroupTemporaryReleasePanel from './GroupTemporaryReleasePanel.vue'
 
   interface Group extends Omit<BaseGroup, 'access_rules'> {
@@ -23,10 +23,22 @@
   }>()
 
   const accessRuleStore = useAccessRuleStore()
+  const portalGroupStore = usePortalGroupStore()
+  const portalGroupOptions = computed(() => {
+    return [
+      { id: null, name: 'Todas as catracas' },
+      ...portalGroupStore.portalGroups.map(pg => ({ id: pg.id, name: pg.name })),
+    ]
+  })
   const tab = ref('dados')
   const name = ref('')
   const loading = ref(false)
-  const groupAccessRules = ref<number[]>([])
+  interface RuleWithPortalGroup {
+    access_rule_id: number
+    portal_group_id: number | null
+  }
+  const groupAccessRules = ref<RuleWithPortalGroup[]>([])
+  const existingAccessRulePortalGroups = ref<Map<number, number | null>>(new Map())
 
   // Estados para importação
   const importFile = ref<File | null>(null)
@@ -37,19 +49,35 @@
   const exportFormat = ref<'csv' | 'xlsx'>('csv')
   const exporting = ref(false)
 
+  function findRuleIndex (ruleId: number): number {
+    return groupAccessRules.value.findIndex(r => r.access_rule_id === ruleId)
+  }
+
+  function getPortalGroupIdForRule (ruleId: number): number | null {
+    const entry = groupAccessRules.value.find(r => r.access_rule_id === ruleId)
+    return entry ? entry.portal_group_id : null
+  }
+
   function toggleAccessRule (ruleId: number, value: boolean): void {
     const currentRules = [...groupAccessRules.value]
     if (value) {
-      if (!currentRules.includes(ruleId)) {
-        currentRules.push(ruleId)
+      if (findRuleIndex(ruleId) === -1) {
+        currentRules.push({ access_rule_id: ruleId, portal_group_id: null })
       }
     } else {
-      const index = currentRules.indexOf(ruleId)
+      const index = findRuleIndex(ruleId)
       if (index !== -1) {
         currentRules.splice(index, 1)
       }
     }
     groupAccessRules.value = currentRules
+  }
+
+  function updateRulePortalGroupId (ruleId: number, portalGroupId: number | null): void {
+    const index = findRuleIndex(ruleId)
+    if (index !== -1) {
+      groupAccessRules.value[index].portal_group_id = portalGroupId
+    }
   }
 
   // Atualiza os campos locais quando o props.group mudar
@@ -58,7 +86,20 @@
     newGroup => {
       if (newGroup) {
         name.value = newGroup.name
-        groupAccessRules.value = newGroup.access_rules?.map(r => typeof r === 'number' ? r : r.id) || []
+        const rules = newGroup.access_rules || []
+        if (rules.length > 0 && typeof rules[0] === 'object') {
+          // Quando vem com info completa de regras (access_rule objects)
+          groupAccessRules.value = (rules as { access_rule_id: number, portal_group_id: number | null }[]).map(r => ({
+            access_rule_id: r.access_rule_id,
+            portal_group_id: r.portal_group_id,
+          }))
+        } else {
+          // Quando vem como array simples de IDs (backward compat)
+          groupAccessRules.value = (rules as number[]).map(id => ({
+            access_rule_id: typeof id === 'number' ? id : (id as any)?.id ?? 0,
+            portal_group_id: null,
+          }))
+        }
       }
     },
     { immediate: true },
@@ -120,7 +161,7 @@
     emit('save', {
       ...props.group,
       name: name.value,
-      access_rules: groupAccessRules.value,
+      access_rules: [...groupAccessRules.value],
     })
     close()
   }
@@ -129,6 +170,9 @@
     loading.value = true
     try {
       await accessRuleStore.loadAccessRules()
+      if (portalGroupStore.portalGroups.length === 0) {
+        await portalGroupStore.loadPortalGroups({ page_size: 100 })
+      }
     } catch (error) {
       console.error('Erro ao carregar regras de acesso:', error)
     } finally {
@@ -196,9 +240,9 @@
                       />
 
                       <template v-else>
-                        <div class="text-subtitle-1 mb-4">
-                          Selecione as regras de acesso para este grupo:
-                        </div>
+                        <v-alert class="mb-4" density="compact" type="info" variant="tonal">
+                          Selecione as regras de acesso para este grupo e, opcionalmente, defina o escopo de catracas.
+                        </v-alert>
 
                         <v-list lines="two">
                           <v-list-item
@@ -214,11 +258,30 @@
                               />
                             </template>
 
+                            <template #default>
+                              <v-row dense align="center">
+                                <v-col cols="12" md="6">
+                                  <v-select
+                                    v-if="getPortalGroupIdForRule(rule.id) !== undefined"
+                                    density="compact"
+                                    hide-details
+                                    :items="portalGroupOptions"
+                                    item-title="name"
+                                    item-value="id"
+                                    label="Grupo de Portais"
+                                    variant="outlined"
+                                    :model-value="getPortalGroupIdForRule(rule.id)"
+                                    @update:model-value="(val) => updateRulePortalGroupId(rule.id, val)"
+                                  />
+                                </v-col>
+                              </v-row>
+                            </template>
+
                             <template #append>
                               <v-switch
                                 color="primary"
                                 hide-details
-                                :model-value="groupAccessRules.includes(rule.id)"
+                                :model-value="getPortalGroupIdForRule(rule.id) !== undefined"
                                 @update:model-value="(value) => toggleAccessRule(rule.id, !!value)"
                               />
                             </template>
