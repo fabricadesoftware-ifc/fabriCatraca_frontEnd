@@ -160,7 +160,7 @@
 </template>
 
 <style scoped>
-.v-data-table >>> tbody tr {
+.v-data-table :deep(tbody tr) {
   cursor: pointer;
 }
 </style>

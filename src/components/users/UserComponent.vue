@@ -340,7 +340,7 @@ function appRoleLabel(value?: string) {
 </template>
 
 <style scoped>
-.v-data-table >>> tbody tr {
+.v-data-table :deep(tbody tr) {
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
 }
