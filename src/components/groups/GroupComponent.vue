@@ -52,7 +52,7 @@
     if (rules.length === 0) return []
     // New format: array of { access_rule_id, portal_group_id }
     if (typeof rules[0] === 'object' && 'access_rule_id' in rules[0]) {
-      return rules as Array<{ access_rule_id: number, portal_group_id: number | null }>
+      return rules as unknown as Array<{ access_rule_id: number, portal_group_id: number | null }>
     }
     // Old format: array of numbers or AccessRule objects
     return rules.map(r => ({
@@ -144,7 +144,7 @@
         ? rulesWithPortalGroup
         : ((fullGroup as any)?.access_rules || []).map((r: any) => typeof r === 'number' ? { access_rule_id: r, portal_group_id: null } : { access_rule_id: r.id, portal_group_id: null })
 
-      selectedGroup.value = Object.assign({}, item, fullGroup || {}, { access_rules })
+      selectedGroup.value = Object.assign({}, item, fullGroup || {}, { access_rules: accessRules })
     } catch {
       selectedGroup.value = item
     } finally {
@@ -255,7 +255,7 @@
 
 <style scoped>
 /* O Vuetify já cuida do hover quando você usa hover="true" */
-.v-data-table >>> tbody tr {
+.v-data-table :deep(tbody tr) {
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
 }

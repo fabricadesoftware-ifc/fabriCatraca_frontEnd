@@ -89,7 +89,7 @@
         const rules = newGroup.access_rules || []
         if (rules.length > 0 && typeof rules[0] === 'object') {
           // Quando vem com info completa de regras (access_rule objects)
-          groupAccessRules.value = (rules as { access_rule_id: number, portal_group_id: number | null }[]).map(r => ({
+          groupAccessRules.value = (rules as unknown as { access_rule_id: number, portal_group_id: number | null }[]).map(r => ({
             access_rule_id: r.access_rule_id,
             portal_group_id: r.portal_group_id,
           }))
@@ -161,7 +161,7 @@
     emit('save', {
       ...props.group,
       name: name.value,
-      access_rules: [...groupAccessRules.value],
+      access_rules: [...groupAccessRules.value] as unknown as (number | AccessRule)[],
     })
     close()
   }

@@ -381,7 +381,7 @@
           const existingGroup = existingRel?.group
           if (existingGroup) {
             selectedGroupId.value = existingGroup.id
-            selectedPortalGroupId.value = existingRel?.portal_group?.id ?? existingRel?.portal_group_id ?? null
+            selectedPortalGroupId.value = existingRel?.portal_group?.id ?? (existingRel?.portal_group_id as number | null) ?? null
             groupIsLocked.value = true
             await loadExistingForGroup(existingGroup.id)
           }
