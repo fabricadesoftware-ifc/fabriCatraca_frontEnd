@@ -592,6 +592,7 @@ export interface TemporaryUserRelease {
   result_message: string;
   created_at: string;
   updated_at: string;
+  portal_group?: { id: number; name: string; description: string; devices?: any[] };
 }
 
 export interface TemporaryUserReleaseCreatePayload {
@@ -599,6 +600,7 @@ export interface TemporaryUserReleaseCreatePayload {
   duration_minutes: number;
   notes?: string;
   valid_from?: string;
+  portal_group_id?: number | null;
 }
 
 export interface TemporaryGroupRelease {
@@ -617,6 +619,7 @@ export interface TemporaryGroupRelease {
   result_message: string;
   created_at: string;
   updated_at: string;
+  portal_group?: { id: number; name: string; description: string; devices?: any[] };
 }
 
 export interface TemporaryGroupReleaseCreatePayload {
@@ -624,6 +627,7 @@ export interface TemporaryGroupReleaseCreatePayload {
   duration_minutes: number;
   notes?: string;
   valid_from?: string;
+  portal_group_id?: number | null;
 }
 
 export interface ReleaseAuditActor {

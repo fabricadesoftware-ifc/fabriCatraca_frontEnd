@@ -2,7 +2,7 @@
 import type { TemporaryUserRelease } from "@/types";
 import { computed, onMounted, ref, watch } from "vue";
 import { toast } from "vue3-toastify";
-import { TemporaryUserReleasesService } from "@/services";
+import { TemporaryUserReleasesService, PortalGroupsService } from "@/services";
 
 const props = defineProps<{ userId: number }>();
 
@@ -12,6 +12,8 @@ const saving = ref(false);
 const cancellingId = ref<number | null>(null);
 const durationMinutes = ref(5);
 const notes = ref("");
+const selectedPortalGroupId = ref<number | null>(null);
+const portalGroups = ref<any[]>([]);
 
 function toDateTimeLocalValue(date = new Date()) {
   const timezoneOffset = date.getTimezoneOffset() * 60_000;
@@ -88,6 +90,15 @@ async function loadReleases() {
   }
 }
 
+async function loadPortalGroups() {
+  try {
+    const response = await PortalGroupsService.getPortalGroups({ page_size: 100, is_active: true });
+    portalGroups.value = response.results || [];
+  } catch (error) {
+    console.error("Erro ao carregar grupos de portais:", error);
+  }
+}
+
 const notesRules = [(v: any) => (!!v && v.trim() !== "") || "A observação é obrigatória"];
 
 async function createRelease() {
@@ -113,9 +124,11 @@ async function createRelease() {
       duration_minutes: durationMinutes.value,
       notes: notes.value,
       valid_from: new Date(validFrom.value).toISOString(),
+      portal_group_id: selectedPortalGroupId.value,
     });
     notes.value = "";
     validFrom.value = toDateTimeLocalValue();
+    selectedPortalGroupId.value = null;
     toast.success("Liberação temporária criada com sucesso", { autoClose: 3000 });
     await loadReleases();
   } catch (error) {
@@ -142,11 +155,15 @@ watch(
   () => props.userId,
   () => {
     validFrom.value = toDateTimeLocalValue();
+    selectedPortalGroupId.value = null;
     loadReleases();
   },
 );
 
-onMounted(loadReleases);
+onMounted(() => {
+  loadReleases();
+  loadPortalGroups();
+});
 </script>
 
 <template>
@@ -183,6 +200,26 @@ onMounted(loadReleases);
                   type="datetime-local"
                   variant="outlined"
                 />
+                <v-select
+                  v-model="selectedPortalGroupId"
+                  :items="portalGroups"
+                  item-title="name"
+                  item-value="id"
+                  label="Grupo de Portais"
+                  clearable
+                  variant="outlined"
+                  hint="Selecione o grupo de catracas onde a liberação será aplicada"
+                  persistent-hint
+                >
+                  <template v-slot:prepend-item>
+                    <v-list-item
+                      density="compact"
+                      title="Todas as catracas"
+                      @click="selectedPortalGroupId = null"
+                    />
+                    <v-divider class="my-2" />
+                  </template>
+                </v-select>
               </v-col>
 
               <v-col cols="12" md="8">

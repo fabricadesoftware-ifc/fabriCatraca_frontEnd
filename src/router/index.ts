@@ -28,6 +28,7 @@ const allowedPathsByRole: Record<string, RegExp[]> = {
     /^\/sisae$/,
     /^\/liberar-usuario$/,
     /^\/liberar-turma$/,
+    /^\/portal-groups$/,
   ],
   guarita: [/^\/$/, /^\/guarita$/, /^\/visitantes$/],
   sisae: [/^\/$/, /^\/liberar-usuario$/, /^\/liberar-turma$/, /^\/logs$/],

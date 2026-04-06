@@ -2,7 +2,7 @@
 import type { TemporaryGroupRelease } from "@/types";
 import { computed, onMounted, ref, watch } from "vue";
 import { toast } from "vue3-toastify";
-import { TemporaryGroupReleasesService } from "@/services";
+import { TemporaryGroupReleasesService, PortalGroupsService } from "@/services";
 
 const props = defineProps<{ groupId: number }>();
 
@@ -12,6 +12,8 @@ const saving = ref(false);
 const cancellingId = ref<number | null>(null);
 const durationMinutes = ref(5);
 const notes = ref("");
+const selectedPortalGroupId = ref<number | null>(null);
+const portalGroups = ref<any[]>([]);
 
 function toDateTimeLocalValue(date = new Date()) {
   const timezoneOffset = date.getTimezoneOffset() * 60_000;
@@ -84,6 +86,15 @@ async function loadReleases() {
   }
 }
 
+async function loadPortalGroups() {
+  try {
+    const response = await PortalGroupsService.getPortalGroups({ page_size: 100, is_active: true });
+    portalGroups.value = response.results || [];
+  } catch (error) {
+    console.error("Erro ao carregar grupos de portais:", error);
+  }
+}
+
 const notesRules = [(v: any) => (!!v && v.trim() !== "") || "A observação é obrigatória"];
 
 async function createRelease() {
@@ -109,9 +120,11 @@ async function createRelease() {
       duration_minutes: durationMinutes.value,
       notes: notes.value,
       valid_from: new Date(validFrom.value).toISOString(),
+      portal_group_id: selectedPortalGroupId.value,
     });
     notes.value = "";
     validFrom.value = toDateTimeLocalValue();
+    selectedPortalGroupId.value = null;
     toast.success("Liberação temporária criada com sucesso", { autoClose: 3000 });
     await loadReleases();
   } catch (error) {
@@ -138,11 +151,15 @@ watch(
   () => props.groupId,
   () => {
     validFrom.value = toDateTimeLocalValue();
+    selectedPortalGroupId.value = null;
     loadReleases();
   },
 );
 
-onMounted(loadReleases);
+onMounted(() => {
+  loadReleases();
+  loadPortalGroups();
+});
 </script>
 
 <template>

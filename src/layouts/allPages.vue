@@ -42,6 +42,12 @@ const rawItems = [
     roles: ["admin"],
   },
   {
+    title: "Grupos de Portais",
+    icon: "mdi-map-marker-radius-outline",
+    to: "/portal-groups",
+    roles: ["admin"],
+  },
+  {
     title: "Dispositivos",
     icon: "mdi-turnstile",
     to: "/devices",

@@ -10,6 +10,7 @@ export { useAppStore } from "./app";
 export { useAreaStore } from "./area";
 export { useAuthStore } from "./auth";
 export { useBioStore } from "./bio";
+export { usePortalGroupStore } from "./portalGroup";
 export { useConfigStore } from "./config";
 export { useControlIdConfigStore } from "./controlIdConfig";
 export { useDeviceStore } from "./device";
