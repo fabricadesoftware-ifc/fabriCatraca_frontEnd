@@ -53,7 +53,7 @@ onMounted(async () => {
     :minimal-dialog="true"
     :new-user-defaults="{
       user_type_id: 1,
-      device_scope: 'selected',
+      device_scope: 'all_active',
       selected_device_ids: [],
       selected_devices: [],
       app_role: '',
