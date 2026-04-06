@@ -1,4 +1,3 @@
-import type { Archive } from "@/types";
 import { createApi } from "@/plugins/api";
 
 const uploaderApi = createApi("/uploader");
