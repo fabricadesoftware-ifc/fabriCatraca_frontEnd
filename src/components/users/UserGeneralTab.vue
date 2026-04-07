@@ -139,6 +139,7 @@ const deviceScopeOptions = [
           type="password"
           @update:model-value="emit('update:password', String($event ?? ''))"
         />
+
         <v-text-field
           v-if="!minimalMode"
           :model-value="registration"
@@ -157,6 +158,17 @@ const deviceScopeOptions = [
           @update:model-value="emit('update:deviceScope', $event)"
         />
 
+        <!-- TODO: data inicio e data fim-->
+
+        <v-select
+          :model-value="deviceScope"
+          :items="deviceScopeOptions"
+          item-title="title"
+          item-value="value"
+          label="Escopo de catracas"
+          :disabled="true"
+          type="datetime"
+        />
         <v-select
           v-if="deviceScope === 'selected'"
           :model-value="selectedDeviceIds"

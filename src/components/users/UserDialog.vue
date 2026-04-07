@@ -280,6 +280,7 @@ async function salvarUsuario() {
         cpf: cpf.value || undefined,
         registration: registration.value || undefined,
         picture_id: pictureId || undefined,
+        card_value: capturedCardValue.value,
         user_type_id: 1,
       });
 
