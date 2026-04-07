@@ -189,15 +189,16 @@ function formatDateTime(dateStr: string | null | undefined): string {
               @update:model-value="emit('update:endDate', $event)"
             />
           </v-col>
-        </v-row>
-
-        <v-col cols="12" v-if="minimalMode">
           <v-text-field
             :model-value="formatDateTime(props.lastPassageAt)"
             label="Ultima Passagem na Catraca"
             readonly
+            disabled
             hint="Atualizado automaticamente quando o visitante passa na catraca"
           />
+        </v-row>
+
+        <v-col cols="12" v-if="minimalMode">
         </v-col>
 
         <v-select

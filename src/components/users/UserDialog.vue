@@ -4,7 +4,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { toast } from "vue3-toastify";
 import type { IfcGroupSchedule } from "@/services/ifc_schedules";
 import ifcSchedulesService from "@/services/ifc_schedules";
-import { UploaderService } from "@/services";
+import { UploaderService, CardsService } from "@/services";
 import CardEnrollService from "@/services/card_enroll";
 import { useAuthStore, useDeviceStore, useGroupStore } from "@/stores";
 import UserAccessLogsPanel from "./UserAccessLogsPanel.vue";
@@ -68,6 +68,8 @@ const pictureRemoved = ref(false);
 const cardEnrollDevice = ref<number | null>(null);
 const capturedCardValue = ref<number | null>(null);
 const enrollingCard = ref(false);
+const existingCards = ref<Array<{ id: number; value: number }>>([]);
+const deletingCardId = ref<number | null>(null);
 const startDate = ref<string | null>(null);
 const endDate = ref<string | null>(null);
 const lastPassageAt = ref<string | null>(null);
@@ -191,6 +193,8 @@ watch(
     cardEnrollDevice.value = null;
     capturedCardValue.value = null;
     enrollingCard.value = false;
+    existingCards.value = [];
+    deletingCardId.value = null;
     startDate.value = newUser.start_date ?? null;
     endDate.value = newUser.end_date ?? null;
     lastPassageAt.value = newUser.last_passage_at ?? null;
@@ -238,6 +242,48 @@ function onRemovePicture() {
   pictureFile.value = null;
   pictureRemoved.value = true;
 }
+
+async function loadExistingCards() {
+  if (!props.user || !props.user.id) {
+    existingCards.value = [];
+    return;
+  }
+  try {
+    const response = await CardsService.getCards({ user_id: props.user.id });
+    existingCards.value = response.results.map((c) => ({ id: c.id, value: c.value }));
+  } catch {
+    existingCards.value = [];
+  }
+}
+
+async function deleteExistingCard(id: number) {
+  deletingCardId.value = id;
+  try {
+    await CardsService.deleteCard(id);
+    toast.success("Cartao removido");
+    await loadExistingCards();
+  } catch {
+    toast.error("Erro ao remover cartao");
+  } finally {
+    deletingCardId.value = null;
+  }
+}
+
+watch(
+  () => props.modelValue,
+  async (isOpen) => {
+    if (!isOpen || !isMinimalMode.value) {
+      return;
+    }
+
+    tab.value = "dados";
+    isVisitor.value = true;
+    panelAccessOnly.value = false;
+    deviceAdmin.value = false;
+    appRole.value = "";
+    await loadExistingCards();
+  },
+);
 
 async function startCardEnroll() {
   if (!cardEnrollDevice.value) {
@@ -450,33 +496,67 @@ onMounted(async () => {
             <v-card v-if="isMinimalMode" class="mt-4" variant="outlined">
               <v-card-title class="text-subtitle-1 d-flex align-center">
                 <v-icon class="mr-2" color="primary" icon="mdi-credit-card-wireless" />
-                Cadastrar Cartao
+                Cartoes
               </v-card-title>
               <v-card-text>
-                <v-row>
-                  <v-col cols="12" md="6">
-                    <v-select
-                      v-model="cardEnrollDevice"
-                      item-title="name"
-                      item-value="id"
-                      :items="deviceStore.devices.filter((d) => d.is_active)"
-                      label="Catraca para captura"
-                      density="comfortable"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="6" class="d-flex align-center">
+                <!-- Existing cards -->
+                <div v-if="existingCards.length > 0">
+                  <v-table density="compact" class="mb-4">
+                    <thead>
+                      <tr>
+                        <th class="text-left">Valor</th>
+                        <th class="text-end">Acoes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="card in existingCards" :key="card.id">
+                        <td>{{ card.value }}</td>
+                        <td class="text-end">
+                          <v-btn
+                            color="error"
+                            icon="mdi-delete"
+                            size="x-small"
+                            variant="text"
+                            :loading="deletingCardId === card.id"
+                            @click="deleteExistingCard(card.id)"
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </v-table>
+                </div>
+
+                <!-- Capture new card -->
+                <v-select
+                  v-model="cardEnrollDevice"
+                  item-title="name"
+                  item-value="id"
+                  :items="deviceStore.devices.filter((d) => d.is_active)"
+                  label="Catraca para captura"
+                  density="comfortable"
+                >
+                  <template #append-inner>
                     <v-btn
                       color="primary"
                       :loading="enrollingCard"
                       :disabled="!cardEnrollDevice"
-                      prepend-icon="mdi-credit-card-plus"
-                      block
-                      @click="startCardEnroll"
+                      icon="mdi-credit-card-plus"
+                      size="small"
+                      variant="text"
+                      @click.stop="startCardEnroll"
+                    />
+                    <v-btn
+                      color="primary"
+                      :loading="false"
+                      :disabled="enrollingCard || !cardEnrollDevice"
+                      variant="text"
+                      size="small"
+                      @click.stop="startCardEnroll"
                     >
-                      Capturar Cartao
+                      Capturar
                     </v-btn>
-                  </v-col>
-                </v-row>
+                  </template>
+                </v-select>
                 <v-alert
                   v-if="capturedCardValue"
                   class="mt-2"
