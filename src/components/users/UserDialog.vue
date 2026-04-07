@@ -571,7 +571,7 @@ onMounted(async () => {
             </v-card>
           </v-window-item>
 
-          <v-window-item value="departamentos" v-if="appRole == 'admin' && !isMinimalMode">
+          <v-window-item value="departamentos" v-if="authStore.role == 'admin' && !isMinimalMode">
             <UserGroupsTab
               :groups="groupStore.groups"
               :loading="loading"
@@ -580,7 +580,7 @@ onMounted(async () => {
             />
           </v-window-item>
 
-          <v-window-item value="cartoes" v-if="appRole == 'admin' && !isMinimalMode">
+          <v-window-item value="cartoes" v-if="authStore.role == 'admin' && !isMinimalMode">
             <UserCardsPanel :user-id="props.user.id" />
           </v-window-item>
 
@@ -598,11 +598,11 @@ onMounted(async () => {
             <UserTemporaryReleasePanel :user-id="props.user.id" />
           </v-window-item>
 
-          <v-window-item value="pin" v-if="appRole == 'admin' && !isMinimalMode">
+          <v-window-item value="pin" v-if="authStore.role == 'admin' && !isMinimalMode">
             <UserPinTab :pin="pin" />
           </v-window-item>
 
-          <v-window-item value="biometria" v-if="!isMinimalMode" :disabled="appRole == 'admin'">
+          <v-window-item value="biometria"  v-if="authStore.role == 'admin' && !isMinimalMode">
             <UserBioPanel :user-id="props.user.id" />
           </v-window-item>
 
