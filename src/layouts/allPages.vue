@@ -12,6 +12,12 @@ const rawItems = [
     roles: ["admin", "guarita", "sisae"],
   },
   {
+    title: "Cadastrar Usuario",
+    icon: "mdi-account-plus",
+    to: " ",
+    roles: ["admin", "sisae"],
+  },
+  {
     title: "Usuario",
     icon: "mdi-account",
     to: "/users",
@@ -71,18 +77,19 @@ const rawItems = [
     to: "/visitantes",
     roles: ["admin", "guarita"],
   },
+    {
+    title: "Liberar Turma",
+    icon: "mdi-account-group-outline",
+    to: "/liberar-turma",
+    roles: ["admin", "sisae"],
+  },
   {
     title: "Liberar Usuário",
     icon: "mdi-account-clock",
     to: "/liberar-usuario",
     roles: ["admin", "sisae"],
   },
-  {
-    title: "Liberar Turma",
-    icon: "mdi-account-group-outline",
-    to: "/liberar-turma",
-    roles: ["admin", "sisae"],
-  },
+
   {
     title: "Reconfigurar Catracas",
     icon: "mdi-cog-sync",
@@ -112,6 +119,13 @@ const rawItems = [
       },
     ],
   },
+  {
+    title: "Configurações",
+    icon: "mdi-cog",
+    to: "/settings",
+    roles: ["admin"],
+  },
+
 ];
 
 const items = computed(() =>
