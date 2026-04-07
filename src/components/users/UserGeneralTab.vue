@@ -27,6 +27,9 @@ const props = defineProps<{
   roleOptions: { title: string; value: string }[];
   minimalMode?: boolean;
   pictureUrl?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  lastPassageAt?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -44,6 +47,8 @@ const emit = defineEmits<{
   (e: "update:selectedDeviceIds", value: number[]): void;
   (e: "select-picture", value: File | null): void;
   (e: "remove-picture"): void;
+  (e: "update:startDate", value: string | null): void;
+  (e: "update:endDate", value: string | null): void;
 }>();
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -69,6 +74,11 @@ const deviceScopeOptions = [
   { title: "Somente catracas selecionadas", value: "selected" },
   { title: "Nao sincronizar com catracas", value: "none" },
 ];
+
+function formatDateTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return "Nao registrada";
+  return new Date(dateStr).toLocaleString("pt-BR");
+}
 </script>
 
 <template>
@@ -158,17 +168,38 @@ const deviceScopeOptions = [
           @update:model-value="emit('update:deviceScope', $event)"
         />
 
-        <!-- TODO: data inicio e data fim-->
+        <v-row dense class="pt-2">
+          <v-col cols="12" md="6">
+            <v-text-field
+              :model-value="props.startDate"
+              label="Data de inicio"
+              type="date"
+              clearable
+              :disabled="isSisaeViewer"
+              @update:model-value="emit('update:startDate', $event)"
+            />
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+              :model-value="props.endDate"
+              label="Data de fim"
+              type="date"
+              clearable
+              :disabled="isSisaeViewer"
+              @update:model-value="emit('update:endDate', $event)"
+            />
+          </v-col>
+        </v-row>
 
-        <v-select
-          :model-value="deviceScope"
-          :items="deviceScopeOptions"
-          item-title="title"
-          item-value="value"
-          label="Escopo de catracas"
-          :disabled="true"
-          type="datetime"
-        />
+        <v-col cols="12" v-if="minimalMode">
+          <v-text-field
+            :model-value="formatDateTime(props.lastPassageAt)"
+            label="Ultima Passagem na Catraca"
+            readonly
+            hint="Atualizado automaticamente quando o visitante passa na catraca"
+          />
+        </v-col>
+
         <v-select
           v-if="deviceScope === 'selected'"
           :model-value="selectedDeviceIds"

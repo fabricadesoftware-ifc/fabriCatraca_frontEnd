@@ -68,6 +68,9 @@ const pictureRemoved = ref(false);
 const cardEnrollDevice = ref<number | null>(null);
 const capturedCardValue = ref<number | null>(null);
 const enrollingCard = ref(false);
+const startDate = ref<string | null>(null);
+const endDate = ref<string | null>(null);
+const lastPassageAt = ref<string | null>(null);
 
 const isSisaeViewer = computed(() => authStore.role === "sisae");
 const isMinimalMode = computed(() => !!props.minimalMode);
@@ -188,6 +191,9 @@ watch(
     cardEnrollDevice.value = null;
     capturedCardValue.value = null;
     enrollingCard.value = false;
+    startDate.value = newUser.start_date ?? null;
+    endDate.value = newUser.end_date ?? null;
+    lastPassageAt.value = newUser.last_passage_at ?? null;
   },
   { immediate: true },
 );
@@ -329,6 +335,8 @@ async function salvarUsuario() {
     selected_device_ids: panelAccessOnly.value ? [] : selectedDeviceIds.value,
     picture_id: savedUser.picture_id,
     remove_picture: pictureRemoved.value,
+    start_date: startDate.value,
+    end_date: endDate.value,
   };
 
   if (canShowPasswordField.value && password.value.trim()) {
@@ -419,6 +427,9 @@ onMounted(async () => {
               :registration="registration"
               :role-options="roleOptions"
               :selected-device-ids="selectedDeviceIds"
+              :start-date="startDate"
+              :end-date="endDate"
+              :last-passage-at="lastPassageAt"
               @remove-picture="onRemovePicture"
               @select-picture="onSelectPicture"
               @update:app-role="appRole = $event"

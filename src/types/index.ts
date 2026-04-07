@@ -267,6 +267,9 @@ export interface User {
   panel_access_only?: boolean;
   password?: string;
   user_groups?: Group[];
+  start_date?: string | null;
+  end_date?: string | null;
+  last_passage_at?: string | null;
 }
 
 export interface UserAccessRule {

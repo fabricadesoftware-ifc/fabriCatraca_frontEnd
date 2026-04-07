@@ -100,6 +100,8 @@ async function salvarUsuario(user: User) {
         device_admin: user.device_admin,
         picture_id: user.picture_id,
         remove_picture: user.remove_picture,
+        start_date: user.start_date,
+        end_date: user.end_date,
       });
 
       const userGroupIds = (user.user_groups || []).map((g) => (typeof g === "number" ? g : g.id));
@@ -141,6 +143,8 @@ async function salvarUsuario(user: User) {
             device_admin: user.device_admin,
             picture_id: user.picture_id,
             remove_picture: user.remove_picture,
+            start_date: user.start_date,
+            end_date: user.end_date,
           })
         : currentUser;
 
@@ -217,6 +221,9 @@ function novoUsuario() {
     devices: [],
     email: "",
     pin: "",
+    start_date: null,
+    end_date: null,
+    last_passage_at: null,
     ...props.newUserDefaults,
   };
   dialog.value = true;
