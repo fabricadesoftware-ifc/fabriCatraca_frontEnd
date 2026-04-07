@@ -82,6 +82,7 @@ watch(search, (newSearch) => {
 
 async function salvarUsuario(user: User) {
   try {
+    const userGroupIds = (user.user_groups || []).map((g) => (typeof g === "number" ? g : g.id));
     let savedUser: User;
 
     if (user.id === 0) {
@@ -104,7 +105,6 @@ async function salvarUsuario(user: User) {
         end_date: user.end_date,
       });
 
-      const userGroupIds = (user.user_groups || []).map((g) => (typeof g === "number" ? g : g.id));
       for (const groupId of userGroupIds) {
         await userStore.addUserToGroup(savedUser.id, groupId);
       }
@@ -115,45 +115,34 @@ async function salvarUsuario(user: User) {
         throw new Error("Usuario nao encontrado");
       }
 
-      const basicDataChanged =
-        currentUser.name !== user.name ||
-        currentUser.email !== user.email ||
-        currentUser.app_role !== user.app_role ||
-        !!currentUser.panel_access_only !== !!user.panel_access_only ||
-        currentUser.registration !== user.registration ||
-        currentUser.user_type_id !== user.user_type_id ||
-        !!currentUser.device_admin !== !!user.device_admin ||
-        !!user.password ||
-        !!user.picture_id ||
-        !!user.remove_picture;
+      savedUser = await userStore.updateUser(user.id, {
+        name: user.name,
+        email: user.email,
+        cpf: user.cpf,
+        phone: user.phone,
+        password: user.password,
+        app_role: user.app_role,
+        panel_access_only: user.panel_access_only,
+        device_scope: user.panel_access_only ? "none" : user.device_scope,
+        selected_device_ids: user.panel_access_only ? [] : user.selected_device_ids,
+        registration: user.registration,
+        user_type_id: user.user_type_id,
+        device_admin: user.device_admin,
+        picture_id: user.picture_id,
+        remove_picture: user.remove_picture,
+        start_date: user.start_date,
+        end_date: user.end_date,
+      });
 
-      savedUser = basicDataChanged
-        ? await userStore.updateUser(user.id, {
-            name: user.name,
-            email: user.email,
-            cpf: user.cpf,
-            phone: user.phone,
-            password: user.password,
-            app_role: user.app_role,
-            panel_access_only: user.panel_access_only,
-            device_scope: user.panel_access_only ? "none" : user.device_scope,
-            selected_device_ids: user.panel_access_only ? [] : user.selected_device_ids,
-            registration: user.registration,
-            user_type_id: user.user_type_id,
-            device_admin: user.device_admin,
-            picture_id: user.picture_id,
-            remove_picture: user.remove_picture,
-            start_date: user.start_date,
-            end_date: user.end_date,
-          })
-        : currentUser;
-
-      const userGroupIds = (user.user_groups || []).map((g) => (typeof g === "number" ? g : g.id));
       const currentGroups =
         currentUser.user_groups?.map((g) => (typeof g === "number" ? g : g.id)) || [];
 
-      const groupsToAdd = userGroupIds.filter((groupId: number) => !currentGroups.includes(groupId));
-      const groupsToRemove = currentGroups.filter((groupId: number) => !userGroupIds.includes(groupId));
+      const groupsToAdd = userGroupIds.filter(
+        (groupId: number) => !currentGroups.includes(groupId),
+      );
+      const groupsToRemove = currentGroups.filter(
+        (groupId: number) => !userGroupIds.includes(groupId),
+      );
 
       for (const groupId of groupsToAdd) {
         await userStore.addUserToGroup(user.id, groupId);
@@ -252,6 +241,7 @@ function appRoleLabel(value?: string) {
   if (value === "admin") return "Administrador";
   if (value === "guarita") return "Guarita";
   if (value === "sisae") return "SISAE";
+
   return "Sem perfil";
 }
 </script>
@@ -317,23 +307,27 @@ function appRoleLabel(value?: string) {
     @update:selected="onSelect"
   >
     <template #item.app_role="{ item }">
-      {{ appRoleLabel(item.effective_app_role || item.app_role) }}
+      <template v-if="item">{{ appRoleLabel(item.effective_app_role || item.app_role) }}</template>
     </template>
 
     <template #item.user_groups="{ item }">
-      {{
-        item.user_groups?.length
-          ? typeof item.user_groups[0] === "object"
-            ? item.user_groups[0].name
-            : "Grupo " + item.user_groups[0]
-          : "Nao ha grupo"
-      }}
+      <template v-if="item">
+        {{
+          item.user_groups?.length
+            ? typeof item.user_groups[0] === "object"
+              ? item.user_groups[0].name
+              : "Grupo " + item.user_groups[0]
+            : "Nao ha grupo"
+        }}
+      </template>
     </template>
 
     <template #item.device_admin="{ item }">
-      <v-chip :color="item.device_admin ? 'primary' : 'grey'" size="small" variant="tonal">
-        {{ item.device_admin ? "Sim" : "Nao" }}
-      </v-chip>
+      <template v-if="item">
+        <v-chip :color="item.device_admin ? 'primary' : 'grey'" size="small" variant="tonal">
+          {{ item.device_admin ? "Sim" : "Nao" }}
+        </v-chip>
+      </template>
     </template>
   </v-data-table-server>
 

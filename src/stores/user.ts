@@ -1,6 +1,5 @@
 import type { QueryParams, User } from '@/types'
 import { defineStore } from 'pinia'
-import router from '@/router'
 import { UsersService } from '@/services'
 import userGroupsService from '@/services/user_groups'
 
@@ -38,14 +37,12 @@ export const useUserStore = defineStore('user', {
       this.saving = true
       try {
         const response = await UsersService.createUser(data)
-        this.users.push(response.data)
         return response.data
       } catch (error) {
         console.error(error)
         throw error
       } finally {
         this.saving = false
-        router.go(0)
       }
     },
 
@@ -53,17 +50,12 @@ export const useUserStore = defineStore('user', {
       this.saving = true
       try {
         const response = await UsersService.updateUser(id, data)
-        const index = this.users.findIndex(u => u.id === id)
-        if (index !== -1) {
-          this.users[index] = response.data
-        }
         return response.data
       } catch (error) {
         console.error(error)
         throw error
       } finally {
         this.saving = false
-        router.go(0)
       }
     },
 

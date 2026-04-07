@@ -14,7 +14,7 @@ const rawItems = [
   {
     title: "Cadastrar Usuario",
     icon: "mdi-account-plus",
-    to: " ",
+    to: "/users",
     roles: ["admin", "sisae"],
   },
   {
@@ -119,12 +119,7 @@ const rawItems = [
       },
     ],
   },
-  {
-    title: "Configurações",
-    icon: "mdi-cog",
-    to: "/settings",
-    roles: ["admin"],
-  },
+
 
 ];
 
