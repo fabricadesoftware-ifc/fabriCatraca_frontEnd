@@ -265,12 +265,16 @@ onMounted(async () => {
           <v-tab value="dados" v-if="!isReleaseOnlyMode">Dados Gerais</v-tab>
           <v-tab
             value="departamentos"
-            v-if="props.user.name && authStore.role == 'admin' && !isMinimalMode && !isReleaseOnlyMode"
+            v-if="
+              props.user.name && authStore.role == 'admin' && !isMinimalMode && !isReleaseOnlyMode
+            "
             >Grupos</v-tab
           >
           <v-tab
             value="cartoes"
-            v-if="props.user.name && authStore.role == 'admin' && !isMinimalMode && !isReleaseOnlyMode"
+            v-if="
+              props.user.name && authStore.role == 'admin' && !isMinimalMode && !isReleaseOnlyMode
+            "
             >Cartoes</v-tab
           >
           <v-tab
@@ -281,10 +285,16 @@ onMounted(async () => {
           <v-tab value="liberacao" v-if="props.user.id && !isMinimalMode && !isRegisterOnlyMode"
             >Liberacao temporaria</v-tab
           >
-          <v-tab value="pin" v-if="props.user.pin && authStore.role == 'admin' && !isMinimalMode && !isReleaseOnlyMode"
+          <v-tab
+            value="pin"
+            v-if="
+              props.user.pin && authStore.role == 'admin' && !isMinimalMode && !isReleaseOnlyMode
+            "
             >PIN</v-tab
           >
-          <v-tab value="biometria" v-if="props.user.name && canManageBiometry && !isReleaseOnlyMode">Biometria</v-tab>
+          <v-tab value="biometria" v-if="props.user.name && canManageBiometry && !isReleaseOnlyMode"
+            >Biometria</v-tab
+          >
           <v-tab
             value="acessos"
             v-if="props.user.name && !isMinimalMode && !isReleaseOnlyMode && !isRegisterOnlyMode"

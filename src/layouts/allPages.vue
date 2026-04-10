@@ -77,7 +77,7 @@ const rawItems = [
     to: "/visitantes",
     roles: ["admin", "guarita"],
   },
-    {
+  {
     title: "Liberar Turma",
     icon: "mdi-account-group-outline",
     to: "/liberar-turma",
@@ -119,8 +119,6 @@ const rawItems = [
       },
     ],
   },
-
-
 ];
 
 const items = computed(() =>
@@ -316,8 +314,8 @@ onBeforeUnmount(() => {
             </v-menu>
 
             <div class="ml-2">
-              <div class="text-subtitle-2 font-weight-medium cursor-pointer" ></div>
-              <v-speed-dial location="bottom right" transition="fade-transition" >
+              <div class="text-subtitle-2 font-weight-medium cursor-pointer"></div>
+              <v-speed-dial location="bottom right" transition="fade-transition">
                 <template v-slot:activator="{ props: activatorProps }">
                   <v-fab v-bind="activatorProps" size="large" variant="tonal"
                     ><v-icon>mdi-account</v-icon> {{ authStore.user?.name || "Usuário" }}

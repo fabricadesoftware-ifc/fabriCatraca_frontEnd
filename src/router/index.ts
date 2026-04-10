@@ -86,7 +86,7 @@ router.beforeEach(async (to, from, next) => {
 
   if (accessToken) {
     const allowedPatterns = allowedPathsByRole[authStore.role] || [];
-    const isAllowed = allowedPatterns.some(pattern => pattern.test(to.path));
+    const isAllowed = allowedPatterns.some((pattern) => pattern.test(to.path));
     if (!isAllowed) {
       if (defaultRoute !== to.path) {
         return next(defaultRoute);
