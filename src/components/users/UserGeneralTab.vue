@@ -1,26 +1,13 @@
 <script setup lang="ts">
 import type { Device, User as BaseUser } from "@/types";
+import type { UserFieldFlags, UserFormState } from "@/composables/useUserFormState";
 import { ref } from "vue";
 
 const props = defineProps<{
-  name: string;
-  email: string;
-  cpf?: string;
-  phone?: string;
-  password: string;
-  appRole: BaseUser["app_role"];
-  panelAccessOnly: boolean;
-  registration: string;
-  isVisitor: boolean;
-  deviceAdmin: boolean;
-  deviceScope: BaseUser["device_scope"];
-  selectedDeviceIds: number[];
+  form: UserFormState;
+  fieldFlags: UserFieldFlags;
+  canManagePhoto: boolean;
   deviceOptions: Device[];
-  hasEmailField: boolean;
-  hasAppRoleField: boolean;
-  hasPanelAccessOnlyField: boolean;
-  hasUserTypeField: boolean;
-  hasDeviceAdminField: boolean;
   canShowPasswordField: boolean;
   isSisaeViewer: boolean;
   groups: Array<string>;
@@ -33,22 +20,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:name", value: string): void;
-  (e: "update:email", value: string): void;
-  (e: "update:cpf", value: string): void;
-  (e: "update:phone", value: string): void;
-  (e: "update:password", value: string): void;
-  (e: "update:appRole", value: BaseUser["app_role"]): void;
-  (e: "update:panelAccessOnly", value: boolean): void;
-  (e: "update:registration", value: string): void;
-  (e: "update:isVisitor", value: boolean): void;
-  (e: "update:deviceAdmin", value: boolean): void;
-  (e: "update:deviceScope", value: BaseUser["device_scope"]): void;
-  (e: "update:selectedDeviceIds", value: number[]): void;
+  (e: "update:form", value: Partial<UserFormState>): void;
   (e: "select-picture", value: File | null): void;
   (e: "remove-picture"): void;
-  (e: "update:startDate", value: string | null): void;
-  (e: "update:endDate", value: string | null): void;
 }>();
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -93,104 +67,114 @@ function formatDateTime(dateStr: string | null | undefined): string {
           disabled
         />
         <v-text-field
-          :model-value="name"
+          :model-value="form.name"
           label="Nome"
           required
           :rules="[(v) => !!v || 'Nome e obrigatorio']"
           :disabled="isSisaeViewer"
-          @update:model-value="emit('update:name', String($event ?? ''))"
+          @update:model-value="emit('update:form', { name: String($event ?? '') })"
         />
         <v-text-field
-          v-if="hasEmailField"
-          :model-value="email"
+          v-if="fieldFlags.hasEmailField"
+          :model-value="form.email"
           :label="minimalMode ? 'E-mail' : 'E-mail para login'"
           :disabled="isSisaeViewer"
-          @update:model-value="emit('update:email', String($event ?? ''))"
+          @update:model-value="emit('update:form', { email: String($event ?? '') })"
         />
         <v-text-field
           v-if="minimalMode"
-          :model-value="cpf"
+          :model-value="form.cpf"
           label="CPF"
           :disabled="isSisaeViewer"
-          @update:model-value="emit('update:cpf', String($event ?? ''))"
+          @update:model-value="emit('update:form', { cpf: String($event ?? '') })"
         />
         <v-text-field
           v-if="minimalMode"
-          :model-value="phone"
+          :model-value="form.phone"
           label="Telefone"
           required
           :rules="[(v) => !!v || 'Telefone e obrigatorio para visitantes']"
           :disabled="isSisaeViewer"
-          @update:model-value="emit('update:phone', String($event ?? ''))"
+          @update:model-value="emit('update:form', { phone: String($event ?? '') })"
         />
         <v-select
-          v-if="hasAppRoleField && !minimalMode"
-          :model-value="appRole"
+          v-if="fieldFlags.hasAppRoleField && !minimalMode"
+          :model-value="form.appRole"
           :items="roleOptions"
           item-title="title"
           item-value="value"
           label="Perfil do painel"
           :disabled="isSisaeViewer"
-          @update:model-value="emit('update:appRole', $event)"
+          @update:model-value="
+            emit('update:form', { appRole: ($event as BaseUser['app_role']) ?? '' })
+          "
         />
         <v-switch
-          v-if="hasPanelAccessOnlyField && !minimalMode"
-          :model-value="panelAccessOnly"
+          v-if="fieldFlags.hasPanelAccessOnlyField && !minimalMode"
+          :model-value="form.panelAccessOnly"
           color="info"
           label="Conta somente do painel"
           :disabled="isSisaeViewer"
-          @update:model-value="emit('update:panelAccessOnly', Boolean($event))"
+          @update:model-value="emit('update:form', { panelAccessOnly: Boolean($event) })"
         />
         <v-text-field
           v-if="canShowPasswordField && !minimalMode"
-          :model-value="password"
+          :model-value="form.password"
           label="Senha do painel"
           placeholder="Preencha para definir ou alterar a senha"
           type="password"
-          @update:model-value="emit('update:password', String($event ?? ''))"
+          @update:model-value="emit('update:form', { password: String($event ?? '') })"
         />
 
         <v-text-field
           v-if="!minimalMode"
-          :model-value="registration"
+          :model-value="form.registration"
           label="Matricula"
           :disabled="isSisaeViewer"
-          @update:model-value="emit('update:registration', String($event ?? ''))"
+          @update:model-value="emit('update:form', { registration: String($event ?? '') })"
         />
 
         <v-select
-          :model-value="deviceScope"
+          :model-value="form.deviceScope"
           :items="deviceScopeOptions"
           item-title="title"
           item-value="value"
           label="Escopo de catracas"
-          :disabled="isSisaeViewer || panelAccessOnly"
-          @update:model-value="emit('update:deviceScope', $event)"
+          :disabled="isSisaeViewer || form.panelAccessOnly"
+          @update:model-value="
+            emit('update:form', {
+              deviceScope: ($event as BaseUser['device_scope']) ?? 'all_active',
+            })
+          "
         />
 
         <v-row dense class="pt-2">
           <v-col cols="12" md="6">
             <v-text-field
-              :model-value="props.startDate"
+              :model-value="props.form.startDate"
               label="Data de inicio"
               type="date"
               clearable
               :disabled="isSisaeViewer"
-              @update:model-value="emit('update:startDate', $event)"
+              @update:model-value="
+                emit('update:form', { startDate: ($event as string | null) ?? null })
+              "
             />
           </v-col>
           <v-col cols="12" md="6">
             <v-text-field
-              :model-value="props.endDate"
+              :model-value="props.form.endDate"
               label="Data de fim"
               type="date"
               clearable
               :disabled="isSisaeViewer"
-              @update:model-value="emit('update:endDate', $event)"
+              @update:model-value="
+                emit('update:form', { endDate: ($event as string | null) ?? null })
+              "
             />
           </v-col>
           <v-text-field
-            :model-value="formatDateTime(props.lastPassageAt)"
+            :model-value="formatDateTime(props.form.lastPassageAt)"
             label="Ultima Passagem na Catraca"
             readonly
             disabled
@@ -198,12 +182,11 @@ function formatDateTime(dateStr: string | null | undefined): string {
           />
         </v-row>
 
-        <v-col cols="12" v-if="minimalMode">
-        </v-col>
+        <v-col cols="12" v-if="minimalMode"> </v-col>
 
         <v-select
-          v-if="deviceScope === 'selected'"
-          :model-value="selectedDeviceIds"
+          v-if="form.deviceScope === 'selected'"
+          :model-value="form.selectedDeviceIds"
           :items="deviceOptions"
           item-title="name"
           item-value="id"
@@ -211,25 +194,27 @@ function formatDateTime(dateStr: string | null | undefined): string {
           clearable
           label="Catracas selecionadas"
           multiple
-          :disabled="isSisaeViewer || panelAccessOnly"
-          @update:model-value="emit('update:selectedDeviceIds', ($event as number[]) || [])"
+          :disabled="isSisaeViewer || form.panelAccessOnly"
+          @update:model-value="
+            emit('update:form', { selectedDeviceIds: ($event as number[]) || [] })
+          "
         />
 
         <v-switch
-          v-if="hasUserTypeField && !minimalMode"
-          :model-value="isVisitor"
+          v-if="fieldFlags.hasUserTypeField && !minimalMode"
+          :model-value="form.isVisitor"
           color="warning"
           label="Visitante"
           :disabled="isSisaeViewer"
-          @update:model-value="emit('update:isVisitor', Boolean($event))"
+          @update:model-value="emit('update:form', { isVisitor: Boolean($event) })"
         />
         <v-switch
-          v-if="hasDeviceAdminField && !minimalMode"
-          :model-value="deviceAdmin"
+          v-if="fieldFlags.hasDeviceAdminField && !minimalMode"
+          :model-value="form.deviceAdmin"
           color="primary"
           label="Administrador da catraca"
           :disabled="isSisaeViewer"
-          @update:model-value="emit('update:deviceAdmin', Boolean($event))"
+          @update:model-value="emit('update:form', { deviceAdmin: Boolean($event) })"
         />
         <v-text-field v-if="!minimalMode" label="Data de nascimento" type="date" disabled />
         <v-text-field v-if="!minimalMode" label="(xx) xxxxx-xxxx" type="tel" disabled />
@@ -244,16 +229,17 @@ function formatDateTime(dateStr: string | null | undefined): string {
           @change="onFileSelected"
         />
         <v-avatar class="mb-4" size="150">
-          <v-img
-            v-if="pictureUrl"
-            :src="pictureUrl"
-          />
+          <v-img v-if="pictureUrl" :src="pictureUrl" />
           <v-icon v-else size="100">mdi-account-circle</v-icon>
         </v-avatar>
-        <v-btn class="mb-2" color="primary" v-if="!isSisaeViewer" @click="openFilePicker"
+        <v-btn class="mb-2" color="primary" v-if="canManagePhoto" @click="openFilePicker"
           >Arquivo</v-btn
         >
-        <v-btn class="mb-2" color="error" v-if="pictureUrl && !isSisaeViewer" @click="onRemovePicture"
+        <v-btn
+          class="mb-2"
+          color="error"
+          v-if="pictureUrl && canManagePhoto"
+          @click="onRemovePicture"
           >Remover</v-btn
         >
       </v-col>

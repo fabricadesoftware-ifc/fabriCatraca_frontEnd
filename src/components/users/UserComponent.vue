@@ -19,6 +19,7 @@ const props = defineProps<{
   title?: string;
   createLabel?: string;
   saveButtonLabel?: string;
+  dialogMode?: "default" | "release-only" | "register-only";
   canCreate?: boolean;
   minimalDialog?: boolean;
   newUserDefaults?: Partial<User>;
@@ -333,6 +334,7 @@ function appRoleLabel(value?: string) {
 
   <UserDialog
     v-model="dialog"
+    :dialog-mode="props.dialogMode"
     :minimal-mode="props.minimalDialog"
     :save-label="props.createLabel"
     :user="selectedUser"

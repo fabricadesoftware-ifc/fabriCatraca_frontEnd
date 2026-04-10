@@ -31,6 +31,7 @@
     ]
   })
   const tab = ref('dados')
+  const isSisae = computed(() => props.app_role === 'sisae')
   const name = ref('')
   const loading = ref(false)
   interface RuleWithPortalGroup {
@@ -101,6 +102,19 @@
           }))
         }
       }
+    },
+    { immediate: true },
+  )
+
+  watch(
+    () => props.modelValue,
+    isOpen => {
+      if (!isOpen) return
+      if (isSisae.value && props.group?.id) {
+        tab.value = 'liberacao'
+        return
+      }
+      tab.value = 'dados'
     },
     { immediate: true },
   )
@@ -193,9 +207,9 @@
 
       <v-card-text>
         <v-tabs v-model="tab" bg-color="transparent" color="primary">
-          <v-tab value="dados">Dados Gerais</v-tab>
+          <v-tab v-if="!isSisae" value="dados">Dados Gerais</v-tab>
           <v-tab v-if="props.group.id" value="liberacao">Liberação</v-tab>
-          <template v-if="props.app_role !== 'sisae'">
+          <template v-if="!isSisae">
             <v-tab value="regras">Regras de Acesso</v-tab>
             <v-tab value="importar">Importar Usuários</v-tab>
             <v-tab value="exportar">Exportar Usuários</v-tab>
@@ -204,7 +218,7 @@
 
         <v-window v-model="tab">
           <!-- Aba Dados Gerais -->
-          <v-window-item value="dados">
+          <v-window-item v-if="!isSisae" value="dados">
             <v-container>
               <v-row>
                 <v-col cols="12">

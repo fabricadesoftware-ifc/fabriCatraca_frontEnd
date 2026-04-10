@@ -14,7 +14,7 @@ const rawItems = [
   {
     title: "Cadastrar Usuario",
     icon: "mdi-account-plus",
-    to: "/users",
+    to: "/cadastrar-usuario",
     roles: ["admin", "sisae"],
   },
   {
