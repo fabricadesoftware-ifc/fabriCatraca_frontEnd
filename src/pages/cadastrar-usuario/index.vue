@@ -45,10 +45,11 @@ onMounted(async () => {
     <h1 class="text-h4 font-weight-bold mb-4">Cadastrar Usuário</h1>
 
     <v-divider class="my-4" />
+    <!-- || authStore.role === 'sisae' -->
 
     <UserComponent
       :app_role="authStore.role"
-      :can-create="authStore.role === 'admin' || authStore.role === 'sisae'"
+      :can-create="authStore.role === 'admin'"
       :create-label="'Cadastrar usuário'"
       :current-page="userStore.current_page"
       :dialog-mode="'register-only'"
