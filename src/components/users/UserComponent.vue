@@ -34,6 +34,7 @@ const emit = defineEmits<{
 const userStore = useUserStore();
 const dialog = ref(false);
 const selectedUser = ref<User | null>(null);
+const saveErrors = ref<Record<string, string[]>>({});
 const selection = ref({
   selected: [] as User[],
 });
@@ -82,7 +83,14 @@ watch(search, (newSearch) => {
 });
 
 async function salvarUsuario(user: User) {
+  saveErrors.value = {};
   try {
+    if (props.minimalDialog && selectedUser.value?.id === 0 && user.id !== 0) {
+      await userStore.loadUsers(buildReloadQuery());
+      dialog.value = false;
+      return;
+    }
+
     const userGroupIds = (user.user_groups || []).map((g) => (typeof g === "number" ? g : g.id));
     let savedUser: User;
 
@@ -155,14 +163,30 @@ async function salvarUsuario(user: User) {
     }
 
     await userStore.loadUsers(buildReloadQuery());
+    dialog.value = false;
     toast.success("Usuario salvo com sucesso.");
-  } catch (error) {
+  } catch (error: any) {
+    const responseData = error?.response?.data;
+    if (responseData && typeof responseData === "object") {
+      saveErrors.value = Object.fromEntries(
+        Object.entries(responseData).map(([key, value]) => [
+          key,
+          Array.isArray(value) ? value.map((item) => String(item)) : [String(value)],
+        ]),
+      );
+    }
     console.error(error);
-    toast.error("Erro ao salvar usuario. Por favor, tente novamente.");
+    const errorMessage =
+      saveErrors.value.error?.[0]
+      || saveErrors.value.detail?.[0]
+      || saveErrors.value.non_field_errors?.[0]
+      || "Erro ao salvar usuario. Verifique os campos destacados.";
+    toast.error(errorMessage);
   }
 }
 
 function showUserDetails(event: Event, { item }: { item: User }) {
+  saveErrors.value = {};
   selectedUser.value = item;
   dialog.value = true;
 }
@@ -194,6 +218,7 @@ async function removerSelecionados() {
 }
 
 function novoUsuario() {
+  saveErrors.value = {};
   selectedUser.value = {
     id: 0,
     name: "",
@@ -334,6 +359,7 @@ function appRoleLabel(value?: string) {
 
   <UserDialog
     v-model="dialog"
+    :backend-errors="saveErrors"
     :dialog-mode="props.dialogMode"
     :minimal-mode="props.minimalDialog"
     :save-label="props.createLabel"

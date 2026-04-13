@@ -2,13 +2,16 @@
 import type { Device, User as BaseUser } from "@/types";
 import type { UserFieldFlags, UserFormState } from "@/composables/useUserFormState";
 import { ref } from "vue";
+import { formatCpf, formatPhone, isCpfValidFormat, isPhoneValidFormat } from "@/utils/contact";
 
 const props = defineProps<{
   form: UserFormState;
   fieldFlags: UserFieldFlags;
+  backendErrors?: Record<string, string[]>;
   canManagePhoto: boolean;
   deviceOptions: Device[];
   canShowPasswordField: boolean;
+  isGuaritaViewer: boolean;
   isSisaeViewer: boolean;
   groups: Array<string>;
   roleOptions: { title: string; value: string }[];
@@ -53,12 +56,45 @@ function formatDateTime(dateStr: string | null | undefined): string {
   if (!dateStr) return "Nao registrada";
   return new Date(dateStr).toLocaleString("pt-BR");
 }
+
+function getFieldErrors(field: string): string[] {
+  return props.backendErrors?.[field] ?? [];
+}
+
+const cpfRules = [
+  (value: string) => !value || isCpfValidFormat(value) || "CPF deve estar no formato 000.000.000-00",
+];
+
+const phoneRules = [
+  (value: string) => !!value || "Telefone e obrigatorio para visitantes",
+  (value: string) =>
+    isPhoneValidFormat(value) || "Telefone deve estar no formato (00) 0000-0000 ou (00) 00000-0000",
+];
 </script>
 
 <template>
   <v-container>
     <v-row>
       <v-col cols="8">
+        <v-alert
+          v-if="
+            getFieldErrors('non_field_errors').length
+            || getFieldErrors('error').length
+            || getFieldErrors('detail').length
+          "
+          class="mb-4"
+          density="comfortable"
+          type="error"
+          variant="tonal"
+        >
+          {{
+            [
+              ...getFieldErrors("error"),
+              ...getFieldErrors("detail"),
+              ...getFieldErrors("non_field_errors"),
+            ].join(" ")
+          }}
+        </v-alert>
         <v-text-field
           v-if="!minimalMode"
           :model-value="groups[0] || 'Usuario sem turma'"
@@ -70,6 +106,7 @@ function formatDateTime(dateStr: string | null | undefined): string {
           :model-value="form.name"
           label="Nome"
           required
+          :error-messages="getFieldErrors('name')"
           :rules="[(v) => !!v || 'Nome e obrigatorio']"
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:form', { name: String($event ?? '') })"
@@ -78,6 +115,7 @@ function formatDateTime(dateStr: string | null | undefined): string {
           v-if="fieldFlags.hasEmailField"
           :model-value="form.email"
           :label="minimalMode ? 'E-mail' : 'E-mail para login'"
+          :error-messages="getFieldErrors('email')"
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:form', { email: String($event ?? '') })"
         />
@@ -85,17 +123,22 @@ function formatDateTime(dateStr: string | null | undefined): string {
           v-if="minimalMode"
           :model-value="form.cpf"
           label="CPF"
+          :error-messages="getFieldErrors('cpf')"
+          :maxlength="14"
+          :rules="cpfRules"
           :disabled="isSisaeViewer"
-          @update:model-value="emit('update:form', { cpf: String($event ?? '') })"
+          @update:model-value="emit('update:form', { cpf: formatCpf(String($event ?? '')) })"
         />
         <v-text-field
           v-if="minimalMode"
           :model-value="form.phone"
           label="Telefone"
           required
-          :rules="[(v) => !!v || 'Telefone e obrigatorio para visitantes']"
+          :error-messages="getFieldErrors('phone')"
+          :maxlength="15"
+          :rules="phoneRules"
           :disabled="isSisaeViewer"
-          @update:model-value="emit('update:form', { phone: String($event ?? '') })"
+          @update:model-value="emit('update:form', { phone: formatPhone(String($event ?? '')) })"
         />
         <v-select
           v-if="fieldFlags.hasAppRoleField && !minimalMode"
@@ -104,6 +147,7 @@ function formatDateTime(dateStr: string | null | undefined): string {
           item-title="title"
           item-value="value"
           label="Perfil do painel"
+          :error-messages="getFieldErrors('app_role')"
           :disabled="isSisaeViewer"
           @update:model-value="
             emit('update:form', { appRole: ($event as BaseUser['app_role']) ?? '' })
@@ -114,6 +158,7 @@ function formatDateTime(dateStr: string | null | undefined): string {
           :model-value="form.panelAccessOnly"
           color="info"
           label="Conta somente do painel"
+          :error-messages="getFieldErrors('panel_access_only')"
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:form', { panelAccessOnly: Boolean($event) })"
         />
@@ -122,6 +167,7 @@ function formatDateTime(dateStr: string | null | undefined): string {
           :model-value="form.password"
           label="Senha do painel"
           placeholder="Preencha para definir ou alterar a senha"
+          :error-messages="getFieldErrors('password')"
           type="password"
           @update:model-value="emit('update:form', { password: String($event ?? '') })"
         />
@@ -130,6 +176,7 @@ function formatDateTime(dateStr: string | null | undefined): string {
           v-if="!minimalMode"
           :model-value="form.registration"
           label="Matricula"
+          :error-messages="getFieldErrors('registration')"
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:form', { registration: String($event ?? '') })"
         />
@@ -140,6 +187,7 @@ function formatDateTime(dateStr: string | null | undefined): string {
           item-title="title"
           item-value="value"
           label="Escopo de catracas"
+          :error-messages="getFieldErrors('device_scope')"
           :disabled="isSisaeViewer || form.panelAccessOnly"
           @update:model-value="
             emit('update:form', {
@@ -155,7 +203,8 @@ function formatDateTime(dateStr: string | null | undefined): string {
               label="Data de inicio"
               type="date"
               clearable
-              :disabled="isSisaeViewer"
+              :error-messages="getFieldErrors('start_date')"
+              :disabled="isSisaeViewer || isGuaritaViewer"
               @update:model-value="
                 emit('update:form', { startDate: ($event as string | null) ?? null })
               "
@@ -167,6 +216,7 @@ function formatDateTime(dateStr: string | null | undefined): string {
               label="Data de fim"
               type="date"
               clearable
+              :error-messages="getFieldErrors('end_date')"
               :disabled="isSisaeViewer"
               @update:model-value="
                 emit('update:form', { endDate: ($event as string | null) ?? null })
@@ -194,6 +244,7 @@ function formatDateTime(dateStr: string | null | undefined): string {
           clearable
           label="Catracas selecionadas"
           multiple
+          :error-messages="getFieldErrors('selected_device_ids')"
           :disabled="isSisaeViewer || form.panelAccessOnly"
           @update:model-value="
             emit('update:form', { selectedDeviceIds: ($event as number[]) || [] })

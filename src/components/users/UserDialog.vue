@@ -8,6 +8,7 @@ import { useAuthStore, useDeviceStore, useGroupStore } from "@/stores";
 import { useUserCardEnrollment } from "@/composables/useUserCardEnrollment";
 import { useUserFormState, type UserDialogUser } from "@/composables/useUserFormState";
 import { useUserGroupSchedules } from "@/composables/useUserGroupSchedules";
+import { isCpfValidFormat, isPhoneValidFormat } from "@/utils/contact";
 import UserAccessLogsPanel from "./UserAccessLogsPanel.vue";
 import UserBioPanel from "./UserBioPanel.vue";
 import UserCardsPanel from "./UserCardsPanel.vue";
@@ -24,6 +25,7 @@ interface User extends UserDialogUser {}
 const props = defineProps<{
   modelValue: boolean;
   user: User | null;
+  backendErrors?: Record<string, string[]>;
   dialogMode?: "default" | "release-only" | "register-only";
   minimalMode?: boolean;
   saveLabel?: string;
@@ -44,10 +46,13 @@ const loading = ref(false);
 const pictureFile = ref<File | null>(null);
 const pictureUploadPending = ref(false);
 const pictureRemoved = ref(false);
+const localErrors = ref<Record<string, string[]>>({});
+const dismissedParentErrors = ref<string[]>([]);
 const userRef = toRef(props, "user");
 const modelValueRef = toRef(props, "modelValue");
 
 const isSisaeViewer = computed(() => authStore.role === "sisae");
+const isGuaritaViewer = computed(() => authStore.role === "guarita");
 const isMinimalMode = computed(() => !!props.minimalMode);
 const isReleaseOnlyMode = computed(() => props.dialogMode === "release-only");
 const isRegisterOnlyMode = computed(() => props.dialogMode === "register-only");
@@ -110,6 +115,8 @@ watch(
     pictureFile.value = null;
     pictureUploadPending.value = false;
     pictureRemoved.value = false;
+    localErrors.value = {};
+    dismissedParentErrors.value = [];
     resetSchedules();
   },
   { immediate: true },
@@ -120,21 +127,52 @@ watch(modelValueRef, (isOpen) => {
     return;
   }
 
+  localErrors.value = {};
+  dismissedParentErrors.value = [];
+
   if (isReleaseOnlyMode.value && props.user?.id) {
     tab.value = "liberacao";
     return;
   }
 
   if (!isMinimalMode.value) {
+    if (isGuaritaViewer.value) {
+      form.startDate = getTodayDateString();
+    }
     return;
   }
 
   tab.value = "dados";
   setMinimalDefaults();
+  if (isGuaritaViewer.value) {
+    form.startDate = getTodayDateString();
+  }
 });
 
 function updateForm(patch: Partial<typeof form>) {
   Object.assign(form, patch);
+
+  const fieldMap: Record<string, string> = {
+    appRole: "app_role",
+    panelAccessOnly: "panel_access_only",
+    deviceScope: "device_scope",
+    selectedDeviceIds: "selected_device_ids",
+    startDate: "start_date",
+    endDate: "end_date",
+  };
+
+  for (const key of Object.keys(patch)) {
+    const backendKey = fieldMap[key] || key;
+    if (localErrors.value[backendKey]) {
+      delete localErrors.value[backendKey];
+    }
+    if (
+      props.backendErrors?.[backendKey]
+      && !dismissedParentErrors.value.includes(backendKey)
+    ) {
+      dismissedParentErrors.value.push(backendKey);
+    }
+  }
 }
 
 function closeDialog() {
@@ -151,13 +189,80 @@ function onRemovePicture() {
   pictureRemoved.value = true;
 }
 
+function normalizeErrors(error: any): Record<string, string[]> {
+  const responseData = error?.response?.data;
+  if (!responseData || typeof responseData !== "object") {
+    return {};
+  }
+
+  const normalized: Record<string, string[]> = {};
+  for (const [key, value] of Object.entries(responseData)) {
+    if (Array.isArray(value)) {
+      normalized[key] = value.map((item) => String(item));
+      continue;
+    }
+    if (typeof value === "string") {
+      normalized[key] = [value];
+      continue;
+    }
+    if (value && typeof value === "object") {
+      normalized[key] = Object.values(value as Record<string, unknown>).flatMap((item) =>
+        Array.isArray(item) ? item.map((entry) => String(entry)) : [String(item)],
+      );
+    }
+  }
+  return normalized;
+}
+
+const combinedErrors = computed(() => ({
+  ...Object.fromEntries(
+    Object.entries(props.backendErrors || {}).filter(
+      ([key]) => !dismissedParentErrors.value.includes(key),
+    ),
+  ),
+  ...localErrors.value,
+}));
+
+function getTodayDateString() {
+  return new Date().toLocaleDateString("en-CA");
+}
+
+const effectiveStartDate = computed(() =>
+  isGuaritaViewer.value ? getTodayDateString() : form.startDate,
+);
+
+function setLocalFieldError(field: string, message: string) {
+  localErrors.value = {
+    ...localErrors.value,
+    [field]: [message],
+  };
+}
+
 async function salvarUsuario() {
   if (!props.user) {
     return;
   }
 
+  localErrors.value = {};
+
   if (isMinimalMode.value && !form.phone.trim()) {
+    setLocalFieldError("phone", "Telefone e obrigatorio para visitantes.");
     toast.warning("Telefone e obrigatorio para cadastrar visitante.");
+    return;
+  }
+
+  if (form.cpf.trim() && !isCpfValidFormat(form.cpf)) {
+    setLocalFieldError("cpf", "CPF deve estar no formato 000.000.000-00.");
+    toast.warning("Corrija o CPF antes de salvar.");
+    return;
+  }
+
+  if (form.phone.trim() && !isPhoneValidFormat(form.phone)) {
+    setLocalFieldError(
+      "phone",
+      "Telefone deve estar no formato (00) 0000-0000 ou (00) 00000-0000.",
+    );
+    toast.warning("Corrija o telefone antes de salvar.");
     return;
   }
 
@@ -178,7 +283,7 @@ async function salvarUsuario() {
         phone: form.phone,
         cpf: form.cpf || undefined,
         registration: form.registration || undefined,
-        start_date: form.startDate,
+        start_date: effectiveStartDate.value,
         end_date: form.endDate,
         picture_id: pictureId || undefined,
         card_value: capturedCardValue.value,
@@ -190,7 +295,11 @@ async function salvarUsuario() {
       closeDialog();
       return;
     } catch (err: any) {
-      const msg = err?.response?.data?.error || "Erro ao cadastrar visitante com cartao";
+      localErrors.value = normalizeErrors(err);
+      const msg =
+        err?.response?.data?.error
+        || localErrors.value.non_field_errors?.[0]
+        || "Erro ao cadastrar visitante com cartao";
       toast.error(msg);
       pictureUploadPending.value = false;
       return;
@@ -221,14 +330,16 @@ async function salvarUsuario() {
 
   const payload = buildUserPayload(
     savedUser,
-    form,
+    {
+      ...form,
+      startDate: effectiveStartDate.value,
+    },
     fieldFlags,
     canShowPasswordField.value,
     pictureRemoved.value,
   );
 
   emit("save", payload);
-  closeDialog();
 }
 
 onMounted(async () => {
@@ -307,12 +418,14 @@ onMounted(async () => {
         <v-window v-model="tab">
           <v-window-item value="dados" v-if="!isReleaseOnlyMode">
             <UserGeneralTab
+              :backend-errors="combinedErrors"
               :form="form"
               :field-flags="fieldFlags"
               :can-manage-photo="canManagePhoto"
               :can-show-password-field="canShowPasswordField"
               :device-options="deviceStore.devices.filter((device) => device.is_active)"
               :groups="selectedGroupNames"
+              :is-guarita-viewer="isGuaritaViewer"
               :is-sisae-viewer="isSisaeViewer"
               :minimal-mode="isMinimalMode"
               :picture-url="props.user.picture_url"

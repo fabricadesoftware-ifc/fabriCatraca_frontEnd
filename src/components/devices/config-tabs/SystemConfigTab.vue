@@ -69,7 +69,6 @@
           v-model="form.clear_expired_users"
           color="primary"
           hint="Quando ativado, o equipamento limpa automaticamente os usuários expirados no reinício diário."
-          inset
           label="Limpar Usuários Expirados"
           persistent-hint
         />

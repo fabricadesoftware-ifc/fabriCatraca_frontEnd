@@ -369,7 +369,6 @@ export interface UIConfig {
   id?: number;
   device: number;
   device_name?: string;
-  screen_always_on?: boolean;
   created_at?: string;
   updated_at?: string;
 }
