@@ -27,12 +27,8 @@ export function formatInputDateTimeToApi(value?: string | null): string | null {
 
 export function getCurrentLocalDateTimeInput(): string {
   const now = new Date();
-  console.log(`Current local date-time: ${now}`);
   const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-  console.log(`Current local date-time adjusted for timezone: ${local}`);
-  console.log(`Current local date-time in ISO format: ${local.toISOString().slice(0, 16)}`);
   return local.toISOString().slice(0, 16);
-
 }
 
 export function formatDateTimeForDisplay(value?: string | null): string {

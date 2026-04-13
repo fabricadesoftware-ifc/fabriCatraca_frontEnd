@@ -94,8 +94,14 @@ export function useUserFormState(userRef: Ref<UserDialogUser | null>) {
     form.deviceAdmin = fieldFlags.hasDeviceAdminField ? !!newUser.device_admin : false;
     form.userGroups =
       newUser.user_groups?.map((group) => (typeof group === "number" ? group : group.id)) || [];
-    form.startDate = formatApiDateTimeToInput(newUser.start_date);
-    form.endDate = formatApiDateTimeToInput(newUser.end_date);
+    form.startDate = newUser.start_date
+      ? formatApiDateTimeToInput(newUser.start_date)
+      : newUser.id === 0
+        ? form.startDate
+        : null;
+    form.endDate = newUser.end_date
+      ? formatApiDateTimeToInput(newUser.end_date)
+      : null;
     form.lastPassageAt = newUser.last_passage_at ?? null;
   }
 

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { User as BaseUser } from "@/types";
-import { computed, onMounted, ref, toRef, watch } from "vue";
+import { computed, nextTick, onMounted, ref, toRef, watch } from "vue";
 import { toast } from "vue3-toastify";
 import { UploaderService } from "@/services";
 import CardEnrollService from "@/services/card_enroll";
@@ -110,6 +110,15 @@ const selectedGroupNames = computed(() => {
 const { schedulesLoading, schedulesError, groupSchedules, loadGroupSchedules, resetSchedules } =
   useUserGroupSchedules(selectedGroupNames, modelValueRef, tab);
 
+async function applyGuaritaStartDateDefault() {
+  if (!isGuaritaViewer.value || !modelValueRef.value) {
+    return;
+  }
+
+  await nextTick();
+  form.startDate = getCurrentLocalDateTimeInput();
+}
+
 watch(
   userRef,
   () => {
@@ -123,7 +132,7 @@ watch(
   { immediate: true },
 );
 
-watch(modelValueRef, (isOpen) => {
+watch(modelValueRef, async (isOpen) => {
   if (!isOpen) {
     return;
   }
@@ -137,18 +146,26 @@ watch(modelValueRef, (isOpen) => {
   }
 
   if (!isMinimalMode.value) {
-    if (isGuaritaViewer.value) {
-      form.startDate = getCurrentLocalDateTimeInput();
-    }
+    await applyGuaritaStartDateDefault();
     return;
   }
 
   tab.value = "dados";
   setMinimalDefaults();
-  if (isGuaritaViewer.value) {
-    form.startDate = getCurrentLocalDateTimeInput();
-  }
+  await applyGuaritaStartDateDefault();
 });
+
+watch(
+  userRef,
+  async () => {
+    if (!modelValueRef.value || !isGuaritaViewer.value) {
+      return;
+    }
+
+    await applyGuaritaStartDateDefault();
+  },
+  { flush: "post" },
+);
 
 function updateForm(patch: Partial<typeof form>) {
   Object.assign(form, patch);
