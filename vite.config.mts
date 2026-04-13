@@ -17,14 +17,14 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     port: 3000,
     proxy: {
-      '/ifc-horarios': {
-        target: 'https://horarios.araquari.ifc.edu.br',
+      "/ifc-horarios": {
+        target: "https://horarios.araquari.ifc.edu.br",
         changeOrigin: true,
         secure: true,
-        rewrite: path => path.replace(/^\/ifc-horarios/, ''),
+        rewrite: (path) => path.replace(/^\/ifc-horarios/, ""),
       },
     },
   },
@@ -32,41 +32,43 @@ export default defineConfig({
     Vue({
       template: { transformAssetUrls },
     }),
+    VueRouter({
+      dts: "src/typed-router.d.ts",
+    }),
+
+    Layouts(),
     Vuetify({
       autoImport: true,
       styles: {
-        configFile: 'src/styles/settings.scss',
+        configFile: "src/styles/settings.scss",
       },
     }),
-    Layouts(),
     AutoImport({
       imports: [
-        'vue',
+        "vue",
         VueRouterAutoImports,
         {
-          pinia: ['defineStore', 'storeToRefs'],
+          pinia: ["defineStore", "storeToRefs"],
         },
       ],
-      dts: 'src/auto-imports.d.ts',
+      dts: "src/auto-imports.d.ts",
       eslintrc: {
         enabled: true,
       },
       vueTemplate: true,
     }),
-    VueRouter({
-      dts: 'src/typed-router.d.ts',
-    }),
+
     Components({
-      dts: 'src/components.d.ts',
+      dts: "src/components.d.ts",
     }),
     // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
     Fonts({
       fontsource: {
         families: [
           {
-            name: 'Roboto',
+            name: "Roboto",
             weights: [100, 300, 400, 500, 700, 900],
-            styles: ['normal', 'italic'],
+            styles: ["normal"],
           },
         ],
       },
@@ -75,36 +77,26 @@ export default defineConfig({
   ],
   optimizeDeps: {
     exclude: [
-      'vuetify',
-      'vue-router',
-      'unplugin-vue-router/runtime',
-      'unplugin-vue-router/data-loaders',
-      'unplugin-vue-router/data-loaders/basic',
+      "vuetify",
+      "vue-router",
+      "unplugin-vue-router/runtime",
+      "unplugin-vue-router/data-loaders",
+      "unplugin-vue-router/data-loaders/basic",
     ],
   },
-  define: { 'process.env': {} },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('src', import.meta.url)),
+      "@": fileURLToPath(new URL("src", import.meta.url)),
     },
-    extensions: [
-      '.js',
-      '.json',
-      '.jsx',
-      '.mjs',
-      '.ts',
-      '.tsx',
-      '.vue',
-    ],
   },
   css: {
     preprocessorOptions: {
       sass: {
-        api: 'modern-compiler',
+        api: "modern-compiler",
       },
       scss: {
-        api: 'modern-compiler',
+        api: "modern-compiler",
       },
     },
   },
-})
+});

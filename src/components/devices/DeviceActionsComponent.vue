@@ -545,7 +545,6 @@ onMounted(reloadData);
                       v-model="authorizationForm.user_image"
                       color="primary"
                       hide-details
-                      inset
                       label="Usuario possui foto"
                     />
                   </v-col>
