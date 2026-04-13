@@ -178,6 +178,8 @@ async function salvarUsuario() {
         phone: form.phone,
         cpf: form.cpf || undefined,
         registration: form.registration || undefined,
+        start_date: form.startDate,
+        end_date: form.endDate,
         picture_id: pictureId || undefined,
         card_value: capturedCardValue.value,
         user_type_id: 1,

@@ -12,6 +12,8 @@ class CardEnrollService {
     phone: string;
     cpf?: string;
     registration?: string;
+    start_date?: string | null;
+    end_date?: string | null;
     email?: string;
     password?: string;
     user_type_id?: number;
