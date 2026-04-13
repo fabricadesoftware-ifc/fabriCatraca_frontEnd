@@ -9,6 +9,7 @@ import { useUserCardEnrollment } from "@/composables/useUserCardEnrollment";
 import { useUserFormState, type UserDialogUser } from "@/composables/useUserFormState";
 import { useUserGroupSchedules } from "@/composables/useUserGroupSchedules";
 import { isCpfValidFormat, isPhoneValidFormat } from "@/utils/contact";
+import { formatInputDateTimeToApi, getCurrentLocalDateTimeInput } from "@/utils/datetime";
 import UserAccessLogsPanel from "./UserAccessLogsPanel.vue";
 import UserBioPanel from "./UserBioPanel.vue";
 import UserCardsPanel from "./UserCardsPanel.vue";
@@ -137,7 +138,7 @@ watch(modelValueRef, (isOpen) => {
 
   if (!isMinimalMode.value) {
     if (isGuaritaViewer.value) {
-      form.startDate = getTodayDateString();
+      form.startDate = getCurrentLocalDateTimeInput();
     }
     return;
   }
@@ -145,7 +146,7 @@ watch(modelValueRef, (isOpen) => {
   tab.value = "dados";
   setMinimalDefaults();
   if (isGuaritaViewer.value) {
-    form.startDate = getTodayDateString();
+    form.startDate = getCurrentLocalDateTimeInput();
   }
 });
 
@@ -223,12 +224,8 @@ const combinedErrors = computed(() => ({
   ...localErrors.value,
 }));
 
-function getTodayDateString() {
-  return new Date().toLocaleDateString("en-CA");
-}
-
 const effectiveStartDate = computed(() =>
-  isGuaritaViewer.value ? getTodayDateString() : form.startDate,
+  isGuaritaViewer.value ? (form.startDate || getCurrentLocalDateTimeInput()) : form.startDate,
 );
 
 function setLocalFieldError(field: string, message: string) {
@@ -283,8 +280,8 @@ async function salvarUsuario() {
         phone: form.phone,
         cpf: form.cpf || undefined,
         registration: form.registration || undefined,
-        start_date: effectiveStartDate.value,
-        end_date: form.endDate,
+        start_date: formatInputDateTimeToApi(effectiveStartDate.value),
+        end_date: formatInputDateTimeToApi(form.endDate),
         picture_id: pictureId || undefined,
         card_value: capturedCardValue.value,
         user_type_id: 1,

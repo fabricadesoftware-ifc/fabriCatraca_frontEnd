@@ -2,6 +2,7 @@
 import { onMounted, ref } from "vue";
 import { useAuthStore, useUserStore } from "@/stores";
 import UserComponent from "@/components/users/UserComponent.vue";
+import { formatDateTimeForDisplay } from "@/utils/datetime";
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
@@ -49,8 +50,8 @@ onMounted(async () => {
       { title: 'CPF', key: 'cpf', align: 'start' },
       { title: 'E-mail', key: 'email', align: 'start' },
       { title: 'Telefone', key: 'phone', align: 'start' },
-      { title: 'Data Inicio', key: 'start_date', align: 'start' },
-      { title: 'Data Fim', key: 'end_date', align: 'start' },
+      { title: 'Inicio Vigencia', key: 'start_date', align: 'start' },
+      { title: 'Fim Vigencia', key: 'end_date', align: 'start' },
       { title: 'Ultima Passagem', key: 'last_passage_at', align: 'start' },
     ]"
     :minimal-dialog="true"
@@ -74,13 +75,13 @@ onMounted(async () => {
     @search-changed="searchChanged($event)"
   >
     <template #item.start_date="{ item }">
-      {{ item.start_date ? new Date(item.start_date).toLocaleDateString('pt-BR') : 'N/A' }}
+      {{ item.start_date ? formatDateTimeForDisplay(item.start_date) : 'N/A' }}
     </template>
     <template #item.end_date="{ item }">
-      {{ item.end_date ? new Date(item.end_date).toLocaleDateString('pt-BR') : 'Sem limite' }}
+      {{ item.end_date ? formatDateTimeForDisplay(item.end_date) : 'Sem limite' }}
     </template>
     <template #item.last_passage_at="{ item }">
-      {{ item.last_passage_at ? new Date(item.last_passage_at).toLocaleString('pt-BR') : 'Nao registrada' }}
+      {{ item.last_passage_at ? formatDateTimeForDisplay(item.last_passage_at) : 'Nao registrada' }}
     </template>
   </UserComponent>
 </template>

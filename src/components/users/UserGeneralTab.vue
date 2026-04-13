@@ -3,6 +3,7 @@ import type { Device, User as BaseUser } from "@/types";
 import type { UserFieldFlags, UserFormState } from "@/composables/useUserFormState";
 import { ref } from "vue";
 import { formatCpf, formatPhone, isCpfValidFormat, isPhoneValidFormat } from "@/utils/contact";
+import { formatDateTimeForDisplay } from "@/utils/datetime";
 
 const props = defineProps<{
   form: UserFormState;
@@ -51,11 +52,6 @@ const deviceScopeOptions = [
   { title: "Somente catracas selecionadas", value: "selected" },
   { title: "Nao sincronizar com catracas", value: "none" },
 ];
-
-function formatDateTime(dateStr: string | null | undefined): string {
-  if (!dateStr) return "Nao registrada";
-  return new Date(dateStr).toLocaleString("pt-BR");
-}
 
 function getFieldErrors(field: string): string[] {
   return props.backendErrors?.[field] ?? [];
@@ -200,8 +196,8 @@ const phoneRules = [
           <v-col cols="12" md="6">
             <v-text-field
               :model-value="props.form.startDate"
-              label="Data de inicio"
-              type="date"
+              label="Data e hora de inicio"
+              type="datetime-local"
               clearable
               :error-messages="getFieldErrors('start_date')"
               :disabled="isSisaeViewer || isGuaritaViewer"
@@ -213,8 +209,8 @@ const phoneRules = [
           <v-col cols="12" md="6">
             <v-text-field
               :model-value="props.form.endDate"
-              label="Data de fim"
-              type="date"
+              label="Data e hora de fim"
+              type="datetime-local"
               clearable
               :error-messages="getFieldErrors('end_date')"
               :disabled="isSisaeViewer"
@@ -223,8 +219,8 @@ const phoneRules = [
               "
             />
           </v-col>
-          <v-text-field
-            :model-value="formatDateTime(props.form.lastPassageAt)"
+            <v-text-field
+            :model-value="formatDateTimeForDisplay(props.form.lastPassageAt)"
             label="Ultima Passagem na Catraca"
             readonly
             disabled

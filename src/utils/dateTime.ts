@@ -1,32 +1,45 @@
-export interface FormatApiDateTimeOptions {
-  includeSeconds?: boolean;
+export function formatApiDateTimeToInput(value?: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
 }
 
-export function formatApiDateTime(dateTime: string, options: FormatApiDateTimeOptions = {}) {
-  if (!dateTime) return "-";
-
-  const { includeSeconds = true } = options;
-  const match = dateTime.match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})(?::(\d{2}))?/);
-
-  if (match) {
-    const [, year, month, day, hour, minute, second = "00"] = match;
-    const time = includeSeconds ? `${hour}:${minute}:${second}` : `${hour}:${minute}`;
-
-    return `${day}/${month}/${year}, ${time}`;
+export function formatInputDateTimeToApi(value?: string | null): string | null {
+  if (!value) {
+    return null;
   }
 
-  const parsedDate = new Date(dateTime);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return dateTime;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
   }
 
-  return parsedDate.toLocaleString("pt-BR", {
-    timeZone: "UTC",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    ...(includeSeconds ? { second: "2-digit" as const } : {}),
-  });
+  return date.toISOString();
+}
+
+export function getCurrentLocalDateTimeInput(): string {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
+export function formatDateTimeForDisplay(value?: string | null): string {
+  if (!value) {
+    return "Nao registrada";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Nao registrada";
+  }
+
+  return date.toLocaleString("pt-BR");
 }

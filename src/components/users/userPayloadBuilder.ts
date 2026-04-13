@@ -1,5 +1,6 @@
 import type { User as BaseUser } from "@/types";
-import type { UserDialogUser, UserFieldFlags, UserFormState } from "@/composables/useUserFormState";
+import type { UserFieldFlags, UserFormState } from "@/composables/useUserFormState";
+import { formatInputDateTimeToApi } from "@/utils/datetime";
 
 export interface SavePayloadUser extends Omit<BaseUser, "user_groups"> {
   user_groups?: (number | { id: number; name: string })[];
@@ -23,8 +24,8 @@ export function buildUserPayload(
     selected_device_ids: form.panelAccessOnly ? [] : form.selectedDeviceIds,
     picture_id: savedUser.picture_id,
     remove_picture: pictureRemoved,
-    start_date: form.startDate,
-    end_date: form.endDate,
+    start_date: formatInputDateTimeToApi(form.startDate),
+    end_date: formatInputDateTimeToApi(form.endDate),
   };
 
   if (canShowPasswordField && form.password.trim()) {

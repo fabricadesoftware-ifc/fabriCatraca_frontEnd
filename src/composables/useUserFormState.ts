@@ -1,5 +1,6 @@
 import type { User as BaseUser } from "@/types";
 import { reactive, watch, type Ref } from "vue";
+import { formatApiDateTimeToInput } from "@/utils/datetime";
 
 export interface UserDialogUser extends Omit<BaseUser, "user_groups"> {
   user_groups?: (number | { id: number; name: string })[];
@@ -93,8 +94,8 @@ export function useUserFormState(userRef: Ref<UserDialogUser | null>) {
     form.deviceAdmin = fieldFlags.hasDeviceAdminField ? !!newUser.device_admin : false;
     form.userGroups =
       newUser.user_groups?.map((group) => (typeof group === "number" ? group : group.id)) || [];
-    form.startDate = newUser.start_date ?? null;
-    form.endDate = newUser.end_date ?? null;
+    form.startDate = formatApiDateTimeToInput(newUser.start_date);
+    form.endDate = formatApiDateTimeToInput(newUser.end_date);
     form.lastPassageAt = newUser.last_passage_at ?? null;
   }
 
