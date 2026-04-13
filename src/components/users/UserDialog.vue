@@ -9,7 +9,7 @@ import { useUserCardEnrollment } from "@/composables/useUserCardEnrollment";
 import { useUserFormState, type UserDialogUser } from "@/composables/useUserFormState";
 import { useUserGroupSchedules } from "@/composables/useUserGroupSchedules";
 import { isCpfValidFormat, isPhoneValidFormat } from "@/utils/contact";
-import { formatInputDateTimeToApi, getCurrentLocalDateTimeInput } from "@/utils/datetime";
+import { formatInputDateTimeToApi, getCurrentLocalDateTimeInput } from "@/utils/dateTime";
 import UserAccessLogsPanel from "./UserAccessLogsPanel.vue";
 import UserBioPanel from "./UserBioPanel.vue";
 import UserCardsPanel from "./UserCardsPanel.vue";

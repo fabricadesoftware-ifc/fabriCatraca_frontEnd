@@ -3,7 +3,7 @@ import type { Device, User as BaseUser } from "@/types";
 import type { UserFieldFlags, UserFormState } from "@/composables/useUserFormState";
 import { ref } from "vue";
 import { formatCpf, formatPhone, isCpfValidFormat, isPhoneValidFormat } from "@/utils/contact";
-import { formatDateTimeForDisplay } from "@/utils/datetime";
+import { formatDateTimeForDisplay } from "@/utils/dateTime";
 
 const props = defineProps<{
   form: UserFormState;

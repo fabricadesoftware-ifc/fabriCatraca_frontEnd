@@ -1,6 +1,6 @@
 import type { User as BaseUser } from "@/types";
 import type { UserFieldFlags, UserFormState } from "@/composables/useUserFormState";
-import { formatInputDateTimeToApi } from "@/utils/datetime";
+import { formatInputDateTimeToApi } from "@/utils/dateTime";
 
 export interface SavePayloadUser extends Omit<BaseUser, "user_groups"> {
   user_groups?: (number | { id: number; name: string })[];

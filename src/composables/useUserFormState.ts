@@ -1,6 +1,6 @@
 import type { User as BaseUser } from "@/types";
 import { reactive, watch, type Ref } from "vue";
-import { formatApiDateTimeToInput } from "@/utils/datetime";
+import { formatApiDateTimeToInput } from "@/utils/dateTime";
 
 export interface UserDialogUser extends Omit<BaseUser, "user_groups"> {
   user_groups?: (number | { id: number; name: string })[];

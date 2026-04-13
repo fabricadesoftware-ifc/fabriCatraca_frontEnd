@@ -2,7 +2,7 @@
 import { onMounted, ref } from "vue";
 import { useAuthStore, useUserStore } from "@/stores";
 import UserComponent from "@/components/users/UserComponent.vue";
-import { formatDateTimeForDisplay } from "@/utils/datetime";
+import { formatDateTimeForDisplay } from "@/utils/dateTime";
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
