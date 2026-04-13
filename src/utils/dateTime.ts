@@ -43,3 +43,7 @@ export function formatDateTimeForDisplay(value?: string | null): string {
 
   return date.toLocaleString("pt-BR");
 }
+
+export function formatApiDateTime(value?: string | null): string {
+  return formatDateTimeForDisplay(value);
+}
