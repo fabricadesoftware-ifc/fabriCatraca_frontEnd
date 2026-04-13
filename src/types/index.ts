@@ -320,6 +320,7 @@ export interface SystemConfig {
   online?: boolean;
   auto_reboot_hour?: number;
   auto_reboot_minute?: number;
+  clear_expired_users?: boolean;
   catra_timeout?: number;
   local_identification?: boolean;
   language?: "pt_BR" | "en_US" | "spa_SPA" | string;

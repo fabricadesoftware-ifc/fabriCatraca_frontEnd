@@ -13,6 +13,7 @@
 
   const form = reactive({
     online: true,
+    clear_expired_users: false,
     catra_timeout: 30000,
     local_identification: true,
     language: 'pt_BR' as string,
@@ -23,6 +24,7 @@
     newConfig => {
       if (newConfig) {
         form.online = newConfig.online ?? true
+        form.clear_expired_users = newConfig.clear_expired_users ?? false
         form.catra_timeout = newConfig.catra_timeout ?? 30000
         form.local_identification = newConfig.local_identification ?? true
         form.language = newConfig.language ?? 'pt_BR'
@@ -60,6 +62,16 @@
           label="Timeout da Catraca"
           persistent-hint
           type="number"
+        />
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-switch
+          v-model="form.clear_expired_users"
+          color="primary"
+          hint="Quando ativado, o equipamento limpa automaticamente os usuários expirados no reinício diário."
+          inset
+          label="Limpar Usuários Expirados"
+          persistent-hint
         />
       </v-col>
       <v-col cols="12" md="6">
