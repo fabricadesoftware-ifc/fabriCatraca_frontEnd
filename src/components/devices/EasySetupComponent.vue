@@ -94,12 +94,16 @@ async function executeSetup() {
 function getDeviceStatusIcon(status: string): string {
   const icons: Record<string, string> = {
     pending: "mdi-clock-outline",
-    running: "mdi-loading mdi-spin",
+    running: "mdi-loading",
     success: "mdi-check-circle",
     partial: "mdi-alert-circle",
     failed: "mdi-close-circle",
   };
   return icons[status] || "mdi-help-circle";
+}
+
+function getDeviceStatusIconClass(status: string): string | undefined {
+  return status === "running" ? "easy-setup-spin" : undefined;
 }
 
 function getDeviceStatusColor(status: string): string {
@@ -357,9 +361,9 @@ onUnmounted(() => {
           <div class="d-flex align-center ga-3 mb-4">
             <v-icon
               :color="overallStatusColor"
-              :icon="store.executing ? 'mdi-cog-sync' : 'mdi-check-circle'"
+              :icon="store.executing ? 'mdi-loading' : 'mdi-check-circle'"
               size="32"
-              :class="{ 'mdi-spin': store.executing }"
+              :class="{ 'easy-setup-spin': store.executing }"
             />
             <div class="flex-grow-1">
               <div class="text-h6">{{ overallStatusLabel }}</div>
@@ -396,6 +400,7 @@ onUnmounted(() => {
               :color="getDeviceStatusColor(dev.status)"
               :icon="getDeviceStatusIcon(dev.status)"
               size="28"
+              :class="getDeviceStatusIconClass(dev.status)"
             />
             <span>{{ dev.device_name }}</span>
             <v-spacer />
@@ -755,5 +760,20 @@ onUnmounted(() => {
 }
 .border-primary {
   border: 2px solid rgb(var(--v-theme-primary)) !important;
+}
+
+.easy-setup-spin {
+  animation: easy-setup-spin 1.2s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes easy-setup-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
