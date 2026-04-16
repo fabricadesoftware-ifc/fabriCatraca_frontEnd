@@ -29,14 +29,26 @@
     },
     tooltip: {
       trigger: 'axis',
-      axisPointer: { type: 'cross', label: { backgroundColor: '#6a7985' } },
+      axisPointer: {
+        type: 'cross',
+        label: {
+          backgroundColor: '#6a7985',
+          formatter: ({ axisDimension, value }: { axisDimension: string; value: string | number }) => {
+            if (axisDimension === 'y') {
+              return String(Math.round(Number(value) || 0))
+            }
+
+            return String(value)
+          },
+        },
+      },
       formatter: (params: any) => {
         const data = params[0]
         const [date, time] = data.name.split(', ')
         const [day, month] = date.split('/')
         return `${day}/${month} as ${time}<br/>
-                <span style="color: #4CAF50;">● Aprovados: ${data.value}</span><br/>
-                <span style="color: #F44336;">● Negados: ${params[1]?.value || 0}</span>`
+                <span style="color: #4CAF50;">● Aprovados: ${Math.round(Number(data.value) || 0)}</span><br/>
+                <span style="color: #F44336;">● Negados: ${Math.round(Number(params[1]?.value) || 0)}</span>`
       },
     },
     legend: { data: ['Aprovados', 'Negados'], bottom: 10 },
@@ -59,8 +71,12 @@
     yAxis: {
       type: 'value',
       name: 'Quantidade de Acessos',
+      minInterval: 1,
       nameTextStyle: { color: '#666666' },
-      axisLabel: { color: '#666666' },
+      axisLabel: {
+        color: '#666666',
+        formatter: (value: number) => String(Math.round(value)),
+      },
       axisLine: { lineStyle: { color: '#e0e0e0' } },
       splitLine: { lineStyle: { color: '#f0f0f0' } },
     },
