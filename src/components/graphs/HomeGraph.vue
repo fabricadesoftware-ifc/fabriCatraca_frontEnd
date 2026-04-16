@@ -22,7 +22,7 @@
     backgroundColor: '#ffffff',
     title: {
       text: 'Acessos por Hora',
-      subtext: 'Histórico das últimas 24 horas',
+      subtext: 'Historico das ultimas 24 horas',
       left: 'center',
       textStyle: { fontSize: 16, fontWeight: 'bold', color: '#333333' },
       subtextStyle: { fontSize: 12, color: '#666666' },
@@ -34,7 +34,7 @@
         const data = params[0]
         const [date, time] = data.name.split(', ')
         const [day, month] = date.split('/')
-        return `${day}/${month} às ${time}<br/>
+        return `${day}/${month} as ${time}<br/>
                 <span style="color: #4CAF50;">● Aprovados: ${data.value}</span><br/>
                 <span style="color: #F44336;">● Negados: ${params[1]?.value || 0}</span>`
       },
@@ -44,7 +44,7 @@
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: chartData.value.dates.slice(0, -3),
+      data: chartData.value.dates,
       axisLabel: {
         rotate: 45,
         fontSize: 10,
@@ -102,11 +102,11 @@
     ],
   }))
 
-  function formatUTC(date: Date, withMinutes = false): string {
-    const day = String(date.getUTCDate()).padStart(2, '0')
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-    const hour = String(date.getUTCHours()).padStart(2, '0')
-    const minute = String(date.getUTCMinutes()).padStart(2, '0')
+  function formatLocal(date: Date, withMinutes = false): string {
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const hour = String(date.getHours()).padStart(2, '0')
+    const minute = String(date.getMinutes()).padStart(2, '0')
     return `${day}/${month}, ${hour}:${withMinutes ? minute : '00'}`
   }
 
@@ -115,24 +115,32 @@
     const now = new Date()
 
     const start = new Date(now)
-    start.setUTCHours(now.getUTCHours() - 23)
-    start.setUTCMinutes(0)
-    start.setUTCSeconds(0)
-    start.setUTCMilliseconds(0)
+    start.setHours(now.getHours() - 23)
+    start.setMinutes(0)
+    start.setSeconds(0)
+    start.setMilliseconds(0)
 
     const current = new Date(start)
     while (current.getTime() <= now.getTime()) {
-      dates.push(formatUTC(current, false)) // HH:00
-      current.setUTCHours(current.getUTCHours() + 1)
+      dates.push(formatLocal(current, false))
+      current.setHours(current.getHours() + 1)
     }
 
-    // Substitui o último ponto pelo horário exato atual (ex: 09:28)
-    const nowKey = formatUTC(now, true)
+    const nowKey = formatLocal(now, true)
     if (dates[dates.length - 1] !== nowKey) {
       dates[dates.length - 1] = nowKey
     }
 
     return dates
+  }
+
+  function isCurrentLocalHour(date: Date, now: Date): boolean {
+    return (
+      date.getHours() === now.getHours() &&
+      date.getDate() === now.getDate() &&
+      date.getMonth() === now.getMonth() &&
+      date.getFullYear() === now.getFullYear()
+    )
   }
 
   function processLogData() {
@@ -145,21 +153,16 @@
       }
 
       const now = new Date()
-      const currentHourKey = formatUTC(now, true) // chave do último ponto
+      const currentHourKey = formatLocal(now, true)
 
       function getKey(log: AccessLogs): string {
         const date = new Date(log.time)
-        const logHour = date.getUTCHours()
-        const nowHour = now.getUTCHours()
-        const logDay = date.getUTCDate()
-        const nowDay = now.getUTCDate()
 
-        // Se o log é da hora atual, agrupa no ponto final (HH:mm)
-        if (logHour === nowHour && logDay === nowDay) {
+        if (isCurrentLocalHour(date, now)) {
           return currentHourKey
         }
 
-        return formatUTC(date, false) // HH:00
+        return formatLocal(date, false)
       }
 
       if (props.approvedLogs) {
@@ -180,16 +183,15 @@
         }
       }
 
-      // Usa a ordem do dateRange diretamente (já está ordenado)
       chartData.value = {
         dates: dateRange,
-        approved: dateRange.map(d => groupedData.get(d)?.approved || 0),
-        denied: dateRange.map(d => groupedData.get(d)?.denied || 0),
+        approved: dateRange.map((dateLabel) => groupedData.get(dateLabel)?.approved || 0),
+        denied: dateRange.map((dateLabel) => groupedData.get(dateLabel)?.denied || 0),
       }
 
       updateChart()
     } catch (error) {
-      console.error('Erro ao processar dados do gráfico:', error)
+      console.error('Erro ao processar dados do grafico:', error)
     }
   }
 
@@ -214,8 +216,8 @@
   }, { deep: true })
 
   onMounted(() => {
-    initChart()      // 1. Cria o gráfico
-    processLogData() // 2. Processa dados e chama updateChart()
+    initChart()
+    processLogData()
   })
 </script>
 
@@ -224,7 +226,7 @@
     <div class="d-flex align-center justify-space-between mb-4">
       <h3 class="text-h6 font-weight-medium">
         <v-icon class="mr-2" color="primary">mdi-chart-line</v-icon>
-        Evolução dos Acessos por Hora
+        Evolucao dos Acessos por Hora
       </h3>
       <v-btn
         color="primary"
@@ -256,7 +258,6 @@
 </template>
 
 <style scoped>
-  /* Estilos específicos para o gráfico */
   .v-card {
     border-radius: 12px;
     background-color: white;
