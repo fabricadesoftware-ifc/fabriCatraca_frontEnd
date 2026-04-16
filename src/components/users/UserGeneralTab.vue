@@ -92,6 +92,16 @@ const phoneRules = [
           }}
         </v-alert>
         <v-text-field
+          v-if="minimalMode"
+          :model-value="form.cpf"
+          label="CPF"
+          :error-messages="getFieldErrors('cpf')"
+          :maxlength="14"
+          :rules="cpfRules"
+          :disabled="isSisaeViewer"
+          @update:model-value="emit('update:form', { cpf: formatCpf(String($event ?? '')) })"
+        />
+        <v-text-field
           v-if="!minimalMode"
           :model-value="groups[0] || 'Usuario sem turma'"
           label="Turma"
@@ -114,16 +124,6 @@ const phoneRules = [
           :error-messages="getFieldErrors('email')"
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:form', { email: String($event ?? '') })"
-        />
-        <v-text-field
-          v-if="minimalMode"
-          :model-value="form.cpf"
-          label="CPF"
-          :error-messages="getFieldErrors('cpf')"
-          :maxlength="14"
-          :rules="cpfRules"
-          :disabled="isSisaeViewer"
-          @update:model-value="emit('update:form', { cpf: formatCpf(String($event ?? '')) })"
         />
         <v-text-field
           v-if="minimalMode"
