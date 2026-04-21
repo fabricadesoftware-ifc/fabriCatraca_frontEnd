@@ -1,7 +1,17 @@
 <script setup lang="ts">
-  import * as echarts from 'echarts'
+  import * as echarts from 'echarts/core'
+  import { LineChart } from 'echarts/charts'
+  import {
+    GridComponent,
+    TooltipComponent,
+    LegendComponent,
+    TitleComponent,
+  } from 'echarts/components'
+  import { CanvasRenderer } from 'echarts/renderers'
   import { computed, onMounted, ref, watch } from 'vue'
   import type { AccessLogs } from '@/types'
+
+  echarts.use([LineChart, GridComponent, TooltipComponent, LegendComponent, TitleComponent, CanvasRenderer])
 
   interface Props {
     approvedLogs: AccessLogs[]
