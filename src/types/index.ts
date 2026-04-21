@@ -270,6 +270,8 @@ export interface User {
   start_date?: string | null;
   end_date?: string | null;
   last_passage_at?: string | null;
+  visit?: Visita;
+  reused_existing_user?: boolean;
 }
 
 export interface UserAccessRule {
@@ -281,6 +283,23 @@ export interface UserAccessRule {
 export interface UserAccessRuleCreate {
   user: number;
   access_rule: number;
+}
+
+export interface Visita {
+  id: number;
+  user: number;
+  user_name?: string;
+  created_by?: number | null;
+  created_by_name?: string | null;
+  initial_date: string;
+  visit_date: string;
+  end_date?: string | null;
+  card?: number | null;
+  card_value?: string | null;
+  status?: "active" | "overdue" | "finished";
+  status_label?: string;
+  finished_at?: string | null;
+  card_removed_at?: string | null;
 }
 
 export interface AccessLogs {
@@ -611,6 +630,7 @@ export interface TemporaryUserRelease {
   created_at: string;
   updated_at: string;
   portal_group?: { id: number; name: string; description: string; devices?: any[] };
+  visita?: Visita | null;
 }
 
 export interface TemporaryUserReleaseCreatePayload {
@@ -619,6 +639,7 @@ export interface TemporaryUserReleaseCreatePayload {
   notes?: string;
   valid_from?: string;
   portal_group_id?: number | null;
+  visita_id?: number | null;
 }
 
 export interface TemporaryGroupRelease {
