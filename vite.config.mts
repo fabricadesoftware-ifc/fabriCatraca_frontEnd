@@ -67,22 +67,18 @@ export default defineConfig({
         ],
       },
     }),
-    // DevTools apenas em desenvolvimento
     !isProd && vueDevTools(),
   ],
   build: {
-    // esbuild é muito mais rápido que terser (padrão)
     minify: "esbuild",
-    // sourcemaps desnecessários em produção — grande impacto no tempo de build
     sourcemap: false,
-    // avisa sobre chunks grandes mas não bloqueia
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        // separa vendor libs do código da app — melhora cache do browser
         manualChunks: {
           "vendor-vue": ["vue", "vue-router", "pinia"],
           "vendor-vuetify": ["vuetify"],
+          "vendor-echarts": ["echarts"],
         },
       },
     },
