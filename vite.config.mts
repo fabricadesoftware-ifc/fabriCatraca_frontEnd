@@ -1,20 +1,17 @@
-// Plugins
-import { fileURLToPath, URL } from 'node:url'
-import Vue from '@vitejs/plugin-vue'
-import AutoImport from 'unplugin-auto-import/vite'
-import Fonts from 'unplugin-fonts/vite'
-import Components from 'unplugin-vue-components/vite'
-import { VueRouterAutoImports } from 'unplugin-vue-router'
-import VueRouter from 'unplugin-vue-router/vite'
-import { defineConfig } from 'vite'
-import Layouts from 'vite-plugin-vue-layouts-next'
-import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
-import vueDevTools from 'vite-plugin-vue-devtools'
+import { fileURLToPath, URL } from "node:url";
+import Vue from "@vitejs/plugin-vue";
+import AutoImport from "unplugin-auto-import/vite";
+import Fonts from "unplugin-fonts/vite";
+import Components from "unplugin-vue-components/vite";
+import { VueRouterAutoImports } from "unplugin-vue-router";
+import VueRouter from "unplugin-vue-router/vite";
+import { defineConfig } from "vite";
+import Layouts from "vite-plugin-vue-layouts-next";
+import Vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
+import vueDevTools from "vite-plugin-vue-devtools";
 
+const isProd = process.env.NODE_ENV === "production";
 
-// Utilities
-
-// https://vitejs.dev/config/
 export default defineConfig({
   server: {
     host: "0.0.0.0",
@@ -35,7 +32,6 @@ export default defineConfig({
     VueRouter({
       dts: "src/typed-router.d.ts",
     }),
-
     Layouts(),
     Vuetify({
       autoImport: true,
@@ -57,11 +53,9 @@ export default defineConfig({
       },
       vueTemplate: true,
     }),
-
     Components({
       dts: "src/components.d.ts",
     }),
-    // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
     Fonts({
       fontsource: {
         families: [
@@ -73,8 +67,26 @@ export default defineConfig({
         ],
       },
     }),
-    vueDevTools(),
+    // DevTools apenas em desenvolvimento
+    !isProd && vueDevTools(),
   ],
+  build: {
+    // esbuild é muito mais rápido que terser (padrão)
+    minify: "esbuild",
+    // sourcemaps desnecessários em produção — grande impacto no tempo de build
+    sourcemap: false,
+    // avisa sobre chunks grandes mas não bloqueia
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        // separa vendor libs do código da app — melhora cache do browser
+        manualChunks: {
+          "vendor-vue": ["vue", "vue-router", "pinia"],
+          "vendor-vuetify": ["vuetify"],
+        },
+      },
+    },
+  },
   optimizeDeps: {
     exclude: [
       "vuetify",
