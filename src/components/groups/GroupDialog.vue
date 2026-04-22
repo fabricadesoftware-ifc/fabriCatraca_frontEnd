@@ -59,6 +59,10 @@ function getPortalGroupIdForRule(ruleId: number): number | null {
   return entry ? entry.portal_group_id : null;
 }
 
+function hasAccessRule(ruleId: number): boolean {
+  return findRuleIndex(ruleId) !== -1;
+}
+
 function toggleAccessRule(ruleId: number, value: boolean): void {
   const currentRules = [...groupAccessRules.value];
   if (value) {
@@ -286,7 +290,7 @@ onMounted(async () => {
                               <v-row dense align="center">
                                 <v-col cols="12" md="6">
                                   <v-select
-                                    v-if="getPortalGroupIdForRule(rule.id) !== undefined"
+                                    v-if="hasAccessRule(rule.id)"
                                     density="compact"
                                     hide-details
                                     :items="portalGroupOptions"
@@ -307,7 +311,7 @@ onMounted(async () => {
                               <v-switch
                                 color="primary"
                                 hide-details
-                                :model-value="getPortalGroupIdForRule(rule.id) !== undefined"
+                                :model-value="hasAccessRule(rule.id)"
                                 @update:model-value="(value) => toggleAccessRule(rule.id, !!value)"
                               />
                             </template>

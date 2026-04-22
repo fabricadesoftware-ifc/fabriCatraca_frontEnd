@@ -28,7 +28,7 @@ export function useUser () {
     try {
       const response = await UsersService.createUser(data)
       await loadUsers()
-      return response.data
+      return (response as any)?.data || (response as any)?.user || response
     } catch (error) {
       console.error(error)
       throw error
@@ -42,7 +42,7 @@ export function useUser () {
     try {
       const response = await UsersService.updateUser(id, data)
       await loadUsers()
-      return response.data
+      return (response as any)?.data || (response as any)?.user || response
     } catch (error) {
       console.error(error)
       throw error

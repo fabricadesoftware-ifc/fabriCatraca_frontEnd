@@ -290,7 +290,7 @@ onMounted(reloadData);
   <v-container class="pa-6" fluid>
     <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
       <div>
-        <h2 class="text-h5 font-weight-bold">Acoes em Catracas</h2>
+        <h2 class="text-h5 font-weight-bold">Ações em Catracas</h2>
         <p class="text-body-2 text-medium-emphasis mt-1">
           Selecione as catracas e execute a acao remota desejada.
         </p>
@@ -314,7 +314,7 @@ onMounted(reloadData);
           :prepend-icon="currentActionIcon"
           @click="openConfirmDialog"
         >
-          Executar acao
+          Executar ação
         </v-btn>
       </div>
     </div>

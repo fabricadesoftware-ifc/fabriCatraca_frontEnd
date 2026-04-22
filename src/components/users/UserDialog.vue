@@ -80,6 +80,8 @@ const roleOptions = [
   { title: "Administrador", value: "admin" },
   { title: "Guarita", value: "guarita" },
   { title: "SISAE", value: "sisae" },
+  { title: "Aluno", value: "aluno" },
+  { title: "Servidor", value: "servidor" },
 ];
 
 const currentTargetRole = computed(() => {
@@ -304,7 +306,11 @@ async function salvarUsuario() {
         user_type_id: 1,
       });
 
-      toast.success("Visitante e cartao cadastrados com sucesso!");
+      toast.success(
+        result.reused_existing_user
+          ? "Visitante existente reaproveitado e nova visita registrada com cartao!"
+          : "Visitante e cartao cadastrados com sucesso!",
+      );
       emit("save", result.user);
       closeDialog();
       return;

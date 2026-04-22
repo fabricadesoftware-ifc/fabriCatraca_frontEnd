@@ -37,7 +37,7 @@ export const useUserStore = defineStore("user", {
       this.saving = true;
       try {
         const response = await UsersService.createUser(data);
-        return response.data;
+        return (response as any)?.data || (response as any)?.user || response;
       } catch (error) {
         console.error(error);
         throw error;
@@ -50,7 +50,7 @@ export const useUserStore = defineStore("user", {
       this.saving = true;
       try {
         const response = await UsersService.updateUser(id, data);
-        return response.data;
+        return (response as any)?.data || (response as any)?.user || response;
       } catch (error) {
         console.error(error);
         throw error;

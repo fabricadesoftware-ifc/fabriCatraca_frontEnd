@@ -33,7 +33,7 @@ export interface QueryParams {
   user_type_id?: number;
 }
 
-export type AppRole = "admin" | "guarita" | "sisae" | "";
+export type AppRole = "admin" | "guarita" | "sisae" | "aluno" | "servidor" | "";
 
 export interface AccessRule {
   data: any;
@@ -617,6 +617,7 @@ export interface TemporaryUserRelease {
   id: number;
   user: TemporaryReleaseActor;
   requested_by: TemporaryReleaseActor;
+  notified_server?: TemporaryReleaseActor | null;
   access_rule: TemporaryReleaseRule;
   status: "pending" | "active" | "consumed" | "expired" | "cancelled" | "failed";
   valid_from: string;
@@ -631,6 +632,8 @@ export interface TemporaryUserRelease {
   updated_at: string;
   portal_group?: { id: number; name: string; description: string; devices?: any[] };
   visita?: Visita | null;
+  notification_status?: "queued" | "sent" | "failed" | string | null;
+  notification_warning?: string;
 }
 
 export interface TemporaryUserReleaseCreatePayload {
@@ -640,6 +643,7 @@ export interface TemporaryUserReleaseCreatePayload {
   valid_from?: string;
   portal_group_id?: number | null;
   visita_id?: number | null;
+  notified_server_id?: number | null;
 }
 
 export interface TemporaryGroupRelease {

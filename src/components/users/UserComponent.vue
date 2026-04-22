@@ -43,6 +43,10 @@ let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const canCreateUsers = computed(() => props.canCreate ?? props.app_role === "admin");
 
+function normalizeSelectedDeviceIds(value?: number[] | null) {
+  return Array.isArray(value) ? value : [];
+}
+
 function buildReloadQuery() {
   return {
     page: userStore.current_page,
@@ -104,7 +108,9 @@ async function salvarUsuario(user: User) {
         app_role: user.app_role,
         panel_access_only: user.panel_access_only,
         device_scope: user.panel_access_only ? "none" : user.device_scope,
-        selected_device_ids: user.panel_access_only ? [] : user.selected_device_ids,
+        selected_device_ids: user.panel_access_only
+          ? []
+          : normalizeSelectedDeviceIds(user.selected_device_ids),
         registration: user.registration,
         user_type_id: user.user_type_id,
         device_admin: user.device_admin,
@@ -133,7 +139,9 @@ async function salvarUsuario(user: User) {
         app_role: user.app_role,
         panel_access_only: user.panel_access_only,
         device_scope: user.panel_access_only ? "none" : user.device_scope,
-        selected_device_ids: user.panel_access_only ? [] : user.selected_device_ids,
+        selected_device_ids: user.panel_access_only
+          ? []
+          : normalizeSelectedDeviceIds(user.selected_device_ids),
         registration: user.registration,
         user_type_id: user.user_type_id,
         device_admin: user.device_admin,
@@ -164,6 +172,11 @@ async function salvarUsuario(user: User) {
 
     await userStore.loadUsers(buildReloadQuery());
     dialog.value = false;
+    if (props.minimalDialog && savedUser.reused_existing_user) {
+      toast.success("Visitante ja existente reaproveitado e nova visita registrada.");
+      return;
+    }
+
     toast.success("Usuario salvo com sucesso.");
   } catch (error: any) {
     const responseData = error?.response?.data;
@@ -267,6 +280,8 @@ function appRoleLabel(value?: string) {
   if (value === "admin") return "Administrador";
   if (value === "guarita") return "Guarita";
   if (value === "sisae") return "SISAE";
+  if (value === "aluno") return "Aluno";
+  if (value === "servidor") return "Servidor";
 
   return "Sem perfil";
 }
