@@ -8,8 +8,15 @@ import {
   UsersService,
   VisitasService,
 } from "@/services";
+import { useAuthStore } from "@/stores";
 
-const props = defineProps<{ userId: number }>();
+type NotificationTargetUser = Pick<User, "name" | "app_role" | "effective_app_role">;
+
+const props = defineProps<{ userId: number; user: NotificationTargetUser }>();
+const emit = defineEmits<{
+  (e: "created"): void;
+}>();
+const authStore = useAuthStore();
 
 const releases = ref<TemporaryUserRelease[]>([]);
 const serverUsers = ref<User[]>([]);
@@ -25,13 +32,96 @@ const selectedPortalGroupId = ref<number | null>(null);
 const selectedVisitaId = ref<number | null>(null);
 const selectedNotifiedServerId = ref<number | null>(null);
 const portalGroups = ref<any[]>([]);
+const notificationMessage = ref("");
+const notificationMessageDirty = ref(false);
 
 function toDateTimeLocalValue(date = new Date()) {
   const timezoneOffset = date.getTimezoneOffset() * 60_000;
   return new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 16);
 }
 
+function parseDateTimeLocalValue(value: string) {
+  if (!value) {
+    return null;
+  }
+
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return parsedDate;
+}
+
+function formatDate(value: Date | null) {
+  if (!value) {
+    return "--/--/----";
+  }
+
+  return value.toLocaleDateString("pt-BR");
+}
+
+function formatTime(value: Date | null) {
+  if (!value) {
+    return "--:--";
+  }
+
+  return value.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 const validFrom = ref(toDateTimeLocalValue());
+const validFromDate = computed(() => parseDateTimeLocalValue(validFrom.value));
+const validUntilDate = computed(() => {
+  if (!validFromDate.value) {
+    return null;
+  }
+
+  const duration = Number.isFinite(durationMinutes.value) ? Math.max(durationMinutes.value, 0) : 0;
+  const untilDate = new Date(validFromDate.value);
+  untilDate.setMinutes(untilDate.getMinutes() + duration);
+  return untilDate;
+});
+
+function getUserRoleLabel(user: NotificationTargetUser) {
+  const role = user.effective_app_role || user.app_role || "";
+
+  if (role === "aluno") {
+    return "aluno";
+  }
+
+  if (role === "servidor") {
+    return "servidor";
+  }
+
+  if (role === "sisae") {
+    return "usuario do SISAE";
+  }
+
+  return "usuario";
+}
+
+const generatedNotificationMessage = computed(() => {
+  const targetUserType = getUserRoleLabel(props.user);
+  const targetUserName = props.user.name || "Usuario";
+  const requesterName = authStore.user?.name || "Sistema";
+  const reason = notes.value.trim() || "Nao informado";
+  const releaseDate = formatDate(validFromDate.value);
+  const releaseTime = formatTime(validFromDate.value);
+  const expirationDate = formatDate(validUntilDate.value);
+  const expirationTime = formatTime(validUntilDate.value);
+
+  return [
+    "Caro(a) professor(a),",
+    "",
+    `O ${targetUserType} ${targetUserName} foi liberado no dia ${releaseDate} as ${releaseTime} pelo motivo de ${reason}.`,
+    "",
+    `A liberacao permanece valida ate ${expirationDate} as ${expirationTime}.`,
+    `Solicitado por: ${requesterName}.`,
+  ].join("\n");
+});
 
 const openRelease = computed(() =>
   releases.value.find((release) => ["pending", "active"].includes(release.status)),
@@ -182,6 +272,16 @@ async function loadVisitas() {
 
 const notesRules = [(v: any) => (!!v && v.trim() !== "") || "A observacao e obrigatoria"];
 
+function restoreGeneratedNotificationMessage() {
+  notificationMessageDirty.value = false;
+  notificationMessage.value = generatedNotificationMessage.value;
+}
+
+function updateNotificationMessage(value: string) {
+  notificationMessage.value = value;
+  notificationMessageDirty.value = value.trim() !== generatedNotificationMessage.value.trim();
+}
+
 async function createRelease() {
   if (durationMinutes.value <= 0) {
     toast.warning("Informe uma duracao valida em minutos");
@@ -205,6 +305,9 @@ async function createRelease() {
       user_id: props.userId,
       duration_minutes: durationMinutes.value,
       notes: notes.value,
+      notification_message: shouldNotifyServer
+        ? (notificationMessage.value.trim() || generatedNotificationMessage.value)
+        : undefined,
       valid_from: new Date(validFrom.value).toISOString(),
       portal_group_id: selectedPortalGroupId.value,
       visita_id: selectedVisitaId.value,
@@ -218,6 +321,7 @@ async function createRelease() {
     selectedPortalGroupId.value = null;
     selectedVisitaId.value = null;
     selectedNotifiedServerId.value = null;
+    restoreGeneratedNotificationMessage();
     toast.success("Liberacao temporaria criada com sucesso", { autoClose: 3000 });
     if (releaseResponse.notification_warning) {
       toast.warning(releaseResponse.notification_warning, { autoClose: 5000 });
@@ -226,7 +330,7 @@ async function createRelease() {
     } else if (shouldNotifyServer && releaseResponse.notification_status === "sent") {
       toast.success("E-mail enviado para o servidor selecionado", { autoClose: 3000 });
     }
-    await loadReleases();
+    emit("created");
   } catch (error) {
     toast.error(getErrorMessage(error, "Erro ao criar liberacao temporaria"));
   } finally {
@@ -248,12 +352,24 @@ async function cancelRelease(release: TemporaryUserRelease) {
 }
 
 watch(
+  generatedNotificationMessage,
+  (message) => {
+    if (!notificationMessageDirty.value) {
+      notificationMessage.value = message;
+    }
+  },
+  { immediate: true },
+);
+
+watch(
   () => props.userId,
   () => {
+    notes.value = "";
     validFrom.value = toDateTimeLocalValue();
     selectedPortalGroupId.value = null;
     selectedVisitaId.value = null;
     selectedNotifiedServerId.value = null;
+    restoreGeneratedNotificationMessage();
     loadReleases();
     loadVisitas();
   },
@@ -309,7 +425,6 @@ onMounted(() => {
                   label="Grupo de Portais"
                   clearable
                   variant="outlined"
-                  hint="Selecione o grupo de catracas onde a liberacao sera aplicada"
                   persistent-hint
                 >
                   <template #prepend-item>
@@ -328,7 +443,6 @@ onMounted(() => {
                   clearable
                   label="Visita vinculada"
                   variant="outlined"
-                  hint="Opcional: vincule esta liberacao a uma visita existente"
                   persistent-hint
                 />
               </v-col>
@@ -351,20 +465,33 @@ onMounted(() => {
                   clearable
                   label="Servidor para notificar"
                   variant="outlined"
-                  hint="Opcional: selecione o servidor/professor que deve receber o e-mail desta liberacao"
+
                   persistent-hint
                   no-data-text="Nenhum servidor com e-mail encontrado"
                 />
-                <v-alert
-                  v-if="visitas.length > 0"
-                  class="mt-2"
-                  color="info"
-                  icon="mdi-link-variant"
-                  variant="tonal"
+                <v-textarea
+                  v-if="selectedNotifiedServerId !== null"
+                  :model-value="notificationMessage"
+                  label="Mensagem do e-mail"
+                  variant="outlined"
+                  rows="4"
+                  auto-grow
+                  persistent-hint
+                  @update:model-value="updateNotificationMessage"
+                />
+                <div
+                  v-if="selectedNotifiedServerId !== null && notificationMessageDirty"
+                  class="mb-4"
                 >
-                  Agora a liberacao pode ficar ligada a uma visita especifica do usuario. Isso ajuda
-                  a enxergar no sistema qual visita esta sendo tratada.
-                </v-alert>
+                  <v-btn
+                    class="px-0"
+                    size="small"
+                    variant="text"
+                    @click="restoreGeneratedNotificationMessage"
+                  >
+                    Restaurar mensagem automatica
+                  </v-btn>
+                </div>
               </v-col>
             </v-row>
           </v-card-text>
@@ -451,6 +578,9 @@ onMounted(() => {
                     </div>
                     <div v-if="release.notes" class="text-caption text-medium-emphasis">
                       Obs.: {{ release.notes }}
+                    </div>
+                    <div v-if="release.notification_message" class="text-caption text-medium-emphasis">
+                      Msg. e-mail: {{ release.notification_message }}
                     </div>
                   </td>
                   <td class="text-right">

@@ -15,7 +15,7 @@ const isProd = process.env.NODE_ENV === "production";
 export default defineConfig({
   server: {
     host: "0.0.0.0",
-    port: 3000,
+    port: 3001,
     proxy: {
       "/ifc-horarios": {
         target: "https://horarios.araquari.ifc.edu.br",

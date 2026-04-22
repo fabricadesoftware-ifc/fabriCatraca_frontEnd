@@ -493,7 +493,11 @@ onMounted(async () => {
           </v-window-item>
 
           <v-window-item value="liberacao" v-if="!isMinimalMode && !isRegisterOnlyMode">
-            <UserTemporaryReleasePanel :user-id="props.user.id" />
+            <UserTemporaryReleasePanel
+              :user="props.user"
+              :user-id="props.user.id"
+              @created="closeDialog"
+            />
           </v-window-item>
 
           <v-window-item value="pin" v-if="authStore.role == 'admin' && !isMinimalMode">
