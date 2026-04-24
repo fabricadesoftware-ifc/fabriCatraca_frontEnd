@@ -66,6 +66,11 @@ const phoneRules = [
   (value: string) =>
     isPhoneValidFormat(value) || "Telefone deve estar no formato (00) 0000-0000 ou (00) 00000-0000",
 ];
+
+const optionalPhoneRules = [
+  (value: string) =>
+    !value || isPhoneValidFormat(value) || "Telefone deve estar no formato (00) 0000-0000 ou (00) 00000-0000",
+];
 </script>
 
 <template>
@@ -92,13 +97,12 @@ const phoneRules = [
           }}
         </v-alert>
         <v-text-field
-          v-if="minimalMode"
           :model-value="form.cpf"
           label="CPF"
           :error-messages="getFieldErrors('cpf')"
           :maxlength="14"
           :rules="cpfRules"
-          :disabled="isSisaeViewer"
+          :readonly="!minimalMode || isSisaeViewer"
           @update:model-value="emit('update:form', { cpf: formatCpf(String($event ?? '')) })"
         />
         <v-text-field
@@ -263,8 +267,26 @@ const phoneRules = [
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:form', { deviceAdmin: Boolean($event) })"
         />
-        <v-text-field v-if="!minimalMode" label="Data de nascimento" type="date" disabled />
-        <v-text-field v-if="!minimalMode" label="(xx) xxxxx-xxxx" type="tel" disabled />
+        <v-text-field
+          v-if="!minimalMode"
+          :model-value="form.birthDate"
+          label="Data de nascimento"
+          type="date"
+          :error-messages="getFieldErrors('birth_date')"
+          readonly
+          @update:model-value="emit('update:form', { birthDate: ($event as string | null) ?? null })"
+        />
+        <v-text-field
+          v-if="!minimalMode"
+          :model-value="form.phone"
+          label="Telefone"
+          type="tel"
+          :error-messages="getFieldErrors('phone')"
+          :maxlength="15"
+          :rules="optionalPhoneRules"
+          :disabled="isSisaeViewer"
+          @update:model-value="emit('update:form', { phone: formatPhone(String($event ?? '')) })"
+        />
       </v-col>
 
       <v-col v-if="!minimalMode" class="d-flex flex-column align-center" cols="4">

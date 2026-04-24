@@ -30,7 +30,7 @@ const durationMinutes = ref(5);
 const notes = ref("");
 const selectedPortalGroupId = ref<number | null>(null);
 const selectedVisitaId = ref<number | null>(null);
-const selectedNotifiedServerId = ref<number | null>(null);
+const notificationEmail = ref<string | null>("");
 const portalGroups = ref<any[]>([]);
 const notificationMessage = ref("");
 const notificationMessageDirty = ref(false);
@@ -134,15 +134,16 @@ const visitaOptions = computed(() =>
   })),
 );
 
-const notifiedServerOptions = computed(() =>
+const notificationEmailOptions = computed(() =>
   serverUsers.value
     .filter((user) => Boolean(user.email))
     .map((user) => ({
-      title: user.name,
-      value: user.id,
-      subtitle: user.email || "",
+      title: `${user.name} - ${user.email}`,
+      value: user.email || "",
     })),
 );
+
+const notificationEmailValue = computed(() => (notificationEmail.value || "").trim());
 
 function getStatusLabel(status: TemporaryUserRelease["status"]) {
   const labels: Record<TemporaryUserRelease["status"], string> = {
@@ -201,6 +202,10 @@ function getErrorMessage(error: any, fallback: string) {
 
   if (error?.response?.data?.notified_server_id?.[0]) {
     return error.response.data.notified_server_id[0];
+  }
+
+  if (error?.response?.data?.notification_email?.[0]) {
+    return error.response.data.notification_email[0];
   }
 
   if (error?.response?.data?.error) {
@@ -300,18 +305,19 @@ async function createRelease() {
 
   saving.value = true;
   try {
-    const shouldNotifyServer = selectedNotifiedServerId.value !== null;
+    const recipientEmail = notificationEmailValue.value;
+    const shouldNotifyServer = recipientEmail !== "";
     const response = await TemporaryUserReleasesService.createTemporaryUserRelease({
       user_id: props.userId,
       duration_minutes: durationMinutes.value,
       notes: notes.value,
+      notification_email: recipientEmail || undefined,
       notification_message: shouldNotifyServer
         ? (notificationMessage.value.trim() || generatedNotificationMessage.value)
         : undefined,
       valid_from: new Date(validFrom.value).toISOString(),
       portal_group_id: selectedPortalGroupId.value,
       visita_id: selectedVisitaId.value,
-      notified_server_id: selectedNotifiedServerId.value,
     });
     const releaseResponse = (
       "data" in response && response.data ? response.data : response
@@ -320,15 +326,15 @@ async function createRelease() {
     validFrom.value = toDateTimeLocalValue();
     selectedPortalGroupId.value = null;
     selectedVisitaId.value = null;
-    selectedNotifiedServerId.value = null;
+    notificationEmail.value = "";
     restoreGeneratedNotificationMessage();
     toast.success("Liberacao temporaria criada com sucesso", { autoClose: 3000 });
     if (releaseResponse.notification_warning) {
       toast.warning(releaseResponse.notification_warning, { autoClose: 5000 });
     } else if (shouldNotifyServer && releaseResponse.notification_status === "queued") {
-      toast.success("E-mail enfileirado para o servidor selecionado", { autoClose: 3000 });
+      toast.success("E-mail enfileirado para o destinatario informado", { autoClose: 3000 });
     } else if (shouldNotifyServer && releaseResponse.notification_status === "sent") {
-      toast.success("E-mail enviado para o servidor selecionado", { autoClose: 3000 });
+      toast.success("E-mail enviado para o destinatario informado", { autoClose: 3000 });
     }
     emit("created");
   } catch (error) {
@@ -368,7 +374,7 @@ watch(
     validFrom.value = toDateTimeLocalValue();
     selectedPortalGroupId.value = null;
     selectedVisitaId.value = null;
-    selectedNotifiedServerId.value = null;
+    notificationEmail.value = "";
     restoreGeneratedNotificationMessage();
     loadReleases();
     loadVisitas();
@@ -456,21 +462,21 @@ onMounted(() => {
                   :rules="notesRules"
                   required
                 />
-                <v-select
-                  v-model="selectedNotifiedServerId"
-                  :items="notifiedServerOptions"
+                <v-combobox
+                  v-model="notificationEmail"
+                  :items="notificationEmailOptions"
                   :loading="loadingServerUsers"
                   item-title="title"
                   item-value="value"
                   clearable
-                  label="Servidor para notificar"
+                  label="E-mail para notificar"
                   variant="outlined"
-
                   persistent-hint
-                  no-data-text="Nenhum servidor com e-mail encontrado"
+                  hint="Pesquise um servidor cadastrado ou digite outro e-mail."
+                  no-data-text="Digite um e-mail ou aguarde as sugestoes"
                 />
                 <v-textarea
-                  v-if="selectedNotifiedServerId !== null"
+                  v-if="notificationEmailValue !== ''"
                   :model-value="notificationMessage"
                   label="Mensagem do e-mail"
                   variant="outlined"
@@ -480,7 +486,7 @@ onMounted(() => {
                   @update:model-value="updateNotificationMessage"
                 />
                 <div
-                  v-if="selectedNotifiedServerId !== null && notificationMessageDirty"
+                  v-if="notificationEmailValue !== '' && notificationMessageDirty"
                   class="mb-4"
                 >
                   <v-btn
@@ -563,6 +569,9 @@ onMounted(() => {
                     </div>
                     <div v-if="release.notified_server" class="text-caption text-medium-emphasis">
                       Servidor notificado: {{ release.notified_server.name }}
+                    </div>
+                    <div v-if="release.notification_email" class="text-caption text-medium-emphasis">
+                      E-mail notificado: {{ release.notification_email }}
                     </div>
                     <div v-if="release.visita" class="text-caption text-medium-emphasis">
                       Visita vinculada: {{ buildVisitaLabel(release.visita) }}

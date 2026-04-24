@@ -628,6 +628,7 @@ export interface TemporaryUserRelease {
   consumed_log: TemporaryReleaseLog | null;
   notes: string;
   notification_message?: string;
+  notification_email?: string;
   result_message: string;
   created_at: string;
   updated_at: string;
@@ -642,6 +643,7 @@ export interface TemporaryUserReleaseCreatePayload {
   duration_minutes: number;
   notes?: string;
   notification_message?: string;
+  notification_email?: string;
   valid_from?: string;
   portal_group_id?: number | null;
   visita_id?: number | null;

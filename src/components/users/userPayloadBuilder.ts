@@ -18,6 +18,7 @@ export function buildUserPayload(
     name: form.name,
     cpf: form.cpf,
     phone: form.phone,
+    birth_date: form.birthDate,
     registration: form.registration,
     user_groups: form.userGroups,
     device_scope: form.panelAccessOnly ? "none" : form.deviceScope,

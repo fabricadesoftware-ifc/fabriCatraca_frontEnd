@@ -6,8 +6,15 @@
   const emit = defineEmits<{ (e: 'update:modelValue', v: boolean): void, (e: 'imported'): void }>()
 
   const file = ref<File | null>(null)
+  const importProfile = ref('tecnico_integrado')
   const uploading = ref(false)
   const errorMsg = ref<string | null>(null)
+  const importProfileOptions = [
+    { title: 'Técnico integrado / Ensino médio', value: 'tecnico_integrado' },
+    { title: 'Graduação', value: 'graduacao' },
+    { title: 'Servidores', value: 'servidores' },
+    { title: 'Técnico subsequente', value: 'tecnico_subsequente' },
+  ]
 
   function close () {
     emit('update:modelValue', false)
@@ -36,6 +43,7 @@
       // Criar FormData com o arquivo
       const formData = new FormData()
       formData.append('file', file.value)
+      formData.append('import_profile', importProfile.value)
 
       await importUsersService.importUsers(formData)
       emit('imported')
@@ -57,6 +65,16 @@
       </v-card-title>
       <v-card-text>
         <v-alert v-if="errorMsg" class="mb-3" type="error" variant="tonal">{{ errorMsg }}</v-alert>
+        <v-select
+          v-model="importProfile"
+          :items="importProfileOptions"
+          density="comfortable"
+          item-title="title"
+          item-value="value"
+          label="Perfil da importação"
+          prepend-inner-icon="mdi-account-school"
+          variant="outlined"
+        />
         <v-file-input
           accept=".xlsx,.csv"
           counter

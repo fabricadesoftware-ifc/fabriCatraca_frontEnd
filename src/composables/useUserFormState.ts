@@ -11,6 +11,7 @@ export interface UserFormState {
   email: string;
   cpf: string;
   phone: string;
+  birthDate: string | null;
   password: string;
   appRole: BaseUser["app_role"];
   panelAccessOnly: boolean;
@@ -44,6 +45,7 @@ export function useUserFormState(userRef: Ref<UserDialogUser | null>) {
     email: "",
     cpf: "",
     phone: "",
+    birthDate: null,
     password: "",
     appRole: "",
     panelAccessOnly: false,
@@ -82,6 +84,7 @@ export function useUserFormState(userRef: Ref<UserDialogUser | null>) {
     form.email = fieldFlags.hasEmailField ? (newUser.email ?? "") : "";
     form.cpf = newUser.cpf ?? "";
     form.phone = newUser.phone ?? "";
+    form.birthDate = newUser.birth_date ?? null;
     form.password = "";
     form.appRole = fieldFlags.hasAppRoleField ? (newUser.app_role ?? "") : "";
     form.panelAccessOnly = fieldFlags.hasPanelAccessOnlyField ? !!newUser.panel_access_only : false;
