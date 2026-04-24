@@ -20,8 +20,8 @@
       return
     }
     // Valida extensão
-    if (!/(xlsx|xls)$/i.test(f.name.split('.').pop() || '')) {
-      errorMsg.value = 'Arquivo deve ser .xlsx ou .xls'
+    if (!/(xlsx|csv)$/i.test(f.name.split('.').pop() || '')) {
+      errorMsg.value = 'Arquivo deve ser .xlsx ou .csv'
       file.value = null
       return
     }
@@ -41,7 +41,7 @@
       emit('imported')
       close()
     } catch (error: any) {
-      errorMsg.value = error?.response?.data?.message || 'Falha ao importar arquivo'
+      errorMsg.value = error?.response?.data?.message || error?.response?.data?.error || 'Falha ao importar arquivo'
     } finally {
       uploading.value = false
     }
@@ -58,10 +58,10 @@
       <v-card-text>
         <v-alert v-if="errorMsg" class="mb-3" type="error" variant="tonal">{{ errorMsg }}</v-alert>
         <v-file-input
-          accept=".xlsx,.xls"
+          accept=".xlsx,.csv"
           counter
           density="comfortable"
-          label="Selecionar arquivo (.xlsx, .xls)"
+          label="Selecionar arquivo (.xlsx, .csv)"
           prepend-inner-icon="mdi-file-excel"
           show-size
           variant="outlined"

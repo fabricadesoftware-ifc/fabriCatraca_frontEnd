@@ -57,6 +57,7 @@ const isGuaritaViewer = computed(() => authStore.role === "guarita");
 const isMinimalMode = computed(() => !!props.minimalMode);
 const isReleaseOnlyMode = computed(() => props.dialogMode === "release-only");
 const isRegisterOnlyMode = computed(() => props.dialogMode === "register-only");
+const canShowReleaseContextTabs = computed(() => isReleaseOnlyMode.value && isSisaeViewer.value);
 const canManagePhoto = computed(() => authStore.role === "admin" || authStore.role === "sisae");
 const canManageBiometry = computed(
   () => (authStore.role === "admin" || authStore.role === "sisae") && !isMinimalMode.value,
@@ -143,7 +144,7 @@ watch(modelValueRef, async (isOpen) => {
   dismissedParentErrors.value = [];
 
   if (isReleaseOnlyMode.value && props.user?.id) {
-    tab.value = "liberacao";
+    tab.value = canShowReleaseContextTabs.value ? "dados" : "liberacao";
     return;
   }
 
@@ -395,7 +396,9 @@ onMounted(async () => {
 
       <v-card-text>
         <v-tabs v-model="tab" bg-color="transparent" color="primary">
-          <v-tab value="dados" v-if="!isReleaseOnlyMode">Dados Gerais</v-tab>
+          <v-tab value="dados" v-if="!isReleaseOnlyMode || canShowReleaseContextTabs">
+            Dados Gerais
+          </v-tab>
           <v-tab
             value="departamentos"
             v-if="
@@ -412,7 +415,12 @@ onMounted(async () => {
           >
           <v-tab
             value="horarios"
-            v-if="props.user.name && !isMinimalMode && !isReleaseOnlyMode && !isRegisterOnlyMode"
+            v-if="
+              props.user.name
+              && !isMinimalMode
+              && !isRegisterOnlyMode
+              && (!isReleaseOnlyMode || canShowReleaseContextTabs)
+            "
             >Horarios</v-tab
           >
           <v-tab value="liberacao" v-if="props.user.id && !isMinimalMode && !isRegisterOnlyMode"
@@ -430,13 +438,18 @@ onMounted(async () => {
           >
           <v-tab
             value="acessos"
-            v-if="props.user.name && !isMinimalMode && !isReleaseOnlyMode && !isRegisterOnlyMode"
+            v-if="
+              props.user.name
+              && !isMinimalMode
+              && !isRegisterOnlyMode
+              && (!isReleaseOnlyMode || canShowReleaseContextTabs)
+            "
             >Acessos</v-tab
           >
         </v-tabs>
 
         <v-window v-model="tab">
-          <v-window-item value="dados" v-if="!isReleaseOnlyMode">
+          <v-window-item value="dados" v-if="!isReleaseOnlyMode || canShowReleaseContextTabs">
             <UserGeneralTab
               :backend-errors="combinedErrors"
               :form="form"
@@ -482,7 +495,14 @@ onMounted(async () => {
             <UserCardsPanel :user-id="props.user.id" />
           </v-window-item>
 
-          <v-window-item value="horarios" v-if="!isMinimalMode && !isRegisterOnlyMode">
+          <v-window-item
+            value="horarios"
+            v-if="
+              !isMinimalMode
+              && !isRegisterOnlyMode
+              && (!isReleaseOnlyMode || canShowReleaseContextTabs)
+            "
+          >
             <UserSchedulesTab
               :group-schedules="groupSchedules"
               :schedules-error="schedulesError"
@@ -508,7 +528,14 @@ onMounted(async () => {
             <UserBioPanel :user-id="props.user.id" />
           </v-window-item>
 
-          <v-window-item value="acessos" v-if="!isMinimalMode && !isRegisterOnlyMode">
+          <v-window-item
+            value="acessos"
+            v-if="
+              !isMinimalMode
+              && !isRegisterOnlyMode
+              && (!isReleaseOnlyMode || canShowReleaseContextTabs)
+            "
+          >
             <UserAccessLogsPanel :user-id="props.user.id" />
           </v-window-item>
         </v-window>
