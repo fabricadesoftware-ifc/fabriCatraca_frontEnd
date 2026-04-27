@@ -1,15 +1,25 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
   import ImportUsersDialog from '@/components/import/ImportUsersDialog.vue'
+  import type { ImportUsersResult } from '@/services/import_users'
 
   const dialog = ref(false)
-  const lastResult = ref<string | null>(null)
+  const lastResult = ref<{ message: string, elapsed: string | null } | null>(null)
 
   function openDialog () {
     dialog.value = true
   }
-  function onImported () {
-    lastResult.value = 'Importação concluída com sucesso.'
+
+  function formatElapsed (value?: number | null) {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null
+    return `${value.toFixed(2).replace('.', ',')} s`
+  }
+
+  function onImported (result: ImportUsersResult) {
+    lastResult.value = {
+      message: result.message || 'Importação concluída com sucesso.',
+      elapsed: formatElapsed(result.elapsed_s),
+    }
   }
 </script>
 
@@ -26,7 +36,10 @@
         </div>
         <v-btn color="primary" prepend-icon="mdi-upload" @click="openDialog">Selecionar Arquivo</v-btn>
       </div>
-      <v-alert v-if="lastResult" class="mt-4" type="success" variant="tonal">{{ lastResult }}</v-alert>
+      <v-alert v-if="lastResult" class="mt-4" type="success" variant="tonal">
+        <div>{{ lastResult.message }}</div>
+        <div v-if="lastResult.elapsed" class="text-caption mt-1">Tempo total: {{ lastResult.elapsed }}</div>
+      </v-alert>
     </v-card>
 
     <ImportUsersDialog v-model="dialog" @imported="onImported" />

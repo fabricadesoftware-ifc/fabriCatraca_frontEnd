@@ -1,9 +1,12 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
-  import importUsersService from '@/services/import_users'
+  import importUsersService, { type ImportUsersResult } from '@/services/import_users'
 
   const props = defineProps<{ modelValue: boolean }>()
-  const emit = defineEmits<{ (e: 'update:modelValue', v: boolean): void, (e: 'imported'): void }>()
+  const emit = defineEmits<{
+    (e: 'update:modelValue', v: boolean): void
+    (e: 'imported', result: ImportUsersResult): void
+  }>()
 
   const file = ref<File | null>(null)
   const importProfile = ref('tecnico_integrado')
@@ -18,6 +21,11 @@
 
   function close () {
     emit('update:modelValue', false)
+  }
+
+  function formatElapsed (value?: number | null) {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null
+    return `${value.toFixed(2).replace('.', ',')} s`
   }
 
   function onFileChange (f: File | null | undefined) {
@@ -45,11 +53,14 @@
       formData.append('file', file.value)
       formData.append('import_profile', importProfile.value)
 
-      await importUsersService.importUsers(formData)
-      emit('imported')
+      const result = await importUsersService.importUsers(formData)
+      emit('imported', result)
       close()
     } catch (error: any) {
-      errorMsg.value = error?.response?.data?.message || error?.response?.data?.error || 'Falha ao importar arquivo'
+      const responseData = error?.response?.data as ImportUsersResult | undefined
+      const message = responseData?.message || responseData?.error || 'Falha ao importar arquivo'
+      const elapsed = formatElapsed(responseData?.elapsed_s)
+      errorMsg.value = elapsed ? `${message} Tempo total: ${elapsed}.` : message
     } finally {
       uploading.value = false
     }
