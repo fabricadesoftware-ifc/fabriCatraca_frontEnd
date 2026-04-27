@@ -254,7 +254,11 @@ onMounted(async () => {
 
           <!-- Aba Liberação -->
           <v-window-item value="liberacao">
-            <GroupTemporaryReleasePanel v-if="props.group.id" :group-id="props.group.id" />
+            <GroupTemporaryReleasePanel
+              v-if="props.group.id"
+              :group-id="props.group.id"
+              :group-name="props.group.name"
+            />
           </v-window-item>
 
           <!-- Aba Regras de Acesso -->

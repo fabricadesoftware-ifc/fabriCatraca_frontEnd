@@ -11,6 +11,7 @@ import {
 import { useAuthStore } from "@/stores";
 
 type NotificationTargetUser = Pick<User, "name" | "app_role" | "effective_app_role">;
+type NotificationEmailOption = { title: string; value: string };
 
 const props = defineProps<{ userId: number; user: NotificationTargetUser }>();
 const emit = defineEmits<{
@@ -30,7 +31,7 @@ const durationMinutes = ref(5);
 const notes = ref("");
 const selectedPortalGroupId = ref<number | null>(null);
 const selectedVisitaId = ref<number | null>(null);
-const notificationEmail = ref<string | null>("");
+const notificationEmails = ref<string[]>([]);
 const portalGroups = ref<any[]>([]);
 const notificationMessage = ref("");
 const notificationMessageDirty = ref(false);
@@ -116,7 +117,7 @@ const generatedNotificationMessage = computed(() => {
   return [
     "Caro(a) professor(a),",
     "",
-    `O ${targetUserType} ${targetUserName} foi liberado no dia ${releaseDate} as ${releaseTime} pelo motivo de ${reason}.`,
+    `O ${targetUserType=="aluno" ? "discente" : targetUserType} ${targetUserName} foi liberado no dia ${releaseDate} as ${releaseTime} pelo motivo de ${reason}.`,
     "",
     `A liberacao permanece valida ate ${expirationDate} as ${expirationTime}.`,
     `Solicitado por: ${requesterName}.`,
@@ -143,7 +144,28 @@ const notificationEmailOptions = computed(() =>
     })),
 );
 
-const notificationEmailValue = computed(() => (notificationEmail.value || "").trim());
+function normalizeNotificationEmailEntry(entry: unknown) {
+  if (typeof entry === "string") {
+    return entry.trim().toLowerCase();
+  }
+
+  if (entry && typeof entry === "object") {
+    const option = entry as Partial<NotificationEmailOption> & { email?: string };
+    return String(option.value || option.email || "").trim().toLowerCase();
+  }
+
+  return "";
+}
+
+const notificationEmailValues = computed(() => {
+  const values = Array.isArray(notificationEmails.value) ? notificationEmails.value : [];
+  return Array.from(
+    new Set(values.map(normalizeNotificationEmailEntry).filter(Boolean)),
+  );
+});
+
+const notificationEmailValue = computed(() => notificationEmailValues.value.join(", "));
+const hasNotificationEmails = computed(() => notificationEmailValues.value.length > 0);
 
 function getStatusLabel(status: TemporaryUserRelease["status"]) {
   const labels: Record<TemporaryUserRelease["status"], string> = {
@@ -326,7 +348,7 @@ async function createRelease() {
     validFrom.value = toDateTimeLocalValue();
     selectedPortalGroupId.value = null;
     selectedVisitaId.value = null;
-    notificationEmail.value = "";
+    notificationEmails.value = [];
     restoreGeneratedNotificationMessage();
     toast.success("Liberacao temporaria criada com sucesso", { autoClose: 3000 });
     if (releaseResponse.notification_warning) {
@@ -374,7 +396,7 @@ watch(
     validFrom.value = toDateTimeLocalValue();
     selectedPortalGroupId.value = null;
     selectedVisitaId.value = null;
-    notificationEmail.value = "";
+    notificationEmails.value = [];
     restoreGeneratedNotificationMessage();
     loadReleases();
     loadVisitas();
@@ -463,20 +485,24 @@ onMounted(() => {
                   required
                 />
                 <v-combobox
-                  v-model="notificationEmail"
+                  v-model="notificationEmails"
                   :items="notificationEmailOptions"
                   :loading="loadingServerUsers"
+                  chips
+                  closable-chips
                   item-title="title"
                   item-value="value"
                   clearable
-                  label="E-mail para notificar"
+                  hide-selected
+                  label="E-mails para notificar"
+                  multiple
                   variant="outlined"
                   persistent-hint
-                  hint="Pesquise um servidor cadastrado ou digite outro e-mail."
+                  hint="Pesquise servidores cadastrados ou digite outros e-mails."
                   no-data-text="Digite um e-mail ou aguarde as sugestoes"
                 />
                 <v-textarea
-                  v-if="notificationEmailValue !== ''"
+                  v-if="hasNotificationEmails"
                   :model-value="notificationMessage"
                   label="Mensagem do e-mail"
                   variant="outlined"
@@ -486,7 +512,7 @@ onMounted(() => {
                   @update:model-value="updateNotificationMessage"
                 />
                 <div
-                  v-if="notificationEmailValue !== '' && notificationMessageDirty"
+                  v-if="hasNotificationEmails && notificationMessageDirty"
                   class="mb-4"
                 >
                   <v-btn
@@ -571,7 +597,7 @@ onMounted(() => {
                       Servidor notificado: {{ release.notified_server.name }}
                     </div>
                     <div v-if="release.notification_email" class="text-caption text-medium-emphasis">
-                      E-mail notificado: {{ release.notification_email }}
+                      E-mails notificados: {{ release.notification_email }}
                     </div>
                     <div v-if="release.visita" class="text-caption text-medium-emphasis">
                       Visita vinculada: {{ buildVisitaLabel(release.visita) }}

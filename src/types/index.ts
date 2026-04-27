@@ -663,16 +663,22 @@ export interface TemporaryGroupRelease {
   closed_at: string | null;
   consumed_log: TemporaryReleaseLog | null;
   notes: string;
+  notification_message?: string;
+  notification_email?: string;
   result_message: string;
   created_at: string;
   updated_at: string;
   portal_group?: { id: number; name: string; description: string; devices?: any[] };
+  notification_status?: "queued" | "sent" | "failed" | string | null;
+  notification_warning?: string;
 }
 
 export interface TemporaryGroupReleaseCreatePayload {
   group_id: number;
   duration_minutes: number;
   notes?: string;
+  notification_message?: string;
+  notification_email?: string;
   valid_from?: string;
   portal_group_id?: number | null;
 }
