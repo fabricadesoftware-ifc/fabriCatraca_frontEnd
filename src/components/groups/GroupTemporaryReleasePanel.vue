@@ -384,7 +384,6 @@ onMounted(() => {
                   multiple
                   variant="outlined"
                   persistent-hint
-                  hint="Pesquise servidores cadastrados ou digite outros e-mails."
                   no-data-text="Digite um e-mail ou aguarde as sugestoes"
                 />
                 <v-textarea

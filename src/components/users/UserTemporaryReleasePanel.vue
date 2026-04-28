@@ -166,6 +166,7 @@ const notificationEmailValues = computed(() => {
 
 const notificationEmailValue = computed(() => notificationEmailValues.value.join(", "));
 const hasNotificationEmails = computed(() => notificationEmailValues.value.length > 0);
+const canLinkVisit = computed(() => authStore.role !== "sisae");
 
 function getStatusLabel(status: TemporaryUserRelease["status"]) {
   const labels: Record<TemporaryUserRelease["status"], string> = {
@@ -282,6 +283,13 @@ async function loadServerUsers() {
 }
 
 async function loadVisitas() {
+  if (!canLinkVisit.value) {
+    loadingVisitas.value = false;
+    visitas.value = [];
+    selectedVisitaId.value = null;
+    return;
+  }
+
   loadingVisitas.value = true;
   try {
     const response = await VisitasService.getVisitas({
@@ -390,6 +398,19 @@ watch(
 );
 
 watch(
+  canLinkVisit,
+  (enabled) => {
+    if (!enabled) {
+      visitas.value = [];
+      selectedVisitaId.value = null;
+      return;
+    }
+
+    loadVisitas();
+  },
+);
+
+watch(
   () => props.userId,
   () => {
     notes.value = "";
@@ -465,6 +486,7 @@ onMounted(() => {
                   </template>
                 </v-select>
                 <v-select
+                  v-if="canLinkVisit"
                   v-model="selectedVisitaId"
                   :items="visitaOptions"
                   :loading="loadingVisitas"
@@ -498,7 +520,6 @@ onMounted(() => {
                   multiple
                   variant="outlined"
                   persistent-hint
-                  hint="Pesquise servidores cadastrados ou digite outros e-mails."
                   no-data-text="Digite um e-mail ou aguarde as sugestoes"
                 />
                 <v-textarea
