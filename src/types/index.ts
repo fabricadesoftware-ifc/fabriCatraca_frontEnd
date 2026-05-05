@@ -481,13 +481,45 @@ export interface EasySetupListResponse {
   hint: string;
 }
 
+export interface EasySetupChunkStage {
+  operation?: "create" | "modify" | "create_or_modify" | string;
+  chunk_size: number;
+  chunks: number;
+  ok_chunks: number;
+  failed_chunks: number;
+  records_ok: number;
+  records_pending: number;
+}
+
+export interface EasySetupFailedItem {
+  table?: string;
+  item?: Record<string, unknown>;
+  status?: number | null;
+  detail?: string;
+}
+
 export interface EasySetupStepResult {
   ok: boolean;
-  status?: number;
+  status?: number | null;
   count?: number;
   skipped?: boolean;
   datetime?: string;
   full_url?: string;
+  applied?: number;
+  created?: number;
+  modified?: number;
+  skipped_unique?: number;
+  errors?: number;
+  note?: string;
+  strategy?: string;
+  chunk_plan?: number[];
+  initial_status?: number | null;
+  initial_detail?: string;
+  stages?: EasySetupChunkStage[];
+  failed_items?: EasySetupFailedItem[];
+  failed_items_truncated?: boolean;
+  detail?: string;
+  error?: string;
   [key: string]: unknown;
 }
 

@@ -1,15 +1,16 @@
 <script lang="ts" setup>
 import type {
-  EasySetupDevice,
-  EasySetupDeviceResult,
+  EasySetupChunkStage,
+  EasySetupFailedItem,
   EasySetupStepResult,
-  EasySetupStatusDevice,
 } from "@/types";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { toast } from "vue3-toastify";
 import { useEasySetupStore } from "@/stores";
 
 const store = useEasySetupStore();
+
+type EasySetupPushEntry = EasySetupStepResult & { name: string };
 
 // Estado local
 const selectedIds = ref<number[]>([]);
@@ -140,7 +141,7 @@ function getStepColor(step: EasySetupStepResult): string {
 }
 
 function getPushEntries(push: Record<string, EasySetupStepResult>) {
-  const items: Array<EasySetupStepResult & { name: string }> = [];
+  const items: EasySetupPushEntry[] = [];
   const preferredKeys = [
     "users",
     "user_roles",
@@ -171,6 +172,79 @@ function getPushEntries(push: Record<string, EasySetupStepResult>) {
     }
   }
   return items;
+}
+
+function getStages(entry: EasySetupStepResult): EasySetupChunkStage[] {
+  return Array.isArray(entry.stages) ? entry.stages : [];
+}
+
+function getFailedItems(entry: EasySetupStepResult): EasySetupFailedItem[] {
+  return Array.isArray(entry.failed_items) ? entry.failed_items : [];
+}
+
+function hasPushDiagnostics(entry: EasySetupStepResult): boolean {
+  return Boolean(
+    entry.initial_detail ||
+      entry.detail ||
+      entry.error ||
+      getStages(entry).length ||
+      getFailedItems(entry).length,
+  );
+}
+
+function getPushDiagnostics(push: Record<string, EasySetupStepResult>): EasySetupPushEntry[] {
+  return getPushEntries(push).filter(hasPushDiagnostics);
+}
+
+function formatPushStrategy(entry: EasySetupStepResult): string {
+  if (entry.skipped) return "Ignorado";
+  if (entry.strategy === "create_or_modify") return "Criar ou atualizar";
+  if (entry.note === "create_or_modify_dynamic_chunks") return "Criar/atualizar dinamico";
+  if (entry.note === "create_or_modify_batch") return "Criar ou atualizar";
+  if (entry.strategy === "batch" || entry.note === "batch") return "Lote completo";
+  if (entry.note === "upsert_dynamic_chunks") return "Upsert dinamico";
+  if (entry.strategy === "dynamic_chunks") return "Fallback dinamico";
+  if (entry.note) return String(entry.note);
+  return entry.ok ? "Padrao" : "Com falha";
+}
+
+function formatPushCounters(entry: EasySetupStepResult): string {
+  const parts: string[] = [];
+  if (typeof entry.applied === "number") parts.push(`Aplicados ${entry.applied}`);
+  if (typeof entry.created === "number") parts.push(`Criados ${entry.created}`);
+  if (typeof entry.modified === "number" && entry.modified > 0) {
+    parts.push(`Atualizados ${entry.modified}`);
+  }
+  if (typeof entry.skipped_unique === "number" && entry.skipped_unique > 0) {
+    parts.push(`Ja existiam ${entry.skipped_unique}`);
+  }
+  if (typeof entry.errors === "number" && entry.errors > 0) {
+    parts.push(`Erros ${entry.errors}`);
+  }
+  return parts.length ? parts.join(" | ") : `${entry.count ?? 0} registro(s)`;
+}
+
+function formatOperation(stage: EasySetupChunkStage): string {
+  const names: Record<string, string> = {
+    create: "Criacao",
+    create_or_modify: "Criar/atualizar",
+    modify: "Atualizacao",
+  };
+  return names[String(stage.operation || "")] || String(stage.operation || "Operacao");
+}
+
+function formatDetail(value: unknown): string {
+  if (value === null || value === undefined || value === "") return "Sem detalhe";
+  if (typeof value === "string") return value;
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
+
+function formatFailedItem(item: EasySetupFailedItem): string {
+  return formatDetail(item.item || {});
 }
 
 function formatPushName(key: string): string {
@@ -548,6 +622,8 @@ onUnmounted(() => {
                       <tr>
                         <th>Tabela</th>
                         <th class="text-center">Quantidade</th>
+                        <th>Estrategia</th>
+                        <th>Resultado</th>
                         <th class="text-center">Status</th>
                       </tr>
                     </thead>
@@ -560,6 +636,16 @@ onUnmounted(() => {
                           </template>
                           <template v-else>{{ entry.count ?? "—" }}</template>
                         </td>
+                        <td>
+                          <v-chip
+                            :color="entry.strategy === 'dynamic_chunks' ? 'warning' : 'info'"
+                            size="x-small"
+                            variant="tonal"
+                          >
+                            {{ formatPushStrategy(entry) }}
+                          </v-chip>
+                        </td>
+                        <td class="text-caption">{{ formatPushCounters(entry) }}</td>
                         <td class="text-center">
                           <v-icon
                             :color="getStepColor(entry)"
@@ -570,6 +656,121 @@ onUnmounted(() => {
                       </tr>
                     </tbody>
                   </v-table>
+
+                  <template v-if="getPushDiagnostics(dev.report.steps.push).length">
+                    <v-divider class="my-4" />
+                    <div class="text-subtitle-2 font-weight-bold mb-2">
+                      Diagnostico dos lotes
+                    </div>
+                    <v-expansion-panels density="comfortable" variant="accordion">
+                      <v-expansion-panel
+                        v-for="entry in getPushDiagnostics(dev.report.steps.push)"
+                        :key="`${entry.name}-diagnostic`"
+                      >
+                        <v-expansion-panel-title>
+                          <v-icon
+                            :color="getStepColor(entry)"
+                            :icon="getStepIcon(entry)"
+                            class="mr-2"
+                          />
+                          {{ entry.name }}
+                          <v-chip class="ml-2" color="warning" size="x-small" variant="tonal">
+                            {{ formatPushStrategy(entry) }}
+                          </v-chip>
+                        </v-expansion-panel-title>
+                        <v-expansion-panel-text>
+                          <v-alert
+                            v-if="entry.initial_detail"
+                            class="mb-3"
+                            color="warning"
+                            density="compact"
+                            variant="tonal"
+                          >
+                            <div class="font-weight-medium">
+                              Lote completo falhou
+                              <template v-if="entry.initial_status">
+                                (HTTP {{ entry.initial_status }})
+                              </template>
+                            </div>
+                            <code class="easy-setup-code">
+                              {{ entry.initial_detail }}
+                            </code>
+                          </v-alert>
+
+                          <v-alert
+                            v-if="entry.detail || entry.error"
+                            class="mb-3"
+                            color="error"
+                            density="compact"
+                            variant="tonal"
+                          >
+                            {{ formatDetail(entry.detail || entry.error) }}
+                          </v-alert>
+
+                          <v-table v-if="getStages(entry).length" density="compact">
+                            <thead>
+                              <tr>
+                                <th>Operacao</th>
+                                <th class="text-center">Lote</th>
+                                <th class="text-center">Chunks</th>
+                                <th class="text-center">OK</th>
+                                <th class="text-center">Falharam</th>
+                                <th class="text-center">Registros OK</th>
+                                <th class="text-center">Pendentes</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr
+                                v-for="(stage, stageIdx) in getStages(entry)"
+                                :key="`${entry.name}-${stage.chunk_size}-${stageIdx}`"
+                              >
+                                <td>{{ formatOperation(stage) }}</td>
+                                <td class="text-center">{{ stage.chunk_size }}</td>
+                                <td class="text-center">{{ stage.chunks }}</td>
+                                <td class="text-center text-success">{{ stage.ok_chunks }}</td>
+                                <td class="text-center text-error">{{ stage.failed_chunks }}</td>
+                                <td class="text-center">{{ stage.records_ok }}</td>
+                                <td class="text-center">{{ stage.records_pending }}</td>
+                              </tr>
+                            </tbody>
+                          </v-table>
+
+                          <div v-if="getFailedItems(entry).length" class="mt-4">
+                            <div class="text-subtitle-2 font-weight-bold mb-2">
+                              Itens com erro
+                            </div>
+                            <v-list bg-color="transparent" density="compact">
+                              <v-list-item
+                                v-for="(failedItem, failedIdx) in getFailedItems(entry)"
+                                :key="`${entry.name}-failed-${failedIdx}`"
+                              >
+                                <template #prepend>
+                                  <v-chip color="error" size="x-small" variant="tonal">
+                                    HTTP {{ failedItem.status ?? "erro" }}
+                                  </v-chip>
+                                </template>
+                                <v-list-item-title class="text-caption">
+                                  <code>{{ formatFailedItem(failedItem) }}</code>
+                                </v-list-item-title>
+                                <v-list-item-subtitle class="text-wrap">
+                                  {{ formatDetail(failedItem.detail) }}
+                                </v-list-item-subtitle>
+                              </v-list-item>
+                            </v-list>
+                            <v-alert
+                              v-if="entry.failed_items_truncated"
+                              class="mt-2"
+                              color="info"
+                              density="compact"
+                              variant="tonal"
+                            >
+                              Mostrando apenas os primeiros itens com erro para manter a tela leve.
+                            </v-alert>
+                          </div>
+                        </v-expansion-panel-text>
+                      </v-expansion-panel>
+                    </v-expansion-panels>
+                  </template>
                 </v-expansion-panel-text>
               </v-expansion-panel>
             </v-expansion-panels>
@@ -765,6 +966,15 @@ onUnmounted(() => {
 .easy-setup-spin {
   animation: easy-setup-spin 1.2s linear infinite;
   transform-origin: center;
+}
+
+.easy-setup-code {
+  display: block;
+  margin-top: 6px;
+  max-height: 96px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 @keyframes easy-setup-spin {

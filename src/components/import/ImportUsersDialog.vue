@@ -12,12 +12,20 @@
   const importProfile = ref('tecnico_integrado')
   const uploading = ref(false)
   const errorMsg = ref<string | null>(null)
+  const errorDetails = ref<string[]>([])
+  const feedbackType = ref<'error' | 'warning'>('error')
   const importProfileOptions = [
     { title: 'Técnico integrado / Ensino médio', value: 'tecnico_integrado' },
     { title: 'Graduação', value: 'graduacao' },
     { title: 'Servidores', value: 'servidores' },
     { title: 'Técnico subsequente', value: 'tecnico_subsequente' },
   ]
+
+  function clearFeedback () {
+    errorMsg.value = null
+    errorDetails.value = []
+    feedbackType.value = 'error'
+  }
 
   function close () {
     emit('update:modelValue', false)
@@ -29,7 +37,7 @@
   }
 
   function onFileChange (f: File | null | undefined) {
-    errorMsg.value = null
+    clearFeedback()
     if (!f) {
       file.value = null
       return
@@ -43,10 +51,22 @@
     file.value = f
   }
 
+  function buildDetailMessages (result?: ImportUsersResult) {
+    const details: string[] = []
+    for (const detail of result?.errors || []) {
+      if (detail) details.push(`Importação: ${detail}`)
+    }
+    for (const detail of result?.catraca_errors || []) {
+      if (detail) details.push(`Catraca: ${detail}`)
+    }
+    return details
+  }
+
   async function upload () {
     if (!file.value) return
     try {
       uploading.value = true
+      clearFeedback()
 
       // Criar FormData com o arquivo
       const formData = new FormData()
@@ -54,13 +74,25 @@
       formData.append('import_profile', importProfile.value)
 
       const result = await importUsersService.importUsers(formData)
+      const details = buildDetailMessages(result)
+      if (details.length > 0) {
+        const elapsed = formatElapsed(result.elapsed_s)
+        feedbackType.value = result.success === false ? 'error' : 'warning'
+        errorMsg.value = elapsed
+          ? `${result.message || 'Importação concluída com pendências.'} Tempo total: ${elapsed}.`
+          : result.message || 'Importação concluída com pendências.'
+        errorDetails.value = details
+        return
+      }
       emit('imported', result)
       close()
     } catch (error: any) {
       const responseData = error?.response?.data as ImportUsersResult | undefined
       const message = responseData?.message || responseData?.error || 'Falha ao importar arquivo'
       const elapsed = formatElapsed(responseData?.elapsed_s)
+      feedbackType.value = 'error'
       errorMsg.value = elapsed ? `${message} Tempo total: ${elapsed}.` : message
+      errorDetails.value = buildDetailMessages(responseData)
     } finally {
       uploading.value = false
     }
@@ -75,7 +107,14 @@
         <v-btn icon="mdi-close" variant="text" @click="emit('update:modelValue', false)" />
       </v-card-title>
       <v-card-text>
-        <v-alert v-if="errorMsg" class="mb-3" type="error" variant="tonal">{{ errorMsg }}</v-alert>
+        <v-alert v-if="errorMsg" class="mb-3" :type="feedbackType" variant="tonal">
+          <div>{{ errorMsg }}</div>
+          <ul v-if="errorDetails.length > 0" class="mt-3 pl-5">
+            <li v-for="(detail, index) in errorDetails" :key="`${index}-${detail}`">
+              {{ detail }}
+            </li>
+          </ul>
+        </v-alert>
         <v-select
           v-model="importProfile"
           :items="importProfileOptions"
