@@ -378,7 +378,8 @@ onMounted(async () => {
 
 <template>
   <v-dialog
-    :max-width="tab === 'horarios' ? 1280 : 900"
+    :width="900"
+    :height="700"
     :model-value="props.modelValue"
     @update:model-value="emit('update:modelValue', $event)"
   >
@@ -448,7 +449,7 @@ onMounted(async () => {
           >
         </v-tabs>
 
-        <v-window v-model="tab">
+        <v-window v-model="tab" class="w-100">
           <v-window-item value="dados" v-if="!isReleaseOnlyMode || canShowReleaseContextTabs">
             <UserGeneralTab
               :backend-errors="combinedErrors"
