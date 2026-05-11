@@ -219,7 +219,7 @@ onBeforeUnmount(() => {
       </v-list>
     </v-navigation-drawer>
 
-    <v-main class="bg-surface rounded-lg">
+    <v-main class="bg-surface">
       <v-app-bar
         class=""
         density="compact"
