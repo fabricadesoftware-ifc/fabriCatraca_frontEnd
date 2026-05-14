@@ -4,29 +4,52 @@ import type { AppRole, getToken, User } from "@/types";
 import { AuthService } from "@/services";
 import router from "@/router";
 import { showMessage } from "@/utils/showmsg";
+import axios from "axios";
+
+interface IToken {
+  access: string;
+  refresh: string;
+}
 
 export const useAuthStore = defineStore("auth", () => {
   const me = ref<User | null>(null);
-  const access = ref<string>(localStorage.getItem("access_token") ?? "");
-  const refresh = ref<string>(localStorage.getItem("refresh_token") ?? "");
+  const token = ref<IToken | null>({
+    access: localStorage.getItem("access_token") ?? "",
+    refresh: localStorage.getItem("refresh_token") ?? "",
+  });
+  const isAuthenticated = ref<boolean>(false);
   const loading = ref<boolean>(false);
   const error = ref<string | null>(null);
   let meRequest: Promise<void> | null = null;
 
   const user = computed(() => me.value);
-  const isAuthenticated = computed(() => !!access.value);
   const role = computed<AppRole>(() => me.value?.effective_app_role || me.value?.app_role || "");
   const isAdmin = computed(() => role.value === "admin");
   const isGuarita = computed(() => role.value === "guarita");
   const isSisae = computed(() => role.value === "sisae");
-  const getAccessToken = computed(() => access.value);
-  const getRefreshToken = computed(() => refresh.value);
   const isLoading = computed(() => loading.value);
   const getError = computed(() => error.value);
 
-  function persistTokens(tokens: { access: string; refresh: string }) {
-    access.value = tokens.access;
-    refresh.value = tokens.refresh;
+  const getAccessToken = computed(() => token.value?.access ?? "");
+  const getRefreshToken = computed(() => token.value?.refresh ?? "");
+
+  function extractErrorMessage(err: unknown, defaultMessage: string): string {
+    if (axios.isAxiosError(err)) {
+      const data = err.response?.data;
+      if (typeof data === "object" && data !== null) {
+        const keys = Object.keys(data);
+        if (keys.length > 0) {
+          const firstKey = keys[0] as string;
+          const detail = (data as Record<string, unknown>)[firstKey];
+          return String(Array.isArray(detail) ? detail[0] : detail);
+        }
+      }
+    }
+    return defaultMessage;
+  }
+
+  function persistTokens(tokens: IToken) {
+    token.value = tokens;
     localStorage.setItem("access_token", tokens.access);
     localStorage.setItem("refresh_token", tokens.refresh);
   }
@@ -39,38 +62,13 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  function getDefaultRouteByRole(currentRole: AppRole) {
+  function getDefaultRouteByRole(_currentRole: AppRole) {
     return "/";
   }
 
   function hasRole(allowedRoles: AppRole[]) {
-    if (!allowedRoles.length) {
-      return true;
-    }
+    if (!allowedRoles.length) return true;
     return allowedRoles.includes(role.value);
-  }
-
-  async function getToken(credentials: getToken) {
-    loading.value = true;
-    error.value = null;
-
-    try {
-      const response = await AuthService.getToken(credentials);
-
-      persistTokens(response);
-
-      await getMe();
-      showMessage("Logado com sucesso", "success", 1500, "top-right");
-      await router.push(getDefaultRouteByRole(role.value));
-
-      return true;
-    } catch (err: any) {
-      error.value = err?.response?.data?.detail || "Erro ao se logar, verifique suas credenciais!";
-      showMessage(error.value ?? "Erro desconhecido", "error", 1500, "top-right");
-      return false;
-    } finally {
-      loading.value = false;
-    }
   }
 
   async function getMe() {
@@ -85,9 +83,10 @@ export const useAuthStore = defineStore("auth", () => {
       try {
         const response = await AuthService.getMe();
         me.value = response;
+        isAuthenticated.value = true;
         persistCurrentUser(response);
       } catch (err) {
-        console.error(err);
+        console.error("Erro ao buscar usuário:", err);
         logout(false);
       } finally {
         loading.value = false;
@@ -98,21 +97,55 @@ export const useAuthStore = defineStore("auth", () => {
     await meRequest;
   }
 
-  async function takeDatas(user: Array<{ value: string }>) {
-    const values = user.map((u) => u.value);
+  async function login(credentials: getToken) {
+    loading.value = true;
+    error.value = null;
 
-    const credentials: getToken = {
-      email: values[0],
-      password: values[1],
-    };
+    try {
+      const response = await AuthService.getToken(credentials);
+      persistTokens(response);
+      isAuthenticated.value = true;
 
-    return getToken(credentials);
+      await getMe();
+
+      showMessage("Logado com sucesso", "success", 1500, "top-right");
+      await router.push(getDefaultRouteByRole(role.value));
+
+      return true;
+    } catch (err: unknown) {
+      error.value = extractErrorMessage(err, "Erro ao se logar, verifique suas credenciais!");
+      showMessage(error.value, "error", 1500, "top-right");
+      return false;
+    } finally {
+      loading.value = false;
+    }
   }
+
+  async function takeDatas(user: Array<{ value: string }>) {
+    const [email, password] = user.map((u) => u.value);
+    return login({ email, password });
+  }
+
+async function refreshToken(): Promise<string> {
+  const refresh = token.value?.refresh ?? localStorage.getItem("refresh_token");
+
+  if (refresh) {
+    const response = await AuthService.refreshToken(refresh);
+    token.value = response;
+    localStorage.setItem("access_token", response.access);
+    localStorage.setItem("refresh_token", response.refresh);
+    return response.access;
+  } else {
+    logout(false);
+    throw new Error("Sem refresh token disponível");
+  }
+}
 
   function logout(showFeedback = true) {
     me.value = null;
-    access.value = "";
-    refresh.value = "";
+    token.value = null;
+    isAuthenticated.value = false;
+
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     persistCurrentUser(null);
@@ -124,26 +157,13 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  async function refreshAccessToken() {
-    try {
-      const newAccessToken = await AuthService.refreshToken();
-      access.value = newAccessToken;
-      localStorage.setItem("access_token", newAccessToken);
-      return newAccessToken;
-    } catch (err) {
-      logout(false);
-      throw err;
-    }
-  }
-
   function clearError() {
     error.value = null;
   }
 
   return {
     me,
-    access,
-    refresh,
+    token,
     loading,
     error,
     user,
@@ -156,11 +176,11 @@ export const useAuthStore = defineStore("auth", () => {
     getRefreshToken,
     isLoading,
     getError,
-    getToken,
+    login,
     getMe,
     takeDatas,
     logout,
-    refreshAccessToken,
+    refreshToken,
     clearError,
     hasRole,
     getDefaultRouteByRole,
