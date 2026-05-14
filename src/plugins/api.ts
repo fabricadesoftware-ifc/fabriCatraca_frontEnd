@@ -38,20 +38,19 @@ export function createApi(basePrefix = "", options: CreateApiOptions = {}): Axio
       },
       (error) => Promise.reject(error),
     );
+    api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        const authStore = useAuthStore();
+
+        if (error.response?.status === 401) {
+          authStore.refreshAccessToken();
+        }
+
+        return Promise.reject(error);
+      },
+    );
   }
-
-  api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      const authStore = useAuthStore();
-
-      if (error.response?.status === 401) {
-        authStore.refreshAccessToken();
-      }
-
-      return Promise.reject(error);
-    },
-  );
 
   return api;
 }
