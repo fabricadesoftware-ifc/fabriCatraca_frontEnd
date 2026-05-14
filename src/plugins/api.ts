@@ -1,4 +1,5 @@
-import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import type { AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import { useAuthStore } from "@/stores/auth";
 import axios from "axios";
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -40,8 +41,16 @@ export function createApi(basePrefix = "", options: CreateApiOptions = {}): Axio
   }
 
   api.interceptors.response.use(
-    (response: AxiosResponse) => response,
-    async (error) => Promise.reject(error),
+    (response) => response,
+    (error) => {
+      const authStore = useAuthStore();
+
+      if (error.response?.status === 401) {
+        authStore.refreshAccessToken();
+      }
+
+      return Promise.reject(error);
+    },
   );
 
   return api;
