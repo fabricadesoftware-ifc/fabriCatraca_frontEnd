@@ -35,6 +35,8 @@ export interface QueryParams {
 
 export type AppRole = "admin" | "guarita" | "sisae" | "aluno" | "servidor" | "";
 
+export type AppRoleLabels = Partial<Record<AppRole, string>>;
+
 export interface AccessRule {
   data: any;
   id: number;
@@ -264,6 +266,9 @@ export interface User {
   email?: string;
   app_role?: AppRole;
   effective_app_role?: AppRole;
+  app_role_label?: string;
+  effective_app_role_label?: string;
+  role_labels?: AppRoleLabels;
   panel_access_only?: boolean;
   password?: string;
   user_groups?: Group[];

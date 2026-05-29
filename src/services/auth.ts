@@ -6,6 +6,11 @@ interface TokenResponse {
   refresh: string;
 }
 
+export interface IToken {
+  access: string;
+  refresh: string;
+}
+
 class AuthService {
   async getToken(user: getToken): Promise<TokenResponse> {
     try {
@@ -27,24 +32,9 @@ class AuthService {
     }
   }
 
-  async refreshToken(): Promise<string> {
-    try {
-      const refreshToken = localStorage.getItem("refresh_token");
-
-      if (!refreshToken) {
-        throw new Error("No refresh token available");
-      }
-
-      const response = await authApi.post("refresh/", { refresh: refreshToken });
-      const { access } = response.data as Pick<TokenResponse, "access">;
-
-      localStorage.setItem("access_token", access);
-
-      return access;
-    } catch (error) {
-      console.error("Error refreshing token:", error);
-      throw error;
-    }
+  async refreshToken(token: string) {
+    const { data } = await authApi.post("/refresh/", { refresh: token });
+    return data as IToken;
   }
 }
 

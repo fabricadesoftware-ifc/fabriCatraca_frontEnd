@@ -9,6 +9,9 @@ import PortalsService from "@/services/portals";
 
 const authStore = useAuthStore();
 const deviceStore = useDeviceStore();
+const guaritaLabel = computed(() => authStore.roleLabel("guarita"));
+const defaultReleaseName = computed(() => `Liberacao - ${guaritaLabel.value}`);
+const defaultOperationName = computed(() => `Operacao - ${guaritaLabel.value}`);
 
 const portals = ref<Portal[]>([]);
 const loading = ref(false);
@@ -24,7 +27,7 @@ const form = reactive({
   portal_id: null as number | null,
   direction: "clockwise" as "clockwise" | "anticlockwise",
   event: 7,
-  user_name: "Liberação da guarita",
+  user_name: "",
   notes: "",
 });
 
@@ -61,7 +64,7 @@ async function releaseDevice(device: Device, direction: "clockwise" | "anticlock
           device_ids: [device.id],
           event: 7,
           user_id: 0,
-          user_name: "Liberação da guarita",
+          user_name: defaultReleaseName.value,
           user_image: false,
           portal_id: portalId,
           release_mode: "device_event",
@@ -74,7 +77,7 @@ async function releaseDevice(device: Device, direction: "clockwise" | "anticlock
           device_ids: [device.id],
           event: 7,
           user_id: 0,
-          user_name: "Liberação da guarita",
+          user_name: defaultReleaseName.value,
           user_image: false,
           portal_id: portalId,
           release_mode: "device_event",
@@ -90,7 +93,7 @@ async function releaseDevice(device: Device, direction: "clockwise" | "anticlock
         device_ids: [device.id],
         event: 7,
         user_id: 0,
-        user_name: "Liberação da guarita",
+        user_name: defaultReleaseName.value,
         user_image: false,
         portal_id: portalId,
         release_mode: "device_event",
@@ -138,7 +141,7 @@ async function submit() {
       device_ids: deviceIds,
       event: Number(form.event),
       user_id: 0,
-      user_name: form.user_name.trim() || "Operação da guarita",
+      user_name: form.user_name.trim() || defaultOperationName.value,
       user_image: false,
       portal_id: portalId,
       release_mode: form.release_mode,
@@ -326,7 +329,7 @@ onMounted(async () => {
         <ReleaseAuditTable
           :filters="{ requested_by: authStore.user?.id }"
           :release-types="['device_event', 'single_turn']"
-          title="Minhas liberações na guarita"
+          :title="`Minhas liberacoes - ${guaritaLabel}`"
         />
       </v-col>
     </v-row>

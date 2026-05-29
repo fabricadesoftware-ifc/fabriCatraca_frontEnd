@@ -31,9 +31,9 @@
       releaseAuditCount.value = auditResponse.count
       if (authStore.isGuarita) {
         releaseAuditLabel.value = 'Minhas Liberações'
-        releaseAuditDescription.value = 'Total de comandos executados na guarita'
+        releaseAuditDescription.value = `Total de comandos executados em ${authStore.roleLabel('guarita')}`
       } else if (authStore.isSisae) {
-        releaseAuditLabel.value = 'Liberações do SISAE'
+        releaseAuditLabel.value = `Liberações do ${authStore.roleLabel('sisae')}`
         releaseAuditDescription.value = 'Total de liberações agendadas e executadas'
       }
     }

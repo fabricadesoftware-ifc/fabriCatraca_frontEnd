@@ -98,7 +98,11 @@ function getUserRoleLabel(user: NotificationTargetUser) {
   }
 
   if (role === "sisae") {
-    return "usuario do SISAE";
+    return `usuario (${authStore.roleLabel("sisae")})`;
+  }
+
+  if (role === "guarita" || role === "admin") {
+    return `usuario (${authStore.roleLabel(role)})`;
   }
 
   return "usuario";
