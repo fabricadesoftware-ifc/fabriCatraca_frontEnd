@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import type { AppRole, getToken, User } from "@/types";
+import type { AppRole, AppRoleLabels, getToken, User } from "@/types";
 import { AuthService } from "@/services";
 import router from "@/router";
 import { showMessage } from "@/utils/showmsg";
@@ -10,6 +10,15 @@ interface IToken {
   access: string;
   refresh: string;
 }
+
+const DEFAULT_ROLE_LABELS: Record<AppRole, string> = {
+  "": "Sem perfil",
+  admin: "Administrador",
+  guarita: "Guarita",
+  sisae: "SISAE",
+  aluno: "Aluno",
+  servidor: "Servidor",
+};
 
 export const useAuthStore = defineStore("auth", () => {
   const me = ref<User | null>(null);
@@ -24,6 +33,10 @@ export const useAuthStore = defineStore("auth", () => {
 
   const user = computed(() => me.value);
   const role = computed<AppRole>(() => me.value?.effective_app_role || me.value?.app_role || "");
+  const roleLabels = computed<AppRoleLabels>(() => ({
+    ...DEFAULT_ROLE_LABELS,
+    ...(me.value?.role_labels || {}),
+  }));
   const isAdmin = computed(() => role.value === "admin");
   const isGuarita = computed(() => role.value === "guarita");
   const isSisae = computed(() => role.value === "sisae");
@@ -69,6 +82,11 @@ export const useAuthStore = defineStore("auth", () => {
   function hasRole(allowedRoles: AppRole[]) {
     if (!allowedRoles.length) return true;
     return allowedRoles.includes(role.value);
+  }
+
+  function roleLabel(value?: AppRole | string | null) {
+    const normalizedRole = (value || "") as AppRole;
+    return roleLabels.value[normalizedRole] || String(value || DEFAULT_ROLE_LABELS[""]);
   }
 
   async function getMe() {
@@ -169,6 +187,8 @@ async function refreshToken(): Promise<string> {
     user,
     isAuthenticated,
     role,
+    roleLabels,
+    roleLabel,
     isAdmin,
     isGuarita,
     isSisae,

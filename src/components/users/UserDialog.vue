@@ -76,14 +76,14 @@ const {
   startCardEnroll,
 } = useUserCardEnrollment(userRef, modelValueRef, isMinimalMode);
 const panelRoles = ["admin", "guarita", "sisae"] as const;
-const roleOptions = [
+const roleOptions = computed(() => [
   { title: "Sem perfil do painel", value: "" },
-  { title: "Administrador", value: "admin" },
-  { title: "Guarita", value: "guarita" },
-  { title: "SISAE", value: "sisae" },
-  { title: "Aluno", value: "aluno" },
-  { title: "Servidor", value: "servidor" },
-];
+  { title: authStore.roleLabel("admin"), value: "admin" },
+  { title: authStore.roleLabel("guarita"), value: "guarita" },
+  { title: authStore.roleLabel("sisae"), value: "sisae" },
+  { title: authStore.roleLabel("aluno"), value: "aluno" },
+  { title: authStore.roleLabel("servidor"), value: "servidor" },
+]);
 
 const currentTargetRole = computed(() => {
   const directRole = props.user?.app_role;

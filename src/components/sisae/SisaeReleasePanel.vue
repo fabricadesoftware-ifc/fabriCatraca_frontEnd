@@ -60,7 +60,7 @@ onMounted(async () => {
 
       <v-col cols="12">
         <ReleaseAuditTable
-          title="Histórico de liberações do SISAE"
+          :title="`Historico de liberacoes do ${authStore.roleLabel('sisae')}`"
           :release-types="['scheduled_user_release', 'temporary_user_release']"
         />
       </v-col>

@@ -2,6 +2,7 @@
 import type { QueryParams, ReleaseAudit } from "@/types";
 import { computed, onMounted, ref, watch } from "vue";
 import { ReleaseAuditsService } from "@/services";
+import { useAuthStore } from "@/stores";
 
 const props = defineProps<{
   title?: string;
@@ -11,6 +12,7 @@ const props = defineProps<{
 
 const loading = ref(false);
 const audits = ref<ReleaseAudit[]>([]);
+const authStore = useAuthStore();
 
 const filteredAudits = computed(() => {
   if (!props.releaseTypes?.length) {
@@ -52,6 +54,11 @@ function statusLabel(value: string) {
   if (value === "cancelled") return "Cancelada";
   if (value === "failed") return "Falhou";
   return value;
+}
+
+function requestedByRoleLabel(audit: ReleaseAudit) {
+  const role = audit.requested_by_data?.role || audit.requested_by_role || "";
+  return role ? authStore.roleLabel(role) : "—";
 }
 
 async function loadAudits() {
@@ -123,7 +130,7 @@ onMounted(loadAudits);
             <td>
               <div class="text-body-2">{{ audit.requested_by_data?.name || audit.requested_by_name }}</div>
               <div class="text-caption text-medium-emphasis">
-                {{ audit.requested_by_data?.role || audit.requested_by_role || "—" }}
+                {{ requestedByRoleLabel(audit) }}
               </div>
             </td>
             <td>
