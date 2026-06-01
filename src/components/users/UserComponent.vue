@@ -2,7 +2,7 @@
 import type { User as BaseUser } from "@/types";
 import { computed, onMounted, ref, watch } from "vue";
 import { toast } from "vue3-toastify";
-import { useUserStore } from "@/stores";
+import { useAuthStore, useUserStore } from "@/stores";
 import UserDialog from "./UserDialog.vue";
 
 interface User extends Omit<BaseUser, "user_groups"> {
@@ -32,6 +32,7 @@ const emit = defineEmits<{
 }>();
 
 const userStore = useUserStore();
+const authStore = useAuthStore();
 const dialog = ref(false);
 const selectedUser = ref<User | null>(null);
 const saveErrors = ref<Record<string, string[]>>({});
@@ -280,13 +281,7 @@ function onSelect(items: User[]) {
 }
 
 function appRoleLabel(value?: string) {
-  if (value === "admin") return "Administrador";
-  if (value === "guarita") return "Guarita";
-  if (value === "sisae") return "SISAE";
-  if (value === "aluno") return "Aluno";
-  if (value === "servidor") return "Servidor";
-
-  return "Sem perfil";
+  return authStore.roleLabel(value);
 }
 </script>
 

@@ -67,6 +67,7 @@ const rawItems = [
   },
   {
     title: "Guarita",
+    roleLabel: "guarita",
     icon: "mdi-shield-account",
     to: "/guarita",
     roles: ["admin", "guarita"],
@@ -126,6 +127,7 @@ const items = computed(() =>
     .filter((item) => authStore.hasRole((item.roles || []) as any))
     .map((item) => ({
       ...item,
+      title: "roleLabel" in item ? authStore.roleLabel(item.roleLabel) : item.title,
       subitems: item.subitems?.filter(
         (subitem) =>
           !("roles" in subitem) || authStore.hasRole(((subitem as any).roles || []) as any),
