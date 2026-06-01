@@ -234,6 +234,7 @@
     @update:items-per-page="itemsPerPageChanged"
     @update:page="trocarPagina"
     @update:selected="onSelect"
+    height="500px"
   >
     <template #item.users="{ item }">
       {{ item.users?.length || 0 }} usuário(s)

@@ -349,7 +349,7 @@ function appRoleLabel(value?: string) {
     @update:items-per-page="itemsPerPageChanged"
     @update:page="trocarPagina"
     @update:selected="onSelect"
-    height="340px"
+    height="390px"
   >
     <template #item.app_role="{ item }">
       <template v-if="item">{{ appRoleLabel(item.effective_app_role || item.app_role) }}</template>
