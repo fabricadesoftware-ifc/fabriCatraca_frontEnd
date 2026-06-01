@@ -38,7 +38,7 @@ async function searchChanged(search: string | number) {
 }
 
 onMounted(async () => {
-  await userStore.loadUsers({ page_size: 5 });
+  await userStore.loadUsers();
 });
 
 const tab = ref("one");
