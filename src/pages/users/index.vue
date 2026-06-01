@@ -45,6 +45,7 @@
 
     <UserComponent
       :app_role="authStore.role"
+      :loading="userStore.loading"
       :current-page="userStore.current_page"
       :page-size="userStore.page_size"
       :total-items="userStore.count"

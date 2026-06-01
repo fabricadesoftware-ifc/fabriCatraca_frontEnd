@@ -49,6 +49,7 @@ onMounted(async () => {
 
     <UserComponent
       :app_role="authStore.role"
+      :loading="userStore.loading"
       :can-create="authStore.role === 'admin'"
       :create-label="'Cadastrar usuário'"
       :current-page="userStore.current_page"

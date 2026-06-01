@@ -58,7 +58,8 @@ function getFieldErrors(field: string): string[] {
 }
 
 const cpfRules = [
-  (value: string) => !value || isCpfValidFormat(value) || "CPF deve estar no formato 000.000.000-00",
+  (value: string) =>
+    !value || isCpfValidFormat(value) || "CPF deve estar no formato 000.000.000-00",
 ];
 
 const phoneRules = [
@@ -69,7 +70,9 @@ const phoneRules = [
 
 const optionalPhoneRules = [
   (value: string) =>
-    !value || isPhoneValidFormat(value) || "Telefone deve estar no formato (00) 0000-0000 ou (00) 00000-0000",
+    !value ||
+    isPhoneValidFormat(value) ||
+    "Telefone deve estar no formato (00) 0000-0000 ou (00) 00000-0000",
 ];
 </script>
 
@@ -79,9 +82,9 @@ const optionalPhoneRules = [
       <v-col cols="8">
         <v-alert
           v-if="
-            getFieldErrors('non_field_errors').length
-            || getFieldErrors('error').length
-            || getFieldErrors('detail').length
+            getFieldErrors('non_field_errors').length ||
+            getFieldErrors('error').length ||
+            getFieldErrors('detail').length
           "
           class="mb-4"
           density="comfortable"
@@ -122,13 +125,46 @@ const optionalPhoneRules = [
           @update:model-value="emit('update:form', { name: String($event ?? '') })"
         />
         <v-text-field
-          v-if="fieldFlags.hasEmailField"
-          :model-value="form.email"
-          :label="minimalMode ? 'E-mail' : 'E-mail para login'"
-          :error-messages="getFieldErrors('email')"
+          v-if="!minimalMode"
+          :model-value="form.registration"
+          label="Matricula"
+          :error-messages="getFieldErrors('registration')"
           :disabled="isSisaeViewer"
-          @update:model-value="emit('update:form', { email: String($event ?? '') })"
+          @update:model-value="emit('update:form', { registration: String($event ?? '') })"
         />
+
+        <v-row dense>
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-if="!minimalMode"
+              :model-value="form.birthDate"
+              label="Data de nascimento"
+              type="date"
+              :error-messages="getFieldErrors('birth_date')"
+              readonly
+              @update:model-value="
+                emit('update:form', { birthDate: ($event as string | null) ?? null })
+              "
+            />
+          </v-col>
+
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-if="!minimalMode"
+              :model-value="form.phone"
+              label="Telefone"
+              type="tel"
+              :error-messages="getFieldErrors('phone')"
+              :maxlength="15"
+              :rules="optionalPhoneRules"
+              :disabled="isSisaeViewer"
+              @update:model-value="
+                emit('update:form', { phone: formatPhone(String($event ?? '')) })
+              "
+            />
+          </v-col>
+        </v-row>
+
         <v-text-field
           v-if="minimalMode"
           :model-value="form.phone"
@@ -140,19 +176,7 @@ const optionalPhoneRules = [
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:form', { phone: formatPhone(String($event ?? '')) })"
         />
-        <v-select
-          v-if="fieldFlags.hasAppRoleField && !minimalMode"
-          :model-value="form.appRole"
-          :items="roleOptions"
-          item-title="title"
-          item-value="value"
-          label="Perfil do painel"
-          :error-messages="getFieldErrors('app_role')"
-          :disabled="isSisaeViewer"
-          @update:model-value="
-            emit('update:form', { appRole: ($event as BaseUser['app_role']) ?? '' })
-          "
-        />
+
         <v-switch
           v-if="fieldFlags.hasPanelAccessOnlyField && !minimalMode"
           :model-value="form.panelAccessOnly"
@@ -162,25 +186,6 @@ const optionalPhoneRules = [
           :disabled="isSisaeViewer"
           @update:model-value="emit('update:form', { panelAccessOnly: Boolean($event) })"
         />
-        <v-text-field
-          v-if="canShowPasswordField && !minimalMode"
-          :model-value="form.password"
-          label="Senha do painel"
-          placeholder="Preencha para definir ou alterar a senha"
-          :error-messages="getFieldErrors('password')"
-          type="password"
-          @update:model-value="emit('update:form', { password: String($event ?? '') })"
-        />
-
-        <v-text-field
-          v-if="!minimalMode"
-          :model-value="form.registration"
-          label="Matricula"
-          :error-messages="getFieldErrors('registration')"
-          :disabled="isSisaeViewer"
-          @update:model-value="emit('update:form', { registration: String($event ?? '') })"
-        />
-
         <v-select
           :model-value="form.deviceScope"
           :items="deviceScopeOptions"
@@ -223,7 +228,7 @@ const optionalPhoneRules = [
               "
             />
           </v-col>
-            <v-text-field
+          <v-text-field
             :model-value="formatDateTimeForDisplay(props.form.lastPassageAt)"
             label="Ultima Passagem na Catraca"
             readonly
@@ -268,25 +273,42 @@ const optionalPhoneRules = [
           @update:model-value="emit('update:form', { deviceAdmin: Boolean($event) })"
         />
         <v-text-field
-          v-if="!minimalMode"
-          :model-value="form.birthDate"
-          label="Data de nascimento"
-          type="date"
-          :error-messages="getFieldErrors('birth_date')"
-          readonly
-          @update:model-value="emit('update:form', { birthDate: ($event as string | null) ?? null })"
-        />
-        <v-text-field
-          v-if="!minimalMode"
-          :model-value="form.phone"
-          label="Telefone"
-          type="tel"
-          :error-messages="getFieldErrors('phone')"
-          :maxlength="15"
-          :rules="optionalPhoneRules"
+          v-if="fieldFlags.hasEmailField"
+          :model-value="form.email"
+          :label="minimalMode ? 'E-mail' : 'E-mail para login'"
+          :error-messages="getFieldErrors('email')"
           :disabled="isSisaeViewer"
-          @update:model-value="emit('update:form', { phone: formatPhone(String($event ?? '')) })"
+          @update:model-value="emit('update:form', { email: String($event ?? '') })"
         />
+
+        <v-row dense>
+          <v-col cols="12" md="6">
+            <v-select
+              v-if="fieldFlags.hasAppRoleField && !minimalMode"
+              :model-value="form.appRole"
+              :items="roleOptions"
+              item-title="title"
+              item-value="value"
+              label="Perfil do painel"
+              :error-messages="getFieldErrors('app_role')"
+              :disabled="isSisaeViewer"
+              @update:model-value="
+                emit('update:form', { appRole: ($event as BaseUser['app_role']) ?? '' })
+              "
+            />
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-if="canShowPasswordField && !minimalMode"
+              :model-value="form.password"
+              label="Senha do painel"
+              placeholder="Preencha para definir ou alterar a senha"
+              :error-messages="getFieldErrors('password')"
+              type="password"
+              @update:model-value="emit('update:form', { password: String($event ?? '') })"
+            />
+          </v-col>
+        </v-row>
       </v-col>
 
       <v-col v-if="!minimalMode" class="d-flex flex-column align-center" cols="4">

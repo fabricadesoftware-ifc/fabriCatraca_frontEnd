@@ -46,6 +46,7 @@ onMounted(async () => {
       <v-col md="12">
         <UserComponent
           :app_role="authStore.role"
+          :loading="userStore.loading"
           :dialog-mode="'release-only'"
           :current-page="userStore.current_page"
           :page-size="5"

@@ -557,3 +557,23 @@ onMounted(async () => {
     </v-card>
   </v-dialog>
 </template>
+
+<style scoped>
+
+::-webkit-scrollbar {
+  width: 6px;
+  display: block;
+}
+
+::-webkit-scrollbar-track {
+  background: #212121;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background:#2196f3;
+  border-radius: 3px;
+
+}
+
+</style>

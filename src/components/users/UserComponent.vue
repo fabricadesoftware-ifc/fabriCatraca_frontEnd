@@ -11,6 +11,7 @@ interface User extends Omit<BaseUser, "user_groups"> {
 
 const props = defineProps<{
   users: User[];
+  loading: boolean;
   currentPage: number;
   pageSize: number;
   totalPages: number;
@@ -340,7 +341,7 @@ function appRoleLabel(value?: string) {
     :items="props.users"
     :items-length="props.totalItems ?? 0"
     :items-per-page="props.pageSize ?? 10"
-    :loading="props.users.length === 0"
+    :loading="props.loading"
     :page="props.currentPage ?? 1"
     return-object
     :select-strategy="props.app_role === 'admin' ? 'all' : 'single'"
