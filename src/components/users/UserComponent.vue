@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { User as BaseUser } from "@/types";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { toast } from "vue3-toastify";
 import { useAuthStore, useUserStore } from "@/stores";
 import UserDialog from "./UserDialog.vue";
@@ -193,10 +193,10 @@ async function salvarUsuario(user: User) {
     }
     console.error(error);
     const errorMessage =
-      saveErrors.value.error?.[0]
-      || saveErrors.value.detail?.[0]
-      || saveErrors.value.non_field_errors?.[0]
-      || "Erro ao salvar usuario. Verifique os campos destacados.";
+      saveErrors.value.error?.[0] ||
+      saveErrors.value.detail?.[0] ||
+      saveErrors.value.non_field_errors?.[0] ||
+      "Erro ao salvar usuario. Verifique os campos destacados.";
     toast.error(errorMessage);
   }
 }
@@ -344,6 +344,7 @@ function appRoleLabel(value?: string) {
     @update:items-per-page="itemsPerPageChanged"
     @update:page="trocarPagina"
     @update:selected="onSelect"
+    height="390px"
   >
     <template #item.app_role="{ item }">
       <template v-if="item">{{ appRoleLabel(item.effective_app_role || item.app_role) }}</template>

@@ -331,7 +331,7 @@ onBeforeUnmount(() => {
         </v-sheet>
       </v-app-bar>
 
-      <v-sheet class="mr-8 rounded-lg" style="background-color: #eff5f9; color: #000">
+      <v-sheet class="mr-8 rounded-lg" style="background-color: #eff5f9; color: #000" height="100%">
         <router-view />
       </v-sheet>
     </v-main>

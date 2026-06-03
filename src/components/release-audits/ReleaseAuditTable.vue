@@ -107,7 +107,7 @@ onMounted(loadAudits);
     <v-card-text>
       <v-progress-linear v-if="loading" color="primary" indeterminate />
 
-      <v-table v-else density="comfortable">
+      <v-table v-else density="comfortable" height="505px">
         <thead>
           <tr>
             <th>Tipo</th>
