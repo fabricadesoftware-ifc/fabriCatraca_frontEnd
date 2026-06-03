@@ -9,6 +9,7 @@ import { defineConfig } from "vite";
 import Layouts from "vite-plugin-vue-layouts-next";
 import Vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
 import vueDevTools from "vite-plugin-vue-devtools";
+import tailwindcss from '@tailwindcss/vite'
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -39,6 +40,7 @@ export default defineConfig({
         configFile: "src/styles/settings.scss",
       },
     }),
+    tailwindcss(),
     AutoImport({
       imports: [
         "vue",
