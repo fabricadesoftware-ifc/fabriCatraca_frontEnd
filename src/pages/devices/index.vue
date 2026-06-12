@@ -1,7 +1,7 @@
 <script lang="ts" setup>
   import { onMounted } from 'vue'
+  import { toast } from 'vue3-toastify'
   import DeviceComponent from '@/components/devices/DeviceComponent.vue'
-  import router from '@/router'
   import { useDeviceStore } from '@/stores/device'
 
   const deviceStore = useDeviceStore()
@@ -19,10 +19,22 @@
 
   async function handleTestConnection (deviceId: number) {
     try {
-      await deviceStore.testConnection(deviceId)
-      router.go(0)
-    } catch {
-      router.go(0)
+      const result = await deviceStore.testConnection(deviceId)
+      await deviceStore.loadDevices({
+        page: deviceStore.current_page,
+        page_size: deviceStore.page_size,
+      })
+      if (result?.success) {
+        toast.success(result.message || 'Conexao estabelecida com sucesso')
+      } else {
+        toast.warning(result?.message || result?.error || 'Nao foi possivel conectar ao dispositivo')
+      }
+    } catch (error: any) {
+      await deviceStore.loadDevices({
+        page: deviceStore.current_page,
+        page_size: deviceStore.page_size,
+      })
+      toast.error(error?.response?.data?.message || error?.response?.data?.error || 'Erro ao testar conexao')
     }
   }
 

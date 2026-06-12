@@ -130,6 +130,12 @@ export interface Device {
   updating?: boolean;
 }
 
+export interface DeviceConnectionTestResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
 export interface DeviceRegistryItem {
   id: number;
   name: string;

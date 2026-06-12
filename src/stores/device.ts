@@ -80,15 +80,28 @@ export const useDeviceStore = defineStore('device', {
     },
 
     async testConnection (id: number) {
+      const device = this.devices.find(d => d.id === id)
+      if (device) {
+        device.updating = true
+      }
       try {
-        await DeviceService.testConnection(id)
+        const result = await DeviceService.testConnection(id)
+        if (device) {
+          device.status = result.success ? 'online' : 'offline'
+          device.is_active = result.success
+        }
+        return result
       } catch (error) {
-        const device = this.devices.find(d => d.id === id)
         if (device) {
           device.status = 'offline'
+          device.is_active = false
         }
         console.error(error)
         throw error
+      } finally {
+        if (device) {
+          device.updating = false
+        }
       }
     },
 

@@ -1,6 +1,7 @@
 import type {
   BaseResponse,
   Device,
+  DeviceConnectionTestResult,
   DeviceLogoSummary,
   DeviceRegistryReport,
   PaginatedResponse,
@@ -59,7 +60,7 @@ class DeviceService {
     }
   }
 
-  async testConnection (id: number): Promise<BaseResponse<void>> {
+  async testConnection (id: number): Promise<DeviceConnectionTestResult> {
     try {
       const response = await api.get(`/devices/${id}/test_connection/`)
       return response.data
